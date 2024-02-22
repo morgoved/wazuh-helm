@@ -1,0 +1,8 @@
+file: shapes/00-sec-envs-sec-default.yaml
+custom:
+  confMapName: wazuh-authd-pass
+secretenvs:
+  authd.pass: xxxxxxxxxxxxx
+
+
+

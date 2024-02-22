@@ -1,0 +1,20 @@
+file: shapes/00-sec-envs-sec-default.yaml
+custom:
+  confMapName: dashboard-certs
+secretenvs:
+  cert.pem: |
+    -----BEGIN CERTIFICATE-----
+    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    -----END CERTIFICATE-----
+  key.pem: |
+    -----BEGIN PRIVATE KEY-----
+    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    -----END PRIVATE KEY-----
+  root-ca.pem: |
+    -----BEGIN CERTIFICATE-----
+    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    -----END CERTIFICATE-----
+
+
+
+

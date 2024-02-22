@@ -1,0 +1,7 @@
+file: shapes/00-sec-envs-sec-default.yaml
+custom:
+  confMapName: indexer-cred
+secretenvs:
+#  password: SecretPassword
+  password: xxxxxxxxxxxxxxxx
+  username: admin

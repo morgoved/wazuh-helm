@@ -1,0 +1,21 @@
+{{- if .Values.indexer.deployment.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "appIdentifier" .Values.identifier }}-indexer-nodes
+  labels:
+{{ include "labels" $ | indent 4 }}
+    app: {{ include "appIdentifier" .Values.identifier }}
+  {{- with .Values.indexer.service.annotations }}
+  annotations:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ports:
+    - name: indexer-nodes
+      port: {{ .Values.indexer.service.transport }}
+      targetPort: {{ .Values.indexer.service.transport }}
+  selector:
+    app: {{ include "appIdentifier" .Values.identifier }}-indexer
+  type: {{ .Values.indexer.service.type }}
+  {{- end -}}
