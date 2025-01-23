@@ -101,5 +101,3 @@ This fork open in any time to contributors and also open to move into official r
 | wazuh.storageSizeWorker | string | `"50Gi"` |  |
 | wazuh.syslog_enable | bool | `true` |  |
 | wazuh.worker_replicas | int | `2` |  |
-
-
