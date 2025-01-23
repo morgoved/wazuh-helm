@@ -1,17 +1,36 @@
 # wazuh-kubernetes-helmchart
 
-![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) ![AppVersion: 4.8.0](https://img.shields.io/badge/AppVersion-4.8.0-informational?style=flat-square)
+![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) 
+![AppVersion: 4.8.0](https://img.shields.io/badge/AppVersion-4.8.0-informational?style=flat-square)
 
-Wazuh is centralized Security Information Event Management(SIEM) and Vulnerability inteligence and threat monitoring application
-For generate certificates pls follow this https://github.com/wazuh/wazuh-kubernetes/blob/master/instructions.md
-For get hashes you can run docker run --rm -ti wazuh/wazuh-indexer:4.6.0 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh
-All changes into indexer configuration also into secrets will apply auto by job hooks - reloader check changes.
-You can see example folder as work production configuration.
-Already tested at 4.6.0 version.
-Wazuh can have only one master node (configuration ready to use it in multi master but wazuh not support it).
-All xml configuration apply auto changes by init containers.
+Wazuh is a centralized Security Information and Event Management (SIEM) platform offering vulnerability intelligence and threat monitoring capabilities.
 
-This fork open in any time to contributors and also open to move into official repo for wazuh project.
+### Generating Certificates
+
+To generate the necessary certificates, refer to the instructions available [here](https://github.com/wazuh/wazuh-kubernetes/blob/master/instructions.md).
+
+### Retrieving Hashes
+
+To retrieve hashes, execute the following command:
+
+```bash
+docker run --rm -ti wazuh/wazuh-indexer:4.6.0 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh`
+```
+
+### Automatic Configuration Updates
+
+Any changes made to the indexer configuration or secrets will be automatically applied via job hooks. The [`reloader`](https://artifacthub.io/packages/helm/cloudnativeapp/reloader) monitors for updates to ensure seamless application of changes. For a practical example of a production configuration, check the example folder.
+
+### Compatibility
+
+This Helm chart has been tested with Wazuh version 4.6.0. Please note:
+
+Wazuh supports only a single master node and multiple worker nodes. Although the configuration is prepared for a multi-master setup, Wazuh does not currently support this feature.
+All XML configuration files are automatically updated through init containers.
+
+### Contributing
+
+This fork welcomes contributions and is open to transitioning into the official Wazuh project repository. Contributions are encouraged and appreciated.
 
 ## Values
 
@@ -57,7 +76,6 @@ This fork open in any time to contributors and also open to move into official r
 | indexer.images.updateStrategy | string | `"RollingUpdate"` |  |
 | indexer.plugins | list | `[]` |  |
 | indexer.replicas | int | `3` |  |
-| indexer.selfcert.enabled | bool | `false` |  |
 | indexer.service.httpPort | int | `9200` |  |
 | indexer.service.metrics | int | `9600` |  |
 | indexer.service.transport | int | `9300` |  |

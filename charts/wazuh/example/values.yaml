@@ -1,7 +1,3 @@
-reloader:
-  reloader:
-    watchGlobally: false
-  namespace: wazuh
 wazuh:
   images:
     resources:
