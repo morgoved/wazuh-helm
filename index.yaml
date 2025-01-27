@@ -1,0 +1,49 @@
+apiVersion: v1
+entries:
+  wazuh:
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/links: |
+        - name: source
+          url: https://github.com/morgoved/wazuh-helm
+        - name: application source
+          url: https://github.com/wazuh/wazuh
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 4.6.0
+    created: "2025-01-27T14:21:53.580614476Z"
+    dependencies:
+    - condition: reloader.enabled
+      name: reloader
+      repository: https://stakater.github.io/stakater-charts
+      version: 1.2.1
+    description: Wazuh is a centralized Security Information Event Management (SIEM)
+      and Vulnerability inteligence and threat monitoring application.
+    digest: b82224e64b04cabd68d49336d45fb8fa70537ef822b17edaccfb2d76b1d6d6ee
+    home: https://wazuh.com/
+    icon: https://wazuh.com/uploads/2022/05/WAZUH.png
+    keywords:
+    - security
+    - information
+    - threat
+    - management
+    - centralized
+    - kubernetes
+    - wazuh
+    - opendistro
+    - elasticsearch
+    maintainers:
+    - email: andre.gomes@promptlyhealth.com
+      name: Dani
+      url: https://github.com/Ca-moes
+    - name: Morgoved
+      url: https://github.com/morgoved
+    name: wazuh
+    sources:
+    - https://github.com/morgoved/wazuh-helm
+    - https://github.com/wazuh/wazuh-kubernetes
+    type: application
+    urls:
+    - https://github.com/morgoved/wazuh-helm/releases/download/wazuh-0.0.1/wazuh-0.0.1.tgz
+    version: 0.0.1
+generated: "2025-01-27T14:21:53.580623894Z"
