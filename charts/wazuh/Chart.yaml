@@ -1,0 +1,32 @@
+apiVersion: v2
+name: wazuh
+description: Wazuh is centralized Security Information Event Management(SIEM) and Vulnerability inteligence and threat monitoring application.
+type: application
+appVersion: 4.6.0
+version: 0.0.1
+home: https://wazuh.com/
+sources:
+  - https://github.com/morgoved/wazuh-helm
+  - https://github.com/wazuh/wazuh-kubernetes
+maintainers:
+  - name: Dani
+    email: andre.gomes@promptlyhealth.com
+    url: https://github.com/Ca-moes
+  - name: Morgoved
+    url: https://github.com/morgoved
+icon: https://wazuh.com/uploads/2022/05/WAZUH.png
+keywords:
+  - security
+  - information
+  - threat
+  - management
+  - centralized
+  - kubernetes
+  - wazuh
+  - opendistro
+  - elasticsearch
+dependencies:
+  - name: reloader
+    version: 1.2.1
+    repository: https://stakater.github.io/stakater-charts
+    condition: reloader.enabled

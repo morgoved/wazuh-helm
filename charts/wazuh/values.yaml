@@ -1,9 +1,9 @@
+reloader:
+  enabled: true
+
 indexer:
   deployment:
     enabled: true
-
-  selfcert:
-    enabled: false
 
   replicas: 3
 
@@ -84,10 +84,12 @@ dashboard:
     INDEXER_URL: https://wazuh-sand-indexer-rest
     WAZUH_API_URL: https://wazuh-manager-master-0.wazuh-sand-cluster
     WAZUH_API_HOST: wazuh-manager-master-0.wazuh-sand-cluster
+
 serviceAccount:
   create: true
 #  annotations:
 #    eks.amazonaws.com/role-arn: arn:aws:iam::xxxxx:role/wazuh-test
+
 wazuh:
   syslog_enable: true
   deployment:
