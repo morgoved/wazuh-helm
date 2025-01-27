@@ -1,5 +1,0 @@
-file: shapes/00-sec-envs-sec-default.yaml
-custom:
-  confMapName: wazuh-cluster-key
-secretenvs:
-  key: xxxxxxxxxxxxxxxxxxxxxx
