@@ -30,3 +30,11 @@ dependencies:
     version: 1.2.1
     repository: https://stakater.github.io/stakater-charts
     condition: reloader.enabled
+annotations:
+  artifacthub.io/category: security
+  artifacthub.io/links: |
+    - name: source
+      url: https://github.com/morgoved/wazuh-helm
+    - name: application source
+      url: https://github.com/wazuh/wazuh
+  artifacthub.io/prerelease: "true"
