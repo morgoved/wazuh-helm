@@ -2,6 +2,7 @@
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) 
 ![AppVersion: 4.8.0](https://img.shields.io/badge/AppVersion-4.8.0-informational?style=flat-square)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm)](https://artifacthub.io/packages/search?repo=wazuh-helm)
 
 Wazuh is a centralized Security Information and Event Management (SIEM) platform offering vulnerability intelligence and threat monitoring capabilities.
 
