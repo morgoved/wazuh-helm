@@ -1,4 +1,4 @@
-# wazuh-kubernetes-helmchart
+# Wazuh
 
 ![Version: 0.0.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square) 
 ![AppVersion: 4.8.0](https://img.shields.io/badge/AppVersion-4.8.0-informational?style=flat-square)
