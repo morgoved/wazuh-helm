@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wazuh.fullname" . }}-manager-cluster
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+  annotations:
+    {{- toYaml .Values.wazuh.service.annotations | nindent 4 }}
+spec:
+  clusterIP: None
+  ports:
+    - name: cluster
+      port: {{ .Values.wazuh.service.port }}
+      targetPort: {{ .Values.wazuh.service.port }}
+  selector:
+    app: {{ include "wazuh.fullname" . }}-manager

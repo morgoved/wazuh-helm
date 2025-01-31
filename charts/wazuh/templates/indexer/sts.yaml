@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "wazuh.fullname" . }}-indexer
+  labels:
+    app: {{ include "wazuh.fullname" . }}-indexer
+  annotations:
+    {{- toYaml .Values.indexer.annotations | nindent 4 }}
+spec:
+  serviceName: {{ include "wazuh.fullname" . }}-indexer-nodes
+  replicas: {{ .Values.indexer.replicas }}
+  updateStrategy:
+    type: {{ .Values.indexer.updateStrategy }}
+  selector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-indexer
+  template:
+    metadata:
+      labels:
+        app: {{ include "wazuh.fullname" . }}-indexer
+      annotations:
+        {{- toYaml .Values.indexer.annotations | nindent 8 }}
+    spec:
+      volumes:
+      - name: admin-certs
+        secret:
+          secretName: admin-tls
+      - name: node-certs
+        secret:
+          secretName: node-tls
+      - configMap:
+          name: {{ include "wazuh.fullname" . }}-indexer-config
+        name: indexer-conf
+      initContainers:
+        - name: volume-mount-hack
+          image: busybox
+          command:
+          - sh
+          - -c
+          - chown -R 1000:1000 /var/lib/wazuh-indexer
+          resources:
+            {{- toYaml .Values.indexer.initContainers.volumeMountHack.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /var/lib/wazuh-indexer
+              name: wazuh-indexer
+        - name: increase-the-vm-max-map-count
+          image: busybox
+          command:
+            - sysctl
+            - -w
+            - vm.max_map_count=262144
+          securityContext:
+            privileged: true
+          resources:
+            {{- toYaml .Values.indexer.initContainers.increaseTheVmMaxMapCount.resources | nindent 12 }}
+      containers:
+        - name: wazuh-indexer
+          image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
+          env:
+            - name: OPENSEARCH_JAVA_OPTS
+              value: {{ .Values.indexer.env.OPENSEARCH_JAVA_OPTS | quote }}
+            - name: CLUSTER_NAME
+              value: {{ .Values.indexer.env.CLUSTER_NAME | quote }}
+            - name: NETWORK_HOST
+              value: {{ .Values.indexer.env.NETWORK_HOST | quote }}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: DISCOVERY_SERVICE
+              value: {{ include "wazuh.fullname" . }}-indexer-rest
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: DISABLE_INSTALL_DEMO_CONFIG
+              value: {{ .Values.indexer.env.DISABLE_INSTALL_DEMO_CONFIG | quote }}
+          resources:
+            {{- toYaml .Values.indexer.resources | nindent 12 }}
+          volumeMounts:
+            # PVC
+            - mountPath: /var/lib/wazuh-indexer
+              name: wazuh-indexer
+            # Certs
+            - mountPath: /usr/share/wazuh-indexer/certs/node-key.pem
+              name: node-certs
+              readOnly: true
+              subPath: tls.key
+            - mountPath: /usr/share/wazuh-indexer/certs/node.pem
+              name: node-certs
+              readOnly: true
+              subPath: tls.crt
+            - mountPath: /usr/share/wazuh-indexer/certs/root-ca.pem
+              name: node-certs
+              readOnly: true
+              subPath: ca.crt
+            - mountPath: /usr/share/wazuh-indexer/certs/admin.pem
+              name: admin-certs
+              readOnly: true
+              subPath: tls.crt
+            - mountPath: /usr/share/wazuh-indexer/certs/admin-key.pem
+              name: admin-certs
+              readOnly: true
+              subPath: tls.key
+            # Config
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch.yml
+              subPath: opensearch.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/internal_users.yml
+              subPath: internal_users.yml
+              readOnly: true
+          ports:
+            - containerPort: {{ .Values.indexer.service.httpPort }}
+              name: indexer-rest
+            - containerPort: {{ .Values.indexer.service.nodes }}
+              name: indexer-nodes
+  volumeClaimTemplates:
+    - metadata:
+        name: wazuh-indexer
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.indexer.storageSize }}
+        {{- $storageClass := .Values.indexer.storageClass }}
+        {{- if $storageClass }}
+        {{- if (eq "-" $storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: {{ $storageClass }}
+        {{- end }}
+        {{- end }}

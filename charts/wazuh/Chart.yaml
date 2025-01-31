@@ -30,6 +30,10 @@ dependencies:
     version: 1.2.1
     repository: https://stakater.github.io/stakater-charts
     condition: reloader.enabled
+  - name: cert-manager
+    version: 1.16.3
+    repository: https://charts.jetstack.io
+    condition: cert-manager.enabled
 annotations:
   artifacthub.io/category: security
   artifacthub.io/links: |

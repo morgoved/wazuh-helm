@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: {{ include "wazuh.fullname" . }}-indexer
+  annotations:
+    {{- toYaml .Values.indexer.annotations | nindent 4 }}
+  name: {{ include "wazuh.fullname" . }}-indexer-config
+data:
+  internal_users.yml: |
+    {{- tpl .Values.indexer.config.internalUsers . | indent 2 }}
+  opensearch.yml: |
+    {{- tpl .Values.indexer.config.opensearch . | indent 2 }}

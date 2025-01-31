@@ -1,75 +1,97 @@
 reloader:
-  enabled: true
+  enabled: false
+
+cert-manager:
+  enabled: false
+
+nameOverride: null
+fullnameOverride: null
 
 indexer:
-  deployment:
-    enabled: true
-
   replicas: 3
 
-  service:
-    httpPort: 9200
-    transport: 9300
-    metrics: 9600
-    type: ClusterIP
+  annotations: {}
 
+  service:
+    annotations: {}
+    httpPort: 9200
+    nodes: 9300
+    metrics: 9600
+
+  updateStrategy: RollingUpdate
+  
   images:
     repository: wazuh/wazuh-indexer
-    tag: "4.6.0"
+    tag: "4.10.1"
     pullPolicy: IfNotPresent
-    updateStrategy: RollingUpdate
-    replicaCount: 3
     imagePullSecrets:
       enabled: false
       secret: {}
-    resources:
-      requests:
-        cpu: 500m
-        memory: 1Gi
-      limits:
-        cpu: 800m
-        memory: 2Gi
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      memory: 2Gi
+
+  initContainers:
+    volumeMountHack:
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+    increaseTheVmMaxMapCount:
+      resources:
+        limits:
+          memory: 256Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
 
   config:
+    opensearch: |-
+      {{- include "wazuh.indexer.opensearchConfig" . | indent 2 -}}
+    internalUsers: |-
+      {{- include "wazuh.indexer.internalUsers" . | indent 2 -}}
 
   env:
     OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"
     CLUSTER_NAME: "wazuh"
-    # NETWORK_HOST: "_eth0_"
     NETWORK_HOST: "0.0.0.0"
-    HTTP_CORS_ENABLE: "false"
-    ALLOW_DEMOCERTIFICATES: "false"
-    # The minimum number of masters that will be able to form a quorum. This
-    # should be (#masters / 2) + 1. Default is 2.
-    NUMBER_OF_MASTERS: "3"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
-    DISCOVERY_SERVICE: "wazuh-sand-indexer-nodes"
-
 
   plugins: []
 
   storageSize: 50Gi
-  storageClassName: gp2
+  storageClass: null
+
+  cred:
+    existingSecret: ""
+    username: "username"
+    password: "Pa55-worD"
 
 # Kibana for elasticsearch with Wazuh plugins pre-installed
 dashboard:
-  deployment:
-    enabled: true
-
   replicas: 1
+
+  annotations: {}
 
   images:
     repository: wazuh/wazuh-dashboard
-    tag: "4.6.0"
+    tag: "4.10.1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
-    resources:
-      requests:
-        cpu: 500m
-        memory: 512Mi
-      limits:
-        cpu: 900m
-        memory: 1Gi
+  
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
   # with this you will be able to access kibana on http port instead of https
   # if you use Ambassador edgestack this is necessary becasue
   # with `true` route will close unexpectedly
@@ -77,79 +99,111 @@ dashboard:
   enable_ssl: false
 
   service:
+    annotations: {}
     httpPort: 5601
     type: ClusterIP
-
-  env:
-    INDEXER_URL: https://wazuh-sand-indexer-rest
-    WAZUH_API_URL: https://wazuh-manager-master-0.wazuh-sand-cluster
-    WAZUH_API_HOST: wazuh-manager-master-0.wazuh-sand-cluster
-
-serviceAccount:
-  create: true
-#  annotations:
-#    eks.amazonaws.com/role-arn: arn:aws:iam::xxxxx:role/wazuh-test
+  
+  cred:
+    existingSecret: ""
+    username: "username"
+    password: "Pa55-worD"
+  
+  config: |
+    {{- include "wazuh.dashboard.config" . | indent 2 -}}
+  
+  ingress:
+    enabled: false
+    tls: []
+    # - secretName: wazuh-tls
+    #   hosts:
+    #     - wazuh.example.com
+    annotations: {}
+    host: "wazuh.example.com"
 
 wazuh:
   syslog_enable: true
-  deployment:
-    enabled: true
-  master_replicas: 1
-  worker_replicas: 2
-  key: c98b62a9b6169ac5f67dae55ae4a9088
+  key: "c98b62a9b6169ac5f67dae55ae4a9088"
   images:
     repository: wazuh/wazuh-manager
-    tag: "4.6.0"
+    tag: "4.10.1"
     pullSecret: regcred
-    resources:
-      requests:
-        cpu: 500m
-        memory: 500Mi
-      limits:
-        cpu: 850m
-        memory: 1Gi
-    worker_resources:
-      requests:
-        cpu: 1000m
-        memory: 1Gi
-      limits:
-        cpu: 1500m
-        memory: 2Gi
 
   env:
     FILEBEAT_SSL_VERIFICATION_MODE: none
 
   service:
-    # annotations:
-    type: ClusterIP
-    masterType: ClusterIP
-    workerType: ClusterIP
-    m_nodeType: master
-    w_nodeType: worker
-    ports:
-      registration: 1515
-      api: 55000
-      wazuhInternal: 1516
-      agentEvents: 1514
+    annotations: {}
+    port: 1516
 
+  apiCred:
+    # 3 Options:
+    # 1. Set existing secret name
+    # 2. Set username and password manually
+    # 3. Let secret be generated automatically (all empty)
+    existingSecret: ""
+    username: "username"
+    # The password must have a length between 8 and 64 characters and contain at least one upper and lower case letter, a number, and a symbol(.*+?-).
+    password: "Pa55-worD"
+  authd:
+    existingSecret: ""
+    pass: "Pa55-worD"
+  
+  initContainer:
+    resources: {}
 
-  storageSizeWorker: 50Gi
-  storageClassNameWorker: gp2
-  storageSizeMaster: 50Gi
-  storageClassNameMaster: gp2
+  master:
+    replicas: 1
 
-identifier:
-#  clusterId: autogenerated
-#  tenantId: autogenerated
-#  tenantName: autogenerated
-#  spaceId: autogenerated
-#  spaceName: autogenerated
-  appId: sand
-  appName: wazuh
+    annotations: {}
 
-ingress:
-  enabled: false
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-  host: "wazuh.example.com"
+    service:
+      type: ClusterIP
+      annotations: {}
+      ports:
+        registration: 1515
+        api: 55000
+
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    
+    # If defined, storageClassName: <storageClass>
+    # If set to "-", storageClassName: "", which disables dynamic provisioning
+    # If undefined (the default) or set to null, no storageClassName spec is
+    #   set, choosing the default provisioner.
+    storageClass: null
+    storageSize: 10Gi
+
+    conf: |
+      {{- include "wazuh.master.conf" . | indent 2 -}}
+    # To be appended to the master.conf
+    extraConf: ""
+
+  worker:
+    replicas: 2
+
+    annotations: {}
+
+    service:
+      type: ClusterIP
+      annotations: {}
+      ports:
+        agentEvents: 1514
+
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+
+    storageClass: null
+    storageSize: 10Gi
+    
+    conf: |
+      {{- include "wazuh.worker.conf" . | indent 2 -}}
+    # To be appended to the worker.conf
+    extraConf: ""

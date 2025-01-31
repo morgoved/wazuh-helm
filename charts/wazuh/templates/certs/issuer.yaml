@@ -1,0 +1,40 @@
+# https://cert-manager.io/docs/configuration/selfsigned/
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+  subject: #! What to add here?
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: root-ca
+spec:
+  isCA: true
+  secretName: root-secret
+  commonName: root-ca
+  subject:
+    organizations:
+      - Company
+    countries:
+      - US
+    localities:
+      - California
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  duration: 87600h # 3650d
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ca-issuer
+spec:
+  ca:
+    secretName: root-secret
