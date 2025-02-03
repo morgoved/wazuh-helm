@@ -26,16 +26,16 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
-opensearch.hosts: "https://{{ include "wazuh.fullname" . }}-indexer-rest:{{ .Values.indexer.service.httpPort }}"
+opensearch.hosts: "https://indexer:{{ .Values.indexer.service.httpPort }}"
 opensearch.ssl.verificationMode: none
 opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
 opensearch_security.multitenancy.enabled: false
 opensearch_security.readonly_mode.roles: ["kibana_read_only"]
-server.ssl.enabled: false
+server.ssl.enabled: {{ .Values.dashboard.enable_ssl }}
 server.ssl.key: "/usr/share/wazuh-dashboard/certs/key.pem"
 server.ssl.certificate: "/usr/share/wazuh-dashboard/certs/cert.pem"
 opensearch.ssl.certificateAuthorities: ["/usr/share/wazuh-dashboard/certs/root-ca.pem"]
-uiSettings.overrides.defaultRoute: /app/wazuh
+uiSettings.overrides.defaultRoute: /app/wz-home
 {{- end }}
 
 {{/* Snippet for the configuration file used by wazuh master */}}
@@ -154,7 +154,7 @@ uiSettings.overrides.defaultRoute: /app/wazuh
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>"https://{{ include "wazuh.fullname" . }}-indexer-rest:{{ .Values.indexer.service.httpPort }}"</host>
+      <host>"https://indexer:{{ .Values.indexer.service.httpPort }}"</host>
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -353,13 +353,13 @@ uiSettings.overrides.defaultRoute: /app/wazuh
 
   <cluster>
     <name>wazuh</name>
-    <node_name>{{ include "wazuh.fullname" . }}-manager-master-___INDEX___</node_name>
+    <node_name>{{ include "wazuh.fullname" . }}-manager-master-0</node_name>
     <node_type>master</node_type>
-    <key>{{ .Values.wazuh.key }} </key>
+    <key>{{ .Values.wazuh.key }}</key>
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
-        <node>{{ include "wazuh.fullname" . }}-manager-master-0.{{ include "wazuh.fullname" . }}-cluster</node>
+        <node>wazuh-manager-master-0.wazuh-manager-cluster</node>
     </nodes>
     <hidden>no</hidden>
     <disabled>no</disabled>
@@ -500,7 +500,7 @@ uiSettings.overrides.defaultRoute: /app/wazuh
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>"https://{{ include "wazuh.fullname" . }}-indexer-rest:{{ .Values.indexer.service.httpPort }}"</host>
+      <host>"https://indexer:{{ .Values.indexer.service.httpPort }}"</host>
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -705,7 +705,8 @@ uiSettings.overrides.defaultRoute: /app/wazuh
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
-        <node>{{ include "wazuh.fullname" . }}-manager-master-0.{{ include "wazuh.fullname" . }}-cluster</node>
+        <!-- Kubernetes Service Pointing to Master node -->
+        <node>wazuh-manager-master-0.wazuh-manager-cluster</node>
     </nodes>
     <hidden>no</hidden>
     <disabled>no</disabled>

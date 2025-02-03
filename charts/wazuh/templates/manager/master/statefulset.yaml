@@ -3,15 +3,15 @@ kind: StatefulSet
 metadata:
   name: {{ include "wazuh.fullname" . }}-manager-master
   labels:
-    app: {{ include "wazuh.fullname" . }}-manager-master
+    app: {{ include "wazuh.fullname" . }}-manager
     node-type: master
   annotations:
     {{- toYaml .Values.wazuh.master.annotations | nindent 4 }}
 spec:
-  replicas: {{ .Values.wazuh.master.replicas }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ include "wazuh.fullname" . }}-manager-master
+      app: {{ include "wazuh.fullname" . }}-manager
       node-type: master
   serviceName: {{ include "wazuh.fullname" . }}-manager-cluster
   podManagementPolicy: Parallel
@@ -20,7 +20,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ include "wazuh.fullname" . }}-manager-master
+        app: {{ include "wazuh.fullname" . }}-manager
         node-type: master
       name: wazuh-manager-master
       annotations:
@@ -136,7 +136,7 @@ spec:
               name: api
           env:
             - name: INDEXER_URL
-              value: "https://{{ include "wazuh.fullname" . }}-indexer-rest:{{ .Values.indexer.service.httpPort }}"
+              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:

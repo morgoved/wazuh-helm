@@ -70,8 +70,8 @@ indexer:
 
   cred:
     existingSecret: ""
-    username: "username"
-    password: "Pa55-worD"
+    username: "admin"
+    password: "SecretPassword"
 
 # Kibana for elasticsearch with Wazuh plugins pre-installed
 dashboard:
@@ -105,8 +105,8 @@ dashboard:
   
   cred:
     existingSecret: ""
-    username: "username"
-    password: "Pa55-worD"
+    username: "kibanaserver"
+    password: "kibanaserver"
   
   config: |
     {{- include "wazuh.dashboard.config" . | indent 2 -}}
@@ -129,7 +129,7 @@ wazuh:
     pullSecret: regcred
 
   env:
-    FILEBEAT_SSL_VERIFICATION_MODE: none
+    FILEBEAT_SSL_VERIFICATION_MODE: full
 
   service:
     annotations: {}
@@ -141,19 +141,17 @@ wazuh:
     # 2. Set username and password manually
     # 3. Let secret be generated automatically (all empty)
     existingSecret: ""
-    username: "username"
+    username: "wazuh-wui"
     # The password must have a length between 8 and 64 characters and contain at least one upper and lower case letter, a number, and a symbol(.*+?-).
-    password: "Pa55-worD"
+    password: "MyS3cr37P450r.*-"
   authd:
     existingSecret: ""
-    pass: "Pa55-worD"
+    pass: "password"
   
   initContainer:
     resources: {}
 
   master:
-    replicas: 1
-
     annotations: {}
 
     service:
@@ -175,7 +173,7 @@ wazuh:
     # If undefined (the default) or set to null, no storageClassName spec is
     #   set, choosing the default provisioner.
     storageClass: null
-    storageSize: 10Gi
+    storageSize: 50Gi
 
     conf: |
       {{- include "wazuh.master.conf" . | indent 2 -}}
@@ -201,7 +199,7 @@ wazuh:
         memory: 512Mi
 
     storageClass: null
-    storageSize: 10Gi
+    storageSize: 50Gi
     
     conf: |
       {{- include "wazuh.worker.conf" . | indent 2 -}}

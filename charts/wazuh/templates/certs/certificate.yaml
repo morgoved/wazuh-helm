@@ -25,10 +25,6 @@ spec:
     localities:
       - California
 
-  # At least one of commonName (possibly through literalSubject), dnsNames, uris, emailAddresses, ipAddresses or otherNames is required.
-  dnsNames:
-     - "*.{{ .Release.Namespace }}.svc.cluster.local"
-
   # Issuer references are always required.
   issuerRef:
     name: ca-issuer
@@ -62,10 +58,6 @@ spec:
       - US
     localities:
       - California
-
-  # At least one of commonName (possibly through literalSubject), dnsNames, uris, emailAddresses, ipAddresses or otherNames is required.
-  dnsNames:
-    - "*.{{ .Release.Namespace }}.svc.cluster.local"
 
   # Issuer references are always required.
   issuerRef:
@@ -101,10 +93,6 @@ spec:
     localities:
       - California
 
-  # At least one of commonName (possibly through literalSubject), dnsNames, uris, emailAddresses, ipAddresses or otherNames is required.
-  dnsNames:
-    - "*.{{ .Release.Namespace }}.svc.cluster.local"
-
   # Issuer references are always required.
   issuerRef:
     name: ca-issuer
@@ -138,10 +126,6 @@ spec:
       - US
     localities:
       - California
-
-  # At least one of commonName (possibly through literalSubject), dnsNames, uris, emailAddresses, ipAddresses or otherNames is required.
-  dnsNames:
-    - "*.{{ .Release.Namespace }}.svc.cluster.local"
 
   # Issuer references are always required.
   issuerRef:

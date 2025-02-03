@@ -59,7 +59,7 @@ spec:
               name: dashboard
           env:
             - name: INDEXER_URL
-              value: "https://{{ include "wazuh.fullname" . }}-indexer-rest:{{ .Values.indexer.service.httpPort }}"
+              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -86,9 +86,8 @@ spec:
               value: /usr/share/wazuh-dashboard/certs/cert.pem
             - name: SERVER_SSL_KEY
               value: /usr/share/wazuh-dashboard/certs/key.pem
-            #! REVIEW: This is the same as INDEXER_URL
             - name: WAZUH_API_URL
-              value: "https://{{ include "wazuh.fullname" . }}-manager-master.{{ .Release.Namespace }}"
+              value: "https://wazuh"
             - name: API_USERNAME
               valueFrom:
                 secretKeyRef:

@@ -28,7 +28,7 @@ spec:
               service:
                 name: {{ include "wazuh.fullname" . }}-dashboard
                 port:
-                  number: 80
+                  number: 443
             path: /
             pathType: Prefix
 {{- end -}}
