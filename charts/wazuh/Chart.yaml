@@ -1,26 +1,24 @@
 apiVersion: v2
 name: wazuh
-description: Wazuh is a centralized Security Information Event Management (SIEM) and Vulnerability inteligence and threat monitoring application.
+description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
-appVersion: 4.6.0
-version: 0.0.1
+appVersion: 4.10.1
+version: 0.0.2
 home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
-  - https://github.com/wazuh/wazuh-kubernetes
 maintainers:
   - name: Dani
     email: andre.gomes@promptlyhealth.com
     url: https://github.com/Ca-moes
   - name: Morgoved
     url: https://github.com/morgoved
-icon: https://wazuh.com/uploads/2022/05/WAZUH.png
+icon: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/icon.png
 keywords:
   - security
   - information
   - threat
   - management
-  - centralized
   - kubernetes
   - wazuh
   - opendistro
@@ -36,9 +34,23 @@ dependencies:
     condition: cert-manager.enabled
 annotations:
   artifacthub.io/category: security
+  artifacthub.io/changes: |
+    - kind: added
+      description: "Add support for cert-manager"
+    - kind: changed
+      description: "Refactor whole chart"
+    - kind: changed
+      description: "Bump wazuh-manager to 4.10.1"
   artifacthub.io/links: |
-    - name: source
-      url: https://github.com/morgoved/wazuh-helm
     - name: application source
       url: https://github.com/wazuh/wazuh
+    - name: kustomize source
+      url: https://github.com/wazuh/wazuh-kubernetes
   artifacthub.io/prerelease: "true"
+  artifacthub.io/screenshots: |
+    - title: Home Page
+      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/dashboard.png
+    - title: Agent Deployment
+      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/agent-deploy.png
+    - title: Threat Hunting
+      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/threat-hunting.png
