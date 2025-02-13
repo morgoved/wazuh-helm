@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Name is only "dashboard" because of Certicates commonName
+  name: dashboard
+  labels:
+    app: {{ include "wazuh.fullname" . }}-dashboard
+  annotations:
+    {{- toYaml .Values.dashboard.service.annotations | nindent 4 }}
+spec:
+  ports:
+    - name: dashboard
+      port: {{ .Values.dashboard.service.httpPort }}
+      targetPort: {{ .Values.dashboard.service.httpPort }}
+  selector:
+    app: {{ include "wazuh.fullname" . }}-dashboard
+  type: {{ .Values.dashboard.service.type }}

@@ -1,86 +1,85 @@
-{{- if .Values.dashboard.deployment.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "wazuh.dashboard.fullname" . }}-dpl
+  name: {{ include "wazuh.fullname" . }}-dashboard
   labels:
-{{ include "labels" $ | indent 4 }}
-    appComponent: Dashboard-Deployment
+    app: {{ include "wazuh.fullname" . }}-dashboard
   annotations:
-{{ include "annotations" $ | indent 4 }}
-    appComponent: Dashboard-Deployment
+    {{- toYaml .Values.dashboard.annotations | nindent 4 }}
 spec:
   replicas: {{ .Values.dashboard.replicas }}
   selector:
     matchLabels:
-      app: {{ include "appIdentifier" .Values.identifier }}-dashboard
+      app: {{ include "wazuh.fullname" . }}-dashboard
   template:
     metadata:
       labels:
-{{ include "labels" $ | indent 8 }}
-        appComponent: Dashboard-Pod
-        app: {{ include "appIdentifier" .Values.identifier }}-dashboard
+        app: {{ include "wazuh.fullname" . }}-dashboard
       annotations:
+        {{- toYaml .Values.dashboard.annotations | nindent 8 }}
+        {{- if .Values.reloader.enabled -}}
         secret.reloader.stakater.com/reload: "dashboard-certs"
         configmap.reloader.stakater.com/reload: "dashboard-conf"
-        appComponent: Dashboard-Pod
-      name: {{ include "appIdentifier" .Values.identifier }}-dashboard-dpl
+        {{- end }}
+      name: {{ include "wazuh.fullname" . }}-dashboard
     spec:
       volumes:
         - configMap:
-            name: dashboard-conf
+            name: {{ include "wazuh.fullname" . }}-dashboard-config
           name: config
         - name: dashboard-certs
           secret:
-            secretName: dashboard-certs
+            secretName: dashboard-tls
       containers:
         - name: wazuh-dashboard
           image: "{{ .Values.dashboard.images.repository }}:{{ .Values.dashboard.images.tag }}"
           resources:
-{{ toYaml .Values.dashboard.images.resources | indent 12 }}
+            {{- toYaml .Values.dashboard.resources | nindent 12 }}
           volumeMounts:
+            # Config
             - mountPath: /usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
               name: config
               readOnly: false
               subPath: opensearch_dashboards.yml
+            # Certs
             - mountPath: /usr/share/wazuh-dashboard/certs/cert.pem
               name: dashboard-certs
               readOnly: true
-              subPath: cert.pem
+              subPath: tls.crt
             - mountPath: /usr/share/wazuh-dashboard/certs/key.pem
               name: dashboard-certs
               readOnly: true
-              subPath: key.pem
+              subPath: tls.key
             - mountPath: /usr/share/wazuh-dashboard/certs/root-ca.pem
               name: dashboard-certs
               readOnly: true
-              subPath: root-ca.pem
+              subPath: ca.crt
           ports:
             - containerPort: {{ .Values.dashboard.service.httpPort }}
               name: dashboard
           env:
             - name: INDEXER_URL
-              value: {{ .Values.dashboard.env.INDEXER_URL | quote }}
+              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:
                   key: username
-                  name: indexer-cred
+                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
             - name: INDEXER_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: indexer-cred
+                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
             - name: DASHBOARD_USERNAME
               valueFrom:
                 secretKeyRef:
                   key: username
-                  name: dashboard-cred
+                  name: {{ .Values.dashboard.cred.existingSecret | default "dashboard-cred" }}
             - name: DASHBOARD_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: dashboard-cred
+                  name: {{ .Values.dashboard.cred.existingSecret | default "dashboard-cred" }}
             - name: SERVER_SSL_ENABLED
               value: {{ .Values.dashboard.enable_ssl | quote }}
             - name: SERVER_SSL_CERTIFICATE
@@ -88,7 +87,7 @@ spec:
             - name: SERVER_SSL_KEY
               value: /usr/share/wazuh-dashboard/certs/key.pem
             - name: WAZUH_API_URL
-              value: {{ .Values.dashboard.env.WAZUH_API_URL | quote }}
+              value: "https://wazuh"
             - name: API_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -99,4 +98,3 @@ spec:
                 secretKeyRef:
                   key: password
                   name: wazuh-api-cred
-{{- end -}}

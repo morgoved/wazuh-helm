@@ -1,0 +1,180 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "wazuh.fullname" . }}-manager-worker
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+    node-type: worker
+  annotations:
+    {{- toYaml .Values.wazuh.worker.annotations | nindent 4 }}
+spec:
+  replicas: {{ .Values.wazuh.worker.replicas }}
+  selector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-manager
+      node-type: worker
+  serviceName: {{ include "wazuh.fullname" . }}-manager-cluster
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: {{ include "wazuh.fullname" . }}-manager
+        node-type: worker
+      name: wazuh-manager-worker
+      annotations:
+        {{- toYaml .Values.wazuh.worker.annotations | nindent 8 }}
+        {{- if .Values.reloader.enabled -}}
+        secret.reloader.stakater.com/reload: "indexer-certs"
+        configmap.reloader.stakater.com/reload: "{{ template "wazuh.fullname" . }}-worker-config"
+        {{- end }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: {{ include "wazuh.fullname" . }}-manager-worker
+                    node-type: worker
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "wazuh.fullname" . }}-manager-config
+            defaultMode: 0777
+        - name: filebeat-certs
+          secret:
+            secretName: filebeat-tls
+        - name: result-config
+          emptyDir: {}
+      securityContext:
+        fsGroup: 101
+      initContainers:
+        - name: update-index
+          image: alpine
+          command: 
+            - 'sh'
+            - '-c'
+            - '/script.sh'
+          resources:
+            {{- toYaml .Values.wazuh.initContainer.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /ossec.conf
+              name: config
+              readOnly: true
+              subPath: worker.conf
+            - mountPath: /wazuh-config-mount/etc/
+              name: result-config
+            - mountPath: /script.sh
+              name: config
+              readOnly: true
+              subPath: script.sh
+      containers:
+        - name: wazuh-manager
+          image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          resources:
+            {{- toYaml .Values.wazuh.worker.resources | nindent 12 }}
+          securityContext:
+            capabilities:
+              add: ["SYS_CHROOT"]
+          volumeMounts:
+            # Wazuh config
+            - mountPath: /wazuh-config-mount/etc/
+              name: result-config
+            # Certs
+            - mountPath: /etc/ssl/root-ca.pem
+              name: filebeat-certs
+              readOnly: true
+              subPath: ca.crt
+            - mountPath: /etc/ssl/filebeat.pem
+              name: filebeat-certs
+              readOnly: true
+              subPath: tls.crt
+            - mountPath: /etc/ssl/filebeat.key
+              name: filebeat-certs
+              readOnly: true
+              subPath: tls.key
+            # PVC
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/api/configuration
+              subPath: wazuh/var/ossec/api/configuration
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/etc
+              subPath: wazuh/var/ossec/etc
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/logs
+              subPath: wazuh/var/ossec/logs
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/queue
+              subPath: wazuh/var/ossec/queue
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/var/multigroups
+              subPath: wazuh/var/ossec/var/multigroups
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/integrations
+              subPath: wazuh/var/ossec/integrations
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/active-response/bin
+              subPath: wazuh/var/ossec/active-response/bin
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/agentless
+              subPath: wazuh/var/ossec/agentless
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/ossec/wodles
+              subPath: wazuh/var/ossec/wodles
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /etc/filebeat
+              subPath: filebeat/etc/filebeat
+            - name: {{ include "wazuh.fullname" . }}-manager-worker
+              mountPath: /var/lib/filebeat
+              subPath: filebeat/var/lib/filebeat
+          ports:
+            - containerPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
+              name: agents-events
+            - containerPort: {{ .Values.wazuh.service.port }}
+              name: cluster
+          env:
+            - name: INDEXER_URL
+              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
+            - name: INDEXER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
+            - name: INDEXER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
+            - name: FILEBEAT_SSL_VERIFICATION_MODE
+              value: {{ .Values.wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | quote }}
+            - name: WAZUH_CLUSTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: key
+                  name: "wazuh-cluster-key"
+            # Certs
+            - name: SSL_CERTIFICATE_AUTHORITIES
+              value: /etc/ssl/root-ca.pem
+            - name: SSL_CERTIFICATE
+              value: /etc/ssl/filebeat.pem
+            - name: SSL_KEY
+              value: /etc/ssl/filebeat.key
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ include "wazuh.fullname" . }}-manager-worker
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.wazuh.worker.storageSize }}
+        {{- $storageClass := .Values.wazuh.worker.storageClass }}
+        {{- if $storageClass }}
+        {{- if (eq "-" $storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: {{ $storageClass }}
+        {{- end }}
+        {{- end }}

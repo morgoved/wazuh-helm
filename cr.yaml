@@ -1,0 +1,5 @@
+# cr.yaml
+# Set to true for GPG signing
+sign: true
+# UID of the GPG key to use
+key: Dani (Key to Sign Wazuh Helm Chart) <andre.gomes@promptlyhealth.com>

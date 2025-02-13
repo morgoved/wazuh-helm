@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Name is only "indexer" because of Certicates commonName
+  name: indexer
+  labels:
+    app: {{ include "wazuh.fullname" . }}-indexer
+  annotations:
+    {{- toYaml .Values.indexer.service.annotations | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: indexer-rest
+      port: {{ .Values.indexer.service.httpPort }}
+      targetPort: {{ .Values.indexer.service.httpPort }}
+  selector:
+    app: {{ include "wazuh.fullname" . }}-indexer
