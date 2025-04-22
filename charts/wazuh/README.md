@@ -30,6 +30,12 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 |-----|------|---------|-------------|
 | autoreload.enabled | bool | `false` |  |
 | cert-manager.enabled | bool | `false` |  |
+| certificates.duration | string | `"2160h"` |  |
+| certificates.renewBefore | string | `"360h"` |  |
+| certificates.subject.country | string | `"US"` |  |
+| certificates.subject.locality | string | `"California"` |  |
+| certificates.subject.organization | string | `"Company"` |  |
+| dashboard.additionalEnv | list | `[]` |  |
 | dashboard.annotations | object | `{}` |  |
 | dashboard.config | string | `"{{ include \"wazuh.dashboard.config\" . }}\n"` |  |
 | dashboard.cred.existingSecret | string | `""` |  |
@@ -68,6 +74,7 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | dashboard.service.httpPort | int | `5601` |  |
 | dashboard.service.type | string | `"ClusterIP"` |  |
 | fullnameOverride | string | `nil` |  |
+| indexer.additionalEnv | list | `[]` |  |
 | indexer.agentGroupConf[0].agent | string | `"<agent_config>\n  <localfile>\n    <location>journald</location>\n    <log_format>journald</log_format>\n  </localfile>\n  <localfile>\n    <location>/var/log/falco.log</location>\n    <log_format>json</log_format>\n  </localfile>\n  <wodle name=\"docker-listener\">\n    <interval>10m</interval>\n    <attempts>5</attempts>\n    <run_on_start>no</run_on_start>\n    <disabled>no</disabled>\n  </wodle>\n</agent_config>\n"` |  |
 | indexer.agentGroupConf[0].merged | string | `"#cloud\n!228 ar.conf\nrestart-ossec0 - restart-ossec.sh - 0\nrestart-ossec0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-ossec.sh - 0\nrestart-wazuh0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-wazuh - 0\nrestart-wazuh0 - restart-wazuh.exe - 0\n!435 agent.conf\n  <agent_config>\n    <localfile>\n      <location>journald</location>\n      <log_format>journald</log_format>\n    </localfile>\n    <localfile>\n      <location>/var/log/falco.log</location>\n      <log_format>json</log_format>\n    </localfile>\n    <wodle name=\"docker-listener\">\n      <interval>10m</interval>\n      <attempts>5</attempts>\n      <run_on_start>no</run_on_start>\n      <disabled>no</disabled>\n    </wodle>\n  </agent_config>\n"` |  |
 | indexer.agentGroupConf[0].name | string | `"example"` |  |
