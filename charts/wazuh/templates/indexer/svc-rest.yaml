@@ -7,7 +7,7 @@ metadata:
   annotations:
     {{- toYaml .Values.indexer.service.annotations | nindent 4 }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.indexer.service.type }}
   ports:
     - name: indexer-rest
       port: {{ .Values.indexer.service.httpPort }}

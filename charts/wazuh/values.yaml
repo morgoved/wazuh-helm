@@ -13,6 +13,7 @@ indexer:
   annotations: {}
 
   service:
+    type: ClusterIP
     annotations: {}
     httpPort: 9200
     nodes: 9300
