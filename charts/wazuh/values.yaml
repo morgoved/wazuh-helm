@@ -68,6 +68,9 @@ indexer:
 
   securityContext: {}
 
+  networkPolicy:
+    enabled: true
+
   initContainers:
     volumeMountHack:
       resources:
@@ -205,6 +208,9 @@ dashboard:
 
   securityContext: {}
 
+  networkPolicy:
+    enabled: true
+
   # with this you will be able to access kibana on http port instead of https
   # if you use Ambassador edgestack this is necessary becasue
   # with `true` route will close unexpectedly
@@ -300,6 +306,9 @@ wazuh:
       capabilities:
         add: ["SYS_CHROOT"]
     
+    networkPolicy:
+      enabled: true
+    
     # If defined, storageClassName: <storageClass>
     # If set to "-", storageClassName: "", which disables dynamic provisioning
     # If undefined (the default) or set to null, no storageClassName spec is
@@ -341,6 +350,9 @@ wazuh:
     securityContext:
       capabilities:
         add: ["SYS_CHROOT"]
+
+    networkPolicy:
+      enabled: true
 
     storageClass: null
     storageSize: 50Gi
