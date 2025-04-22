@@ -157,7 +157,7 @@ dashboard:
     password: "kibanaserver"
   
   config: |
-    {{- include "wazuh.dashboard.config" . | indent 2 -}}
+    {{- include "wazuh.dashboard.config" . }}
   
   ingress:
     enabled: false
@@ -240,7 +240,7 @@ wazuh:
     storageSize: 50Gi
 
     conf: |
-      {{- include "wazuh.master.conf" . | indent 2 -}}
+      {{- include "wazuh.master.conf" . }}
     # To be appended to the master.conf
     extraConf: ""
 
@@ -274,6 +274,6 @@ wazuh:
     storageSize: 50Gi
     
     conf: |
-      {{- include "wazuh.worker.conf" . | indent 2 -}}
+      {{- include "wazuh.worker.conf" . }}
     # To be appended to the worker.conf
     extraConf: ""
