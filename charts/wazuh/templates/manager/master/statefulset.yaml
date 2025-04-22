@@ -150,7 +150,7 @@ spec:
               name: api
           env:
             - name: INDEXER_URL
-              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
+              value: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:

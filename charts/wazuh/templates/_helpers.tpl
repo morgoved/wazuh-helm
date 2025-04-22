@@ -26,7 +26,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
-opensearch.hosts: "https://indexer:{{ .Values.indexer.service.httpPort }}"
+opensearch.hosts: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
 opensearch.ssl.verificationMode: none
 opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
 opensearch_security.multitenancy.enabled: false
@@ -155,7 +155,7 @@ uiSettings.overrides.defaultRoute: /app/wz-home
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>"https://indexer:{{ .Values.indexer.service.httpPort }}"</host>
+      <host>https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -501,7 +501,7 @@ uiSettings.overrides.defaultRoute: /app/wz-home
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>"https://indexer:{{ .Values.indexer.service.httpPort }}"</host>
+      <host>https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -759,7 +759,7 @@ plugins.security.authcz.admin_dn:
 plugins.security.check_snapshot_restore_write_privileges: true
 plugins.security.enable_snapshot_restore_privilege: true
 plugins.security.nodes_dn:
-  - CN=indexer,O=Company,L=California,C=US
+  - CN={{ include "wazuh.fullname" . }}-indexer,O=Company,L=California,C=US
 plugins.security.restapi.roles_enabled:
 - "all_access"
 - "security_rest_api_access"
