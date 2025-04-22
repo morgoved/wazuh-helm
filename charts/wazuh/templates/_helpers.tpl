@@ -31,6 +31,7 @@ opensearch.ssl.verificationMode: none
 opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
 opensearch_security.multitenancy.enabled: false
 opensearch_security.readonly_mode.roles: ["kibana_read_only"]
+opensearch_security.auth.unauthenticated_routes: ['/api/stats', '/api/status']
 server.ssl.enabled: {{ .Values.dashboard.enable_ssl }}
 server.ssl.key: "/usr/share/wazuh-dashboard/certs/key.pem"
 server.ssl.certificate: "/usr/share/wazuh-dashboard/certs/cert.pem"

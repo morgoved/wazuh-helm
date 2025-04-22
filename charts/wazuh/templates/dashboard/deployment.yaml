@@ -33,8 +33,22 @@ spec:
       containers:
         - name: wazuh-dashboard
           image: "{{ .Values.dashboard.images.repository }}:{{ .Values.dashboard.images.tag }}"
+          {{- with .Values.dashboard.resources }}
           resources:
-            {{- toYaml .Values.dashboard.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dashboard.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dashboard.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dashboard.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             # Config
             - mountPath: /usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
