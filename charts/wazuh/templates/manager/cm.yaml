@@ -13,3 +13,9 @@ data:
     {{- tpl .Values.wazuh.master.conf . | indent 2 }}
   worker.conf: |
     {{- tpl .Values.wazuh.worker.conf . | indent 2 }}
+  local_decoder.xml: | 
+    {{- tpl .Values.wazuh.localDecoder . | nindent 4 }}
+  local_rules.xml: | 
+    {{- tpl .Values.wazuh.localRules . | nindent 4 }}
+  internal_options.conf: | 
+    {{- tpl .Values.wazuh.internalOptions . | nindent 4 }}

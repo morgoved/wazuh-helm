@@ -73,9 +73,15 @@ indexer:
 
   config:
     opensearch: |-
-      {{- include "wazuh.indexer.opensearchConfig" . | indent 2 -}}
+      {{ include "wazuh.indexer.opensearchConfig" . }}
     internalUsers: |-
-      {{- include "wazuh.indexer.internalUsers" . | indent 2 -}}
+      {{ include "wazuh.indexer.internalUsers" . }}
+    securityConfig: |-
+      {{ include "wazuh.indexer.securityConfig" . }}
+    rolesMapping: |-
+      {{ include "wazuh.indexer.rolesMapping" . }}
+    roles: |-
+      {{ include "wazuh.indexer.roles" . }}
 
   env:
     OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"

@@ -8,6 +8,12 @@ metadata:
   name: {{ include "wazuh.fullname" . }}-indexer-config
 data:
   internal_users.yml: |
-    {{- tpl .Values.indexer.config.internalUsers . | indent 2 }}
+    {{- tpl .Values.indexer.config.internalUsers . | nindent 4 }}
   opensearch.yml: |
-    {{- tpl .Values.indexer.config.opensearch . | indent 2 }}
+    {{- tpl .Values.indexer.config.opensearch . | nindent 4 }}
+  roles_mapping.yml: |
+    {{- tpl .Values.indexer.config.rolesMapping . | nindent 4 }}
+  roles.yml: |
+    {{- tpl .Values.indexer.config.roles . | nindent 4 }}
+  config.yml: |
+    {{- tpl .Values.indexer.config.securityConfig . | nindent 4 }}
