@@ -1,0 +1,14 @@
+{{- if .Values.wazuh.worker.pdb.enabled }}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: {{ include "wazuh.fullname" . }}-manager-worker
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-manager
+      node-type: worker
+  {{- with .Values.wazuh.worker.pdb.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+{{- end }}

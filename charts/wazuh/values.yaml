@@ -44,6 +44,10 @@ indexer:
     limits:
       memory: 2Gi
 
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+
   livenessProbe:
     periodSeconds: 20
     timeoutSeconds: 5
@@ -174,6 +178,10 @@ dashboard:
     requests:
       cpu: 500m
       memory: 512Mi
+
+  pdb:
+    enabled: false
+    maxUnavailable: 1
 
   livenessProbe:
     periodSeconds: 20
@@ -321,6 +329,10 @@ wazuh:
       requests:
         cpu: 500m
         memory: 512Mi
+
+    pdb:
+      enabled: true
+      maxUnavailable: 1
 
     livenessProbe: {}
 
