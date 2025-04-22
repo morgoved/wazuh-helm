@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "wazuh.fullname" . }}-indexer
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer
   labels:
-    app: {{ include "wazuh.fullname" . }}-indexer
+    app: {{ include "wazuh.indexer.fullname" . }}-indexer
   annotations:
     {{- toYaml .Values.indexer.annotations | nindent 4 }}
 spec:
-  serviceName: {{ include "wazuh.fullname" . }}-indexer-nodes
+  serviceName: {{ include "wazuh.indexer.fullname" . }}-indexer-nodes
   replicas: {{ .Values.indexer.replicas }}
   updateStrategy:
     type: {{ .Values.indexer.updateStrategy }}
   selector:
     matchLabels:
-      app: {{ include "wazuh.fullname" . }}-indexer
+      app: {{ include "wazuh.indexer.fullname" . }}-indexer
   template:
     metadata:
       labels:
-        app: {{ include "wazuh.fullname" . }}-indexer
+        app: {{ include "wazuh.indexer.fullname" . }}-indexer
       annotations:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/indexer/cm.yml") . | sha256sum }}
@@ -35,7 +35,7 @@ spec:
         secret:
           secretName: node-tls
       - configMap:
-          name: {{ include "wazuh.fullname" . }}-indexer-config
+          name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
         name: indexer-conf
       initContainers:
         - name: volume-mount-hack
@@ -77,7 +77,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: DISCOVERY_SERVICE
-              value: {{ include "wazuh.fullname" . }}-indexer-rest
+              value: {{ include "wazuh.indexer.fullname" . }}-indexer-rest
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
