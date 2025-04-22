@@ -89,6 +89,10 @@ spec:
             # Wazuh Config
             - mountPath: /wazuh-config-mount/etc/
               name: result-config
+            - mountPath: /wazuh-config-mount/etc/internal_options.conf
+              name: config
+              readOnly: true
+              subPath: internal_options.conf
             # Certs
             - mountPath: /etc/ssl/root-ca.pem
               name: filebeat-certs
@@ -107,6 +111,15 @@ spec:
               mountPath: /wazuh-config-mount/etc/authd.pass
               subPath: authd.pass
               readOnly: true
+            # Rules and decoders
+            - mountPath: /wazuh-config-mount/etc/decoders/local_decoder.xml
+              name: config
+              readOnly: true
+              subPath: local_decoder.xml
+            - mountPath: /wazuh-config-mount/etc/rules/local_rules.xml
+              name: config
+              readOnly: true
+              subPath: local_rules.xml
             # PVC
             - name: {{ include "wazuh.fullname" . }}-manager-master
               mountPath: /var/ossec/api/configuration

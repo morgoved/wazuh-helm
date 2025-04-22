@@ -200,6 +200,13 @@ wazuh:
   initContainer:
     resources: {}
 
+  localDecoder: |
+    {{ include "wazuh.localDecoder" . }}
+  localRules: |
+    {{ include "wazuh.localRules" . }}
+  internalOptions: |
+    {{ include "wazuh.internalOptions" . }}
+
   master:
     annotations: {}
 
