@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "wazuh.fullname" . }}-indexer
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer
   labels:
-    app: {{ include "wazuh.fullname" . }}-indexer
+    app: {{ include "wazuh.indexer.fullname" . }}-indexer
   annotations:
     {{- toYaml .Values.indexer.service.annotations | nindent 4 }}
 spec:
@@ -13,4 +13,4 @@ spec:
       port: {{ .Values.indexer.service.httpPort }}
       targetPort: {{ .Values.indexer.service.httpPort }}
   selector:
-    app: {{ include "wazuh.fullname" . }}-indexer
+    app: {{ include "wazuh.indexer.fullname" . }}-indexer

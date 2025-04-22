@@ -23,10 +23,18 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 {{- end -}}
 
+{{- define "wazuh.indexer.fullname" -}}
+{{- if .Values.indexer.fullnameOverride -}}
+{{ .Values.indexer.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else -}}
+{{ include "wazuh.fullname" . }}
+{{- end -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
-opensearch.hosts: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+opensearch.hosts: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
 opensearch.ssl.verificationMode: none
 opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
 opensearch_security.multitenancy.enabled: false
@@ -694,7 +702,7 @@ wazuh_clusterd.debug=0
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
+      <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -1040,7 +1048,7 @@ wazuh_clusterd.debug=0
   <indexer>
     <enabled>yes</enabled>
     <hosts>
-      <host>https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
+      <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -1277,9 +1285,9 @@ wazuh_clusterd.debug=0
 cluster.name: ${CLUSTER_NAME}
 node.name: ${NODE_NAME}
 network.host: ${NETWORK_HOST}
-discovery.seed_hosts: {{ include "wazuh.fullname" . }}-indexer-nodes
+discovery.seed_hosts: {{ include "wazuh.indexer.fullname" . }}-indexer-nodes
 cluster.initial_master_nodes:
-  - {{ include "wazuh.fullname" . }}-indexer-0
+  - {{ include "wazuh.indexer.fullname" . }}-indexer-0
 
 node.max_local_storage_nodes: "3"
 path.data: /var/lib/wazuh-indexer
@@ -1298,7 +1306,7 @@ plugins.security.authcz.admin_dn:
 plugins.security.check_snapshot_restore_write_privileges: true
 plugins.security.enable_snapshot_restore_privilege: true
 plugins.security.nodes_dn:
-  - CN={{ include "wazuh.fullname" . }}-indexer,O={{ .Values.certificates.subject.organization }},L={{ .Values.certificates.subject.locality }},C={{ .Values.certificates.subject.country }}
+  - CN={{ include "wazuh.indexer.fullname" . }}-indexer,O={{ .Values.certificates.subject.organization }},L={{ .Values.certificates.subject.locality }},C={{ .Values.certificates.subject.country }}
 plugins.security.restapi.roles_enabled:
 - "all_access"
 - "security_rest_api_access"
