@@ -80,6 +80,8 @@ indexer:
           cpu: 50m
           memory: 128Mi
 
+  additionalEnv: []
+
   config:
     opensearch: |-
       {{ include "wazuh.indexer.opensearchConfig" . }}
