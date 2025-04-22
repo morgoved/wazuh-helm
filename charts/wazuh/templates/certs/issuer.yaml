@@ -17,11 +17,11 @@ spec:
   commonName: root-ca
   subject:
     organizations:
-      - Company
+      - {{ .Values.certificates.subject.organization }}
     countries:
-      - US
+      - {{ .Values.certificates.subject.country }}
     localities:
-      - California
+      - {{ .Values.certificates.subject.locality }}
   privateKey:
     algorithm: RSA
     size: 2048

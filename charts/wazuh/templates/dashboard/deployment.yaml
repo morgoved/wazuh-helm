@@ -34,6 +34,7 @@ spec:
             secretName: dashboard-tls
       containers:
         - name: wazuh-dashboard
+          imagePullPolicy: {{ .Values.dashboard.images.pullPolicy }}
           image: "{{ .Values.dashboard.images.repository }}:{{ .Values.dashboard.images.tag }}"
           {{- with .Values.dashboard.resources }}
           resources:
@@ -75,7 +76,7 @@ spec:
               name: dashboard
           env:
             - name: INDEXER_URL
-              value: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+              value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -114,3 +115,6 @@ spec:
                 secretKeyRef:
                   key: password
                   name: wazuh-api-cred
+          {{- with .Values.dashboard.additionalEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

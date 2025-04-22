@@ -80,6 +80,8 @@ indexer:
           cpu: 50m
           memory: 128Mi
 
+  additionalEnv: []
+
   config:
     opensearch: |-
       {{ include "wazuh.indexer.opensearchConfig" . }}
@@ -210,6 +212,8 @@ dashboard:
     existingSecret: ""
     username: "kibanaserver"
     password: "kibanaserver"
+
+  additionalEnv: []
   
   config: |
     {{ include "wazuh.dashboard.config" . }}

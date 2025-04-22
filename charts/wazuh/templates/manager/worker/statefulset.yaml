@@ -55,6 +55,7 @@ spec:
       initContainers:
         - name: update-index
           image: alpine
+          imagePullPolicy: {{ .Values.wazuh.worker.images.pullPolicy }}
           command: 
             - 'sh'
             - '-c'
@@ -75,6 +76,7 @@ spec:
       containers:
         - name: wazuh-manager
           image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          imagePullPolicy: {{ .Values.wazuh.worker.images.pullPolicy }}
           {{- with .Values.wazuh.worker.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -158,7 +160,7 @@ spec:
               name: cluster
           env:
             - name: INDEXER_URL
-              value: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+              value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:
