@@ -73,11 +73,22 @@ spec:
       containers:
         - name: wazuh-manager
           image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          {{- with .Values.wazuh.worker.resources }}
           resources:
-            {{- toYaml .Values.wazuh.worker.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.worker.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.worker.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.worker.securityContext }}
           securityContext:
-            capabilities:
-              add: ["SYS_CHROOT"]
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             # Wazuh config
             - mountPath: /wazuh-config-mount/etc/

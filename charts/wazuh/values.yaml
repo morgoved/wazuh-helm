@@ -209,6 +209,14 @@ wazuh:
       requests:
         cpu: 500m
         memory: 512Mi
+
+    livenessProbe: {}
+
+    readinessProbe: {}
+
+    securityContext:
+      capabilities:
+        add: ["SYS_CHROOT"]
     
     # If defined, storageClassName: <storageClass>
     # If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -239,6 +247,14 @@ wazuh:
       requests:
         cpu: 500m
         memory: 512Mi
+
+    livenessProbe: {}
+
+    readinessProbe: {}
+
+    securityContext:
+      capabilities:
+        add: ["SYS_CHROOT"]
 
     storageClass: null
     storageSize: 50Gi

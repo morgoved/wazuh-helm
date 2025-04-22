@@ -66,8 +66,22 @@ spec:
       containers:
         - name: wazuh-manager
           image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          {{- with .Values.wazuh.master.resources }}
           resources:
-            {{- toYaml .Values.wazuh.master.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.master.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.master.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.master.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             capabilities:
               add: ["SYS_CHROOT"]
