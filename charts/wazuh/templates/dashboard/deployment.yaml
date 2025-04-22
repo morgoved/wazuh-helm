@@ -17,7 +17,7 @@ spec:
         app: {{ include "wazuh.fullname" . }}-dashboard
       annotations:
         {{- if .Values.autoreload.enabled }}
-        checksum/configmap: {{ include (print $.Template.BasePath "/dashboard/cm.yml") . | sha256sum }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/dashboard/configmap.yaml") . | sha256sum }}
         checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.indexer.annotations }}
