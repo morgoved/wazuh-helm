@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: admin
+  name: {{ include "wazuh.fullname" . }}-admin
 spec:
   # Secret names are always required.
   secretName: admin-tls
@@ -27,15 +27,14 @@ spec:
 
   # Issuer references are always required.
   issuerRef:
-    name: ca-issuer
+    name: {{ include "wazuh.fullname" . }}-ca-issuer
     # We can reference ClusterIssuers by changing the kind here.
     # The default value is Issuer (i.e. a locally namespaced Issuer)
-    kind: Issuer
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: dashboard
+  name: {{ include "wazuh.fullname" . }}-dashboard
 spec:
   # Secret names are always required.
   secretName: dashboard-tls
@@ -61,15 +60,12 @@ spec:
 
   # Issuer references are always required.
   issuerRef:
-    name: ca-issuer
-    # We can reference ClusterIssuers by changing the kind here.
-    # The default value is Issuer (i.e. a locally namespaced Issuer)
-    kind: Issuer
+    name: {{ include "wazuh.fullname" . }}-ca-issuer
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: node
+  name: {{ include "wazuh.fullname" . }}-node
 spec:
   # Secret names are always required.
   secretName: node-tls
@@ -95,15 +91,14 @@ spec:
 
   # Issuer references are always required.
   issuerRef:
-    name: ca-issuer
+    name: {{ include "wazuh.fullname" . }}-ca-issuer
     # We can reference ClusterIssuers by changing the kind here.
     # The default value is Issuer (i.e. a locally namespaced Issuer)
-    kind: Issuer
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: filebeat
+  name: {{ include "wazuh.fullname" . }}-filebeat
 spec:
   # Secret names are always required.
   secretName: filebeat-tls
@@ -129,7 +124,4 @@ spec:
 
   # Issuer references are always required.
   issuerRef:
-    name: ca-issuer
-    # We can reference ClusterIssuers by changing the kind here.
-    # The default value is Issuer (i.e. a locally namespaced Issuer)
-    kind: Issuer
+    name: {{ include "wazuh.fullname" . }}-ca-issuer
