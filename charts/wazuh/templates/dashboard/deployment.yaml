@@ -114,3 +114,6 @@ spec:
                 secretKeyRef:
                   key: password
                   name: wazuh-api-cred
+          {{- with .Values.dashboard.additionalEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}

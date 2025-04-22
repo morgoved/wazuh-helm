@@ -210,6 +210,8 @@ dashboard:
     existingSecret: ""
     username: "kibanaserver"
     password: "kibanaserver"
+
+  additionalEnv: []
   
   config: |
     {{ include "wazuh.dashboard.config" . }}
