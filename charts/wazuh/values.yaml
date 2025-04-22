@@ -176,6 +176,7 @@ wazuh:
     repository: wazuh/wazuh-manager
     tag: "4.10.1"
     pullSecret: regcred
+    pullPolicy: IfNotPresent
 
   env:
     FILEBEAT_SSL_VERIFICATION_MODE: full
