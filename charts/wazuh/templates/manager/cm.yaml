@@ -19,3 +19,9 @@ data:
     {{- tpl .Values.wazuh.localRules . | nindent 4 }}
   internal_options.conf: | 
     {{- tpl .Values.wazuh.internalOptions . | nindent 4 }}
+{{- range .Values.wazuh.agentGroupConf }}
+  {{ .name }}-agent.conf: | 
+    {{- .agent | nindent 4 }} 
+  {{ .name }}-merged.md: | 
+    {{- .merged | nindent 4 }} 
+{{- end }}

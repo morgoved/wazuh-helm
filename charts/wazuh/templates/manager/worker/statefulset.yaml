@@ -142,6 +142,15 @@ spec:
             - name: {{ include "wazuh.fullname" . }}-manager-worker
               mountPath: /var/lib/filebeat
               subPath: filebeat/var/lib/filebeat
+            # Agent groups configuration
+            {{- range .Values.wazuh.agentGroupConf }}
+            - name: {{ include "wazuh.fullname" $ }}-manager-worker
+              mountPath: /wazuh-config-mount/etc/shared/{{.name}}/agent.conf
+              subPath: {{ .name }}-agent.conf
+            - name: {{ include "wazuh.fullname" $ }}-manager-worker
+              mountPath: /wazuh-config-mount/etc/shared/{{.name}}/merged.md
+              subPath: {{ .name }}-merged.md
+            {{- end }}
           ports:
             - containerPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
               name: agents-events
