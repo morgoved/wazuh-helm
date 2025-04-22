@@ -50,7 +50,7 @@ spec:
 
   isCA: false
 
-  commonName: dashboard
+  commonName: {{ include "wazuh.fullname" . }}-dashboard
   subject:
     organizations:
       - Company
