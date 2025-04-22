@@ -39,6 +39,7 @@ spec:
         name: indexer-conf
       initContainers:
         - name: volume-mount-hack
+          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: busybox
           command:
           - sh
@@ -50,6 +51,7 @@ spec:
             - mountPath: /var/lib/wazuh-indexer
               name: wazuh-indexer
         - name: increase-the-vm-max-map-count
+          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: busybox
           command:
             - sysctl
@@ -61,6 +63,7 @@ spec:
             {{- toYaml .Values.indexer.initContainers.increaseTheVmMaxMapCount.resources | nindent 12 }}
       containers:
         - name: wazuh-indexer
+          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
           env:
             - name: OPENSEARCH_JAVA_OPTS
