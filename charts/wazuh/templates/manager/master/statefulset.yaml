@@ -24,10 +24,12 @@ spec:
         node-type: master
       name: wazuh-manager-master
       annotations:
-        {{- toYaml .Values.wazuh.master.annotations | nindent 8 }}
-        {{- if .Values.reloader.enabled -}}
-        secret.reloader.stakater.com/reload: "wazuh-authd-pass,indexer-certs"
-        configmap.reloader.stakater.com/reload: "{{ template "wazuh.fullname" . }}-master-config"
+        {{- if .Values.autoreload.enabled }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/manager/cm.yaml") . | sha256sum }}
+        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.wazuh.master.annotations }}
+            {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       volumes:

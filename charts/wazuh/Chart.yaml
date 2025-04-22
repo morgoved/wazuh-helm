@@ -1,4 +1,4 @@
-apiVersion: v2
+apiVersion: v3
 name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
@@ -24,10 +24,6 @@ keywords:
   - opendistro
   - elasticsearch
 dependencies:
-  - name: reloader
-    version: 1.2.1
-    repository: https://stakater.github.io/stakater-charts
-    condition: reloader.enabled
   - name: cert-manager
     version: 1.16.3
     repository: https://charts.jetstack.io

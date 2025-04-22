@@ -22,10 +22,12 @@ spec:
         node-type: worker
       name: wazuh-manager-worker
       annotations:
-        {{- toYaml .Values.wazuh.worker.annotations | nindent 8 }}
-        {{- if .Values.reloader.enabled -}}
-        secret.reloader.stakater.com/reload: "indexer-certs"
-        configmap.reloader.stakater.com/reload: "{{ template "wazuh.fullname" . }}-worker-config"
+        {{- if .Values.autoreload.enabled }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/manager/cm.yaml") . | sha256sum }}
+        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.wazuh.worker.annotations }}
+            {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       affinity:
