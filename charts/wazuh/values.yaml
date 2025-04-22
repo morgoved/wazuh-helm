@@ -4,6 +4,14 @@ autoreload:
 cert-manager:
   enabled: false
 
+certificates:
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  subject:
+    organization: Company
+    country: US
+    locality: California
+
 nameOverride: null
 fullnameOverride: null
 
