@@ -84,7 +84,7 @@ spec:
 
   isCA: false
 
-  commonName: indexer
+  commonName: {{ include "wazuh.fullname" . }}-indexer
   subject:
     organizations:
       - Company

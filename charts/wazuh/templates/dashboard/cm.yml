@@ -8,4 +8,4 @@ metadata:
     {{- toYaml .Values.dashboard.annotations | nindent 4 }}
 data:
   opensearch_dashboards.yml: |
-    {{- tpl .Values.dashboard.config . | indent 2 }}
+    {{- tpl .Values.dashboard.config . | nindent 4 }}

@@ -19,7 +19,13 @@ spec:
       labels:
         app: {{ include "wazuh.fullname" . }}-indexer
       annotations:
-        {{- toYaml .Values.indexer.annotations | nindent 8 }}
+        {{- if .Values.autoreload.enabled }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/indexer/cm.yml") . | sha256sum }}
+        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.indexer.annotations }}
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       volumes:
       - name: admin-certs
@@ -75,8 +81,22 @@ spec:
                   fieldPath: metadata.namespace
             - name: DISABLE_INSTALL_DEMO_CONFIG
               value: {{ .Values.indexer.env.DISABLE_INSTALL_DEMO_CONFIG | quote }}
+          {{- with .Values.indexer.resources }}
           resources:
-            {{- toYaml .Values.indexer.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             # PVC
             - mountPath: /var/lib/wazuh-indexer
@@ -110,6 +130,18 @@ spec:
             - name: indexer-conf
               mountPath: /usr/share/wazuh-indexer/opensearch-security/internal_users.yml
               subPath: internal_users.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles.yml
+              subPath: roles.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles_mapping.yml
+              subPath: roles_mapping.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
+              subPath: config.yml
               readOnly: true
           ports:
             - containerPort: {{ .Values.indexer.service.httpPort }}

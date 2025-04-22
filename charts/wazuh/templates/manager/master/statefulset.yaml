@@ -24,10 +24,12 @@ spec:
         node-type: master
       name: wazuh-manager-master
       annotations:
-        {{- toYaml .Values.wazuh.master.annotations | nindent 8 }}
-        {{- if .Values.reloader.enabled -}}
-        secret.reloader.stakater.com/reload: "wazuh-authd-pass,indexer-certs"
-        configmap.reloader.stakater.com/reload: "{{ template "wazuh.fullname" . }}-master-config"
+        {{- if .Values.autoreload.enabled }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/manager/cm.yaml") . | sha256sum }}
+        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.wazuh.master.annotations }}
+            {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
       volumes:
@@ -66,8 +68,22 @@ spec:
       containers:
         - name: wazuh-manager
           image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          {{- with .Values.wazuh.master.resources }}
           resources:
-            {{- toYaml .Values.wazuh.master.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.master.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.master.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.wazuh.master.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           securityContext:
             capabilities:
               add: ["SYS_CHROOT"]
@@ -75,6 +91,10 @@ spec:
             # Wazuh Config
             - mountPath: /wazuh-config-mount/etc/
               name: result-config
+            - mountPath: /wazuh-config-mount/etc/internal_options.conf
+              name: config
+              readOnly: true
+              subPath: internal_options.conf
             # Certs
             - mountPath: /etc/ssl/root-ca.pem
               name: filebeat-certs
@@ -93,6 +113,15 @@ spec:
               mountPath: /wazuh-config-mount/etc/authd.pass
               subPath: authd.pass
               readOnly: true
+            # Rules and decoders
+            - mountPath: /wazuh-config-mount/etc/decoders/local_decoder.xml
+              name: config
+              readOnly: true
+              subPath: local_decoder.xml
+            - mountPath: /wazuh-config-mount/etc/rules/local_rules.xml
+              name: config
+              readOnly: true
+              subPath: local_rules.xml
             # PVC
             - name: {{ include "wazuh.fullname" . }}-manager-master
               mountPath: /var/ossec/api/configuration
@@ -127,6 +156,15 @@ spec:
             - name: {{ include "wazuh.fullname" . }}-manager-master
               mountPath: /var/lib/filebeat
               subPath: filebeat/var/lib/filebeat
+            # Agent groups configuration
+            {{- range .Values.wazuh.agentGroupConf }}
+            - name: {{ include "wazuh.fullname" $ }}-manager-master
+              mountPath: /wazuh-config-mount/etc/shared/{{.name}}/agent.conf
+              subPath: {{ .name }}-agent.conf
+            - name: {{ include "wazuh.fullname" $ }}-manager-master
+              mountPath: /wazuh-config-mount/etc/shared/{{.name}}/merged.md
+              subPath: {{ .name }}-merged.md
+            {{- end }}
           ports:
             - containerPort: {{ .Values.wazuh.master.service.ports.registration }}
               name: registration
@@ -136,7 +174,7 @@ spec:
               name: api
           env:
             - name: INDEXER_URL
-              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
+              value: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:

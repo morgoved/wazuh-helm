@@ -16,10 +16,12 @@ spec:
       labels:
         app: {{ include "wazuh.fullname" . }}-dashboard
       annotations:
-        {{- toYaml .Values.dashboard.annotations | nindent 8 }}
-        {{- if .Values.reloader.enabled -}}
-        secret.reloader.stakater.com/reload: "dashboard-certs"
-        configmap.reloader.stakater.com/reload: "dashboard-conf"
+        {{- if .Values.autoreload.enabled }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/dashboard/cm.yml") . | sha256sum }}
+        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.indexer.annotations }}
+            {{- toYaml . | nindent 8 }}
         {{- end }}
       name: {{ include "wazuh.fullname" . }}-dashboard
     spec:
@@ -33,8 +35,22 @@ spec:
       containers:
         - name: wazuh-dashboard
           image: "{{ .Values.dashboard.images.repository }}:{{ .Values.dashboard.images.tag }}"
+          {{- with .Values.dashboard.resources }}
           resources:
-            {{- toYaml .Values.dashboard.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dashboard.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dashboard.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.dashboard.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             # Config
             - mountPath: /usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
@@ -59,7 +75,7 @@ spec:
               name: dashboard
           env:
             - name: INDEXER_URL
-              value: "https://indexer:{{ .Values.indexer.service.httpPort }}"
+              value: "https://{{ include "wazuh.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
             - name: INDEXER_USERNAME
               valueFrom:
                 secretKeyRef:
