@@ -11,19 +11,19 @@ spec:
     encoding: PKCS8
     size: 2048
 
-  duration: 2160h # 90d
-  renewBefore: 360h # 15d
+  duration: {{ .Values.certificates.duration }}
+  renewBefore: {{ .Values.certificates.renewBefore }}
 
   isCA: false
 
   commonName: admin
   subject:
     organizations:
-      - Company
+      - {{ .Values.certificates.subject.organization }}
     countries:
-      - US
+      - {{ .Values.certificates.subject.country }}
     localities:
-      - California
+      - {{ .Values.certificates.subject.locality }}
 
   # Issuer references are always required.
   issuerRef:
@@ -45,19 +45,19 @@ spec:
     encoding: PKCS8
     size: 2048
 
-  duration: 2160h # 90d
-  renewBefore: 360h # 15d
+  duration: {{ .Values.certificates.duration }}
+  renewBefore: {{ .Values.certificates.renewBefore }}
 
   isCA: false
 
-  commonName: dashboard
+  commonName: {{ include "wazuh.fullname" . }}-dashboard
   subject:
     organizations:
-      - Company
+      - {{ .Values.certificates.subject.organization }}
     countries:
-      - US
+      - {{ .Values.certificates.subject.country }}
     localities:
-      - California
+      - {{ .Values.certificates.subject.locality }}
 
   # Issuer references are always required.
   issuerRef:
@@ -79,19 +79,19 @@ spec:
     encoding: PKCS8
     size: 2048
 
-  duration: 2160h # 90d
-  renewBefore: 360h # 15d
+  duration: {{ .Values.certificates.duration }}
+  renewBefore: {{ .Values.certificates.renewBefore }}
 
   isCA: false
 
   commonName: {{ include "wazuh.fullname" . }}-indexer
   subject:
     organizations:
-      - Company
+      - {{ .Values.certificates.subject.organization }}
     countries:
-      - US
+      - {{ .Values.certificates.subject.country }}
     localities:
-      - California
+      - {{ .Values.certificates.subject.locality }}
 
   # Issuer references are always required.
   issuerRef:
@@ -113,19 +113,19 @@ spec:
     encoding: PKCS8
     size: 2048
 
-  duration: 2160h # 90d
-  renewBefore: 360h # 15d
+  duration: {{ .Values.certificates.duration }}
+  renewBefore: {{ .Values.certificates.renewBefore }}
 
   isCA: false
 
   commonName: filebeat
   subject:
     organizations:
-      - Company
+      - {{ .Values.certificates.subject.organization }}
     countries:
-      - US
+      - {{ .Values.certificates.subject.country }}
     localities:
-      - California
+      - {{ .Values.certificates.subject.locality }}
 
   # Issuer references are always required.
   issuerRef:
