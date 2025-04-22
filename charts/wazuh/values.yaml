@@ -288,7 +288,7 @@ wazuh:
     storageSize: 50Gi
 
     conf: |
-      {{- include "wazuh.master.conf" . }}
+      {{ include "wazuh.master.conf" . }}
     # To be appended to the master.conf
     extraConf: ""
 
