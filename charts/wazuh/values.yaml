@@ -23,7 +23,7 @@ indexer:
   
   images:
     repository: wazuh/wazuh-indexer
-    tag: "4.10.1"
+    tag: "4.11.1"
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false
@@ -154,7 +154,7 @@ dashboard:
 
   images:
     repository: wazuh/wazuh-dashboard
-    tag: "4.10.1"
+    tag: "4.11.1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   
@@ -221,7 +221,7 @@ wazuh:
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
   images:
     repository: wazuh/wazuh-manager
-    tag: "4.10.1"
+    tag: "4.11.1"
     pullSecret: regcred
     pullPolicy: IfNotPresent
 
