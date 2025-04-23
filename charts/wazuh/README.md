@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.11.1](https://img.shields.io/badge/AppVersion-4.11.1-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.11.1](https://img.shields.io/badge/AppVersion-4.11.1-informational?style=flat-square)
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -58,6 +58,9 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | dashboard.livenessProbe.periodSeconds | int | `20` |  |
 | dashboard.livenessProbe.successThreshold | int | `1` |  |
 | dashboard.livenessProbe.timeoutSeconds | int | `5` |  |
+| dashboard.networkPolicy.enabled | bool | `true` |  |
+| dashboard.pdb.enabled | bool | `false` |  |
+| dashboard.pdb.maxUnavailable | int | `1` |  |
 | dashboard.readinessProbe.failureThreshold | int | `10` |  |
 | dashboard.readinessProbe.httpGet.path | string | `"/api/status"` |  |
 | dashboard.readinessProbe.httpGet.port | int | `5601` |  |
@@ -75,9 +78,6 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | dashboard.service.type | string | `"ClusterIP"` |  |
 | fullnameOverride | string | `nil` |  |
 | indexer.additionalEnv | list | `[]` |  |
-| indexer.agentGroupConf[0].agent | string | `"<agent_config>\n  <localfile>\n    <location>journald</location>\n    <log_format>journald</log_format>\n  </localfile>\n  <localfile>\n    <location>/var/log/falco.log</location>\n    <log_format>json</log_format>\n  </localfile>\n  <wodle name=\"docker-listener\">\n    <interval>10m</interval>\n    <attempts>5</attempts>\n    <run_on_start>no</run_on_start>\n    <disabled>no</disabled>\n  </wodle>\n</agent_config>\n"` |  |
-| indexer.agentGroupConf[0].merged | string | `"#cloud\n!228 ar.conf\nrestart-ossec0 - restart-ossec.sh - 0\nrestart-ossec0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-ossec.sh - 0\nrestart-wazuh0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-wazuh - 0\nrestart-wazuh0 - restart-wazuh.exe - 0\n!435 agent.conf\n  <agent_config>\n    <localfile>\n      <location>journald</location>\n      <log_format>journald</log_format>\n    </localfile>\n    <localfile>\n      <location>/var/log/falco.log</location>\n      <log_format>json</log_format>\n    </localfile>\n    <wodle name=\"docker-listener\">\n      <interval>10m</interval>\n      <attempts>5</attempts>\n      <run_on_start>no</run_on_start>\n      <disabled>no</disabled>\n    </wodle>\n  </agent_config>\n"` |  |
-| indexer.agentGroupConf[0].name | string | `"example"` |  |
 | indexer.annotations | object | `{}` |  |
 | indexer.config.internalUsers | string | `"{{ include \"wazuh.indexer.internalUsers\" . }}"` |  |
 | indexer.config.opensearch | string | `"{{ include \"wazuh.indexer.opensearchConfig\" . }}"` |  |
@@ -108,6 +108,9 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | indexer.livenessProbe.successThreshold | int | `1` |  |
 | indexer.livenessProbe.tcpSocket.port | int | `9200` |  |
 | indexer.livenessProbe.timeoutSeconds | int | `5` |  |
+| indexer.networkPolicy.enabled | bool | `true` |  |
+| indexer.pdb.enabled | bool | `true` |  |
+| indexer.pdb.maxUnavailable | int | `1` |  |
 | indexer.plugins | list | `[]` |  |
 | indexer.readinessProbe.failureThreshold | int | `10` |  |
 | indexer.readinessProbe.initialDelaySeconds | int | `10` |  |
@@ -129,6 +132,9 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | indexer.storageSize | string | `"50Gi"` |  |
 | indexer.updateStrategy | string | `"RollingUpdate"` |  |
 | nameOverride | string | `nil` |  |
+| wazuh.agentGroupConf[0].agent | string | `"<agent_config>\n  <localfile>\n    <location>journald</location>\n    <log_format>journald</log_format>\n  </localfile>\n  <localfile>\n    <location>/var/log/falco.log</location>\n    <log_format>json</log_format>\n  </localfile>\n  <wodle name=\"docker-listener\">\n    <interval>10m</interval>\n    <attempts>5</attempts>\n    <run_on_start>no</run_on_start>\n    <disabled>no</disabled>\n  </wodle>\n</agent_config>\n"` |  |
+| wazuh.agentGroupConf[0].merged | string | `"#cloud\n!228 ar.conf\nrestart-ossec0 - restart-ossec.sh - 0\nrestart-ossec0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-ossec.sh - 0\nrestart-wazuh0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-wazuh - 0\nrestart-wazuh0 - restart-wazuh.exe - 0\n!435 agent.conf\n  <agent_config>\n    <localfile>\n      <location>journald</location>\n      <log_format>journald</log_format>\n    </localfile>\n    <localfile>\n      <location>/var/log/falco.log</location>\n      <log_format>json</log_format>\n    </localfile>\n    <wodle name=\"docker-listener\">\n      <interval>10m</interval>\n      <attempts>5</attempts>\n      <run_on_start>no</run_on_start>\n      <disabled>no</disabled>\n    </wodle>\n  </agent_config>\n"` |  |
+| wazuh.agentGroupConf[0].name | string | `"example"` |  |
 | wazuh.apiCred.existingSecret | string | `""` |  |
 | wazuh.apiCred.password | string | `"MyS3cr37P450r.*-"` |  |
 | wazuh.apiCred.username | string | `"wazuh-wui"` |  |
@@ -148,6 +154,7 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | wazuh.master.conf | string | `"{{ include \"wazuh.master.conf\" . }}\n"` |  |
 | wazuh.master.extraConf | string | `""` |  |
 | wazuh.master.livenessProbe | object | `{}` |  |
+| wazuh.master.networkPolicy.enabled | bool | `true` |  |
 | wazuh.master.readinessProbe | object | `{}` |  |
 | wazuh.master.resources.limits.memory | string | `"1Gi"` |  |
 | wazuh.master.resources.requests.cpu | string | `"500m"` |  |
@@ -166,6 +173,9 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | wazuh.worker.conf | string | `"{{ include \"wazuh.worker.conf\" . }}\n"` |  |
 | wazuh.worker.extraConf | string | `""` |  |
 | wazuh.worker.livenessProbe | object | `{}` |  |
+| wazuh.worker.networkPolicy.enabled | bool | `true` |  |
+| wazuh.worker.pdb.enabled | bool | `true` |  |
+| wazuh.worker.pdb.maxUnavailable | int | `1` |  |
 | wazuh.worker.readinessProbe | object | `{}` |  |
 | wazuh.worker.replicas | int | `2` |  |
 | wazuh.worker.resources.limits.memory | string | `"1Gi"` |  |
