@@ -1215,10 +1215,10 @@ wazuh_clusterd.debug=0
   </ruleset>
 
   <rule_test>
-	    <enabled>yes</enabled>
-	    <threads>1</threads>
-	    <max_sessions>64</max_sessions>
-	    <session_timeout>15m</session_timeout>
+    <enabled>yes</enabled>
+    <threads>1</threads>
+    <max_sessions>64</max_sessions>
+    <session_timeout>15m</session_timeout>
   </rule_test>
 
   <!-- Configuration for ossec-authd
@@ -1274,6 +1274,16 @@ wazuh_clusterd.debug=0
     <log_format>syslog</log_format>
     <location>/var/log/dpkg.log</location>
   </localfile>
+
+{{- if .Values.wazuh.syslog_enable }}
+  <remote>
+    <connection>syslog</connection>
+    <port>514</port>
+    <protocol>tcp</protocol>
+    <allowed-ips>0.0.0.0/0</allowed-ips>
+    <local_ip>0.0.0.0</local_ip>
+  </remote>
+{{- end }}
 
   {{- if .Values.wazuh.worker.extraConf }}
   {{ .Values.wazuh.worker.extraConf | indent 2 }}
