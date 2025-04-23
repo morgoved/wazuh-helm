@@ -19,6 +19,7 @@ spec:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/dashboard/configmap.yaml") . | sha256sum }}
         checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/dashboard/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.indexer.annotations }}
             {{- toYaml . | nindent 8 }}
