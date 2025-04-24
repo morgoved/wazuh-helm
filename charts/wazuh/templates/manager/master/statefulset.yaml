@@ -160,10 +160,10 @@ spec:
               subPath: filebeat/var/lib/filebeat
             # Agent groups configuration
             {{- range .Values.wazuh.agentGroupConf }}
-            - name: {{ include "wazuh.fullname" $ }}-manager-master
+            - name: config
               mountPath: /wazuh-config-mount/etc/shared/{{.name}}/agent.conf
               subPath: {{ .name }}-agent.conf
-            - name: {{ include "wazuh.fullname" $ }}-manager-master
+            - name: config
               mountPath: /wazuh-config-mount/etc/shared/{{.name}}/merged.md
               subPath: {{ .name }}-merged.md
             {{- end }}

@@ -96,9 +96,6 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | indexer.images.pullPolicy | string | `"IfNotPresent"` |  |
 | indexer.images.repository | string | `"wazuh/wazuh-indexer"` |  |
 | indexer.images.tag | string | `"4.11.1"` |  |
-| indexer.initContainers.increaseTheVmMaxMapCount.resources.limits.memory | string | `"256Mi"` |  |
-| indexer.initContainers.increaseTheVmMaxMapCount.resources.requests.cpu | string | `"50m"` |  |
-| indexer.initContainers.increaseTheVmMaxMapCount.resources.requests.memory | string | `"128Mi"` |  |
 | indexer.initContainers.volumeMountHack.resources.limits.memory | string | `"256Mi"` |  |
 | indexer.initContainers.volumeMountHack.resources.requests.cpu | string | `"50m"` |  |
 | indexer.initContainers.volumeMountHack.resources.requests.memory | string | `"128Mi"` |  |
@@ -122,7 +119,7 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | indexer.resources.limits.memory | string | `"2Gi"` |  |
 | indexer.resources.requests.cpu | string | `"500m"` |  |
 | indexer.resources.requests.memory | string | `"1Gi"` |  |
-| indexer.securityContext | object | `{}` |  |
+| indexer.securityContext.fsGroup | int | `1000` |  |
 | indexer.service.annotations | object | `{}` |  |
 | indexer.service.httpPort | int | `9200` |  |
 | indexer.service.metrics | int | `9600` |  |
