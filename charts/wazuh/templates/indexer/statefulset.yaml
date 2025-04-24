@@ -37,30 +37,6 @@ spec:
       - configMap:
           name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
         name: indexer-conf
-      initContainers:
-        - name: volume-mount-hack
-          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
-          image: busybox
-          command:
-          - sh
-          - -c
-          - chown -R 1000:1000 /var/lib/wazuh-indexer
-          resources:
-            {{- toYaml .Values.indexer.initContainers.volumeMountHack.resources | nindent 12 }}
-          volumeMounts:
-            - mountPath: /var/lib/wazuh-indexer
-              name: wazuh-indexer
-        - name: increase-the-vm-max-map-count
-          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
-          image: busybox
-          command:
-            - sysctl
-            - -w
-            - vm.max_map_count=262144
-          securityContext:
-            privileged: true
-          resources:
-            {{- toYaml .Values.indexer.initContainers.increaseTheVmMaxMapCount.resources | nindent 12 }}
       containers:
         - name: wazuh-indexer
           imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}

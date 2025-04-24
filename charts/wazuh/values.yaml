@@ -66,20 +66,14 @@ indexer:
     tcpSocket:
       port: 9200
 
-  securityContext: {}
+  securityContext:
+    fsGroup: 1000
 
   networkPolicy:
     enabled: true
 
   initContainers:
     volumeMountHack:
-      resources:
-        limits:
-          memory: 256Mi
-        requests:
-          cpu: 50m
-          memory: 128Mi
-    increaseTheVmMaxMapCount:
       resources:
         limits:
           memory: 256Mi
