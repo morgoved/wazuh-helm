@@ -1,0 +1,46 @@
+{{- if .Values.dashboard.networkPolicy.enabled -}}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ include "wazuh.fullname" . }}-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "wazuh.fullname" . }}-dashboard
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - ports:
+      - protocol: TCP
+        port: {{ .Values.dashboard.service.httpPort }}
+  egress:
+    # Indexer
+    - ports:
+      - protocol: TCP
+        port: {{ .Values.indexer.service.httpPort }}
+      to:
+        - podSelector:
+            matchLabels:
+              app: {{ include "wazuh.indexer.fullname" . }}-indexer
+    # Wazuh Manager
+    - ports:
+      - protocol: TCP
+        port: {{ .Values.wazuh.master.service.ports.api }}
+      to:
+        - podSelector:
+            matchLabels:
+              app: {{ include "wazuh.fullname" . }}-manager
+              node-type: master
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+{{- end -}}

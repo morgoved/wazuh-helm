@@ -12,6 +12,11 @@ spec:
     - name: agents-events
       port: {{ .Values.wazuh.worker.service.ports.agentEvents }}
       targetPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
+{{- if .Values.wazuh.syslog_enable }}
+    - name: syslog
+      port: 514
+      targetPort: 514
+{{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: worker

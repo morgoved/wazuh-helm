@@ -1,0 +1,13 @@
+{{- if .Values.indexer.pdb.enabled }}
+kind: PodDisruptionBudget
+apiVersion: policy/v1
+metadata:
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "wazuh.indexer.fullname" . }}-indexer
+  {{- with .Values.indexer.pdb.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+{{- end }}

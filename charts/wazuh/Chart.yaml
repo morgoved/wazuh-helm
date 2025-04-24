@@ -1,9 +1,9 @@
-apiVersion: v2
+apiVersion: v3
 name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
-appVersion: 4.10.1
-version: 0.0.3
+appVersion: 4.11.1
+version: 0.1.1
 home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
@@ -13,6 +13,8 @@ maintainers:
     url: https://github.com/Ca-moes
   - name: Morgoved
     url: https://github.com/morgoved
+  - name: 71g3pf4c3
+    url: https://github.com/71g3pf4c3
 icon: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/icon.png
 keywords:
   - security
@@ -24,10 +26,6 @@ keywords:
   - opendistro
   - elasticsearch
 dependencies:
-  - name: reloader
-    version: 1.2.1
-    repository: https://stakater.github.io/stakater-charts
-    condition: reloader.enabled
   - name: cert-manager
     version: 1.16.3
     repository: https://charts.jetstack.io

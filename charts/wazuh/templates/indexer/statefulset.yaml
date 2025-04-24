@@ -1,25 +1,31 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "wazuh.fullname" . }}-indexer
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer
   labels:
-    app: {{ include "wazuh.fullname" . }}-indexer
+    app: {{ include "wazuh.indexer.fullname" . }}-indexer
   annotations:
     {{- toYaml .Values.indexer.annotations | nindent 4 }}
 spec:
-  serviceName: {{ include "wazuh.fullname" . }}-indexer-nodes
+  serviceName: {{ include "wazuh.indexer.fullname" . }}-indexer-nodes
   replicas: {{ .Values.indexer.replicas }}
   updateStrategy:
     type: {{ .Values.indexer.updateStrategy }}
   selector:
     matchLabels:
-      app: {{ include "wazuh.fullname" . }}-indexer
+      app: {{ include "wazuh.indexer.fullname" . }}-indexer
   template:
     metadata:
       labels:
-        app: {{ include "wazuh.fullname" . }}-indexer
+        app: {{ include "wazuh.indexer.fullname" . }}-indexer
       annotations:
-        {{- toYaml .Values.indexer.annotations | nindent 8 }}
+        {{- if .Values.autoreload.enabled }}
+        checksum/configmap: {{ include (print $.Template.BasePath "/indexer/configmap.yaml") . | sha256sum }}
+        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.indexer.annotations }}
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       volumes:
       - name: admin-certs
@@ -29,32 +35,11 @@ spec:
         secret:
           secretName: node-tls
       - configMap:
-          name: {{ include "wazuh.fullname" . }}-indexer-config
+          name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
         name: indexer-conf
-      initContainers:
-        - name: volume-mount-hack
-          image: busybox
-          command:
-          - sh
-          - -c
-          - chown -R 1000:1000 /var/lib/wazuh-indexer
-          resources:
-            {{- toYaml .Values.indexer.initContainers.volumeMountHack.resources | nindent 12 }}
-          volumeMounts:
-            - mountPath: /var/lib/wazuh-indexer
-              name: wazuh-indexer
-        - name: increase-the-vm-max-map-count
-          image: busybox
-          command:
-            - sysctl
-            - -w
-            - vm.max_map_count=262144
-          securityContext:
-            privileged: true
-          resources:
-            {{- toYaml .Values.indexer.initContainers.increaseTheVmMaxMapCount.resources | nindent 12 }}
       containers:
         - name: wazuh-indexer
+          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
           env:
             - name: OPENSEARCH_JAVA_OPTS
@@ -68,15 +53,32 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: DISCOVERY_SERVICE
-              value: {{ include "wazuh.fullname" . }}-indexer-rest
+              value: {{ include "wazuh.indexer.fullname" . }}-indexer-rest
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: DISABLE_INSTALL_DEMO_CONFIG
               value: {{ .Values.indexer.env.DISABLE_INSTALL_DEMO_CONFIG | quote }}
+          {{- with .Values.indexer.additionalEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.resources }}
           resources:
-            {{- toYaml .Values.indexer.resources | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.indexer.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             # PVC
             - mountPath: /var/lib/wazuh-indexer
@@ -110,6 +112,18 @@ spec:
             - name: indexer-conf
               mountPath: /usr/share/wazuh-indexer/opensearch-security/internal_users.yml
               subPath: internal_users.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles.yml
+              subPath: roles.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles_mapping.yml
+              subPath: roles_mapping.yml
+              readOnly: true
+            - name: indexer-conf
+              mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
+              subPath: config.yml
               readOnly: true
           ports:
             - containerPort: {{ .Values.indexer.service.httpPort }}

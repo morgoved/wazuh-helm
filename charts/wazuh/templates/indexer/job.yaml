@@ -1,0 +1,102 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer
+  namespace: wazuh
+spec:
+  backoffLimit: 6
+  completionMode: NonIndexed
+  template:
+    metadata:
+      annotations:
+        appId: sand
+        appName: wazuh
+      labels:
+        batch.kubernetes.io/job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
+        job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command:
+        - sh
+        args:
+        - /usr/share/wazuh-indexer/plugins/opensearch-security/tools/securityadmin.sh
+        - -cd 
+        - /usr/share/wazuh-indexer/opensearch-security/
+        - -nhnv 
+        - -cacert 
+        - /usr/share/wazuh-indexer/certs/root-ca.pem
+        - -cert 
+        - /usr/share/wazuh-indexer/certs/admin.pem
+        - -key
+        - /usr/share/wazuh-indexer/certs/admin-key.pem
+        - -p
+        - "9200"
+        - -icl
+        - -h
+        - {{ include "wazuh.indexer.fullname" . }}-indexer
+        image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
+        imagePullPolicy: IfNotPresent
+        name: wazuh-indexer
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        env:
+          - name: JAVA_HOME 
+            value: /usr/share/wazuh-indexer/jdk/
+        volumeMounts:
+        # Certs
+        - mountPath: /usr/share/wazuh-indexer/certs/node-key.pem
+          name: node-certs
+          readOnly: true
+          subPath: tls.key
+        - mountPath: /usr/share/wazuh-indexer/certs/node.pem
+          name: node-certs
+          readOnly: true
+          subPath: tls.crt
+        - mountPath: /usr/share/wazuh-indexer/certs/root-ca.pem
+          name: node-certs
+          readOnly: true
+          subPath: ca.crt
+        - mountPath: /usr/share/wazuh-indexer/certs/admin.pem
+          name: admin-certs
+          readOnly: true
+          subPath: tls.crt
+        - mountPath: /usr/share/wazuh-indexer/certs/admin-key.pem
+          name: admin-certs
+          readOnly: true
+          subPath: tls.key
+        # Config
+        - name: indexer-conf
+          mountPath: /usr/share/wazuh-indexer/opensearch.yml
+          subPath: opensearch.yml
+          readOnly: true
+        - name: indexer-conf
+          mountPath: /usr/share/wazuh-indexer/opensearch-security/internal_users.yml
+          subPath: internal_users.yml
+          readOnly: true
+        - name: indexer-conf
+          mountPath: /usr/share/wazuh-indexer/opensearch-security/roles.yml
+          subPath: roles.yml
+          readOnly: true
+        - name: indexer-conf
+          mountPath: /usr/share/wazuh-indexer/opensearch-security/roles_mapping.yml
+          subPath: roles_mapping.yml
+          readOnly: true
+        - name: indexer-conf
+          mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
+          subPath: config.yml
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: admin-certs
+        secret:
+          secretName: admin-tls
+      - name: node-certs
+        secret:
+          secretName: node-tls
+      - configMap:
+          name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
+        name: indexer-conf
