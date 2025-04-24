@@ -1,5 +1,8 @@
 # cr.yaml
 # Set to true for GPG signing
-sign: true
+owner: morgoved
+git-repo: wazuh-helm
+charts_dir: charts
+sign: true    
 # UID of the GPG key to use
-key: Key-to-Sign-Wazuh-Helm-Chart-morgyes@gmail.com
+key: Wazuh Helm Release Bot (chart signing key) <morgyes@gmail.com>
