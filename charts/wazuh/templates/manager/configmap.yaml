@@ -22,6 +22,4 @@ data:
 {{- range .Values.wazuh.agentGroupConf }}
   {{ .name }}-agent.conf: | 
     {{- .agent | nindent 4 }} 
-  {{ .name }}-merged.md: | 
-    {{- .merged | nindent 4 }} 
 {{- end }}

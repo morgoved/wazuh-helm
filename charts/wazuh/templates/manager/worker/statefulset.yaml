@@ -149,9 +149,6 @@ spec:
             - name: config
               mountPath: /wazuh-config-mount/etc/shared/{{.name}}/agent.conf
               subPath: {{ .name }}-agent.conf
-            - name: config
-              mountPath: /wazuh-config-mount/etc/shared/{{.name}}/merged.md
-              subPath: {{ .name }}-merged.md
             {{- end }}
           ports:
             - containerPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
