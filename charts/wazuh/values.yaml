@@ -1,19 +1,39 @@
+## @param nameOverride String to partially override the names of the components
+##
+nameOverride: null
+## @param fullnameOverride String to fully override the fullname of the components
+##
+fullnameOverride: null
+## @param autoreload
 autoreload:
   enabled: false
 
+## @section cert-manager This are the parameters for the official sub-chart for cert-manager, here you can set
+## all available values of the official Chart. Ref: https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
+##
 cert-manager:
+  ## @param cert-manager.enabled this enabled or disables the sub-chart getting deployed.
+  ##
   enabled: false
-
+## @section certificates If cert-manager is present, the certificates can be generated automatically
+##
 certificates:
+  ## @param certificates.issuer possible configs for the issuer.
+  ##
+  issuer:
+    ## @param certificates.issuer.name of the issuer used for signing the certificates. If this is null a new
+    ## selfsigned issuer will be created with the chart.
+    ##
+    name: null
+    ## @param certificates.issuer.type defines the type of the issuer, possible values are issuer and ClusterIssuer.
+    ##
+    type: issuer
   duration: 2160h # 90d
   renewBefore: 360h # 15d
   subject:
     organization: Company
     country: US
     locality: California
-
-nameOverride: null
-fullnameOverride: null
 
 indexer:
   replicas: 3
@@ -28,7 +48,7 @@ indexer:
     metrics: 9600
 
   updateStrategy: RollingUpdate
-  
+
   images:
     repository: wazuh/wazuh-indexer
     tag: "4.11.1"
@@ -122,7 +142,7 @@ dashboard:
     tag: "4.11.1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
-  
+
   resources:
     limits:
       memory: 1Gi
@@ -169,17 +189,17 @@ dashboard:
     annotations: {}
     httpPort: 5601
     type: ClusterIP
-  
+
   cred:
     existingSecret: ""
     username: "kibanaserver"
     password: "kibanaserver"
 
   additionalEnv: []
-  
+
   config: |
     {{ include "wazuh.dashboard.config" . }}
-  
+
   ingress:
     enabled: false
     className: ""
@@ -218,7 +238,7 @@ wazuh:
   authd:
     existingSecret: ""
     pass: "password"
-  
+
   initContainer:
     resources: {}
 
@@ -273,10 +293,10 @@ wazuh:
     securityContext:
       capabilities:
         add: ["SYS_CHROOT"]
-    
+
     networkPolicy:
       enabled: true
-    
+
     # If defined, storageClassName: <storageClass>
     # If set to "-", storageClassName: "", which disables dynamic provisioning
     # If undefined (the default) or set to null, no storageClassName spec is
@@ -324,7 +344,7 @@ wazuh:
 
     storageClass: null
     storageSize: 50Gi
-    
+
     conf: |
       {{ include "wazuh.worker.conf" . }}
     # To be appended to the worker.conf
