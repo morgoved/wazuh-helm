@@ -1,10 +1,10 @@
-## @param nameOverride String to partially override the names of the components
+## @param nameOverride String to partially override the names of the components.
 ##
 nameOverride: null
-## @param fullnameOverride String to fully override the fullname of the components
+## @param fullnameOverride String to fully override the fullname of the components.
 ##
 fullnameOverride: null
-## @param autoreload
+## @param autoreload if enabled annotations will be added to recreated the statefulset on config changes.
 autoreload:
   enabled: false
 
@@ -15,7 +15,7 @@ cert-manager:
   ## @param cert-manager.enabled this enabled or disables the sub-chart getting deployed.
   ##
   enabled: false
-## @section certificates If cert-manager is present, the certificates can be generated automatically
+## @section certificates If cert-manager is present, the certificates can be generated automatically.
 ##
 certificates:
   ## @param certificates.issuer possible configs for the issuer.
@@ -28,46 +28,70 @@ certificates:
     ## @param certificates.issuer.type defines the type of the issuer, possible values are issuer and ClusterIssuer.
     ##
     type: issuer
+  ## @param certificates.duration timeframe for validity of cert.
+  ##
   duration: 2160h # 90d
+  ## @param certificates.renewBefore timeframe before the cert gets renewed.
+  ##
   renewBefore: 360h # 15d
+  ## @param certificates.subject details mentioned in the certificate.
+  ##
   subject:
     organization: Company
     country: US
     locality: California
-
+## @section indexer configuration of the wazuh indexer.
+##
 indexer:
+  ## @param indexer.replicas number of replicas used in statefulset.
+  ##
   replicas: 3
-
+  ## @param indexer.annotations additional annotations set on statefulset.
+  ##
   annotations: {}
-
+  ## @params indexer.service settings for svc resource.
+  ##
   service:
     type: ClusterIP
     annotations: {}
     httpPort: 9200
     nodes: 9300
     metrics: 9600
-
+  ## @param indexer.updateStrategy updateStrategy for the statefulset.
+  ##
   updateStrategy: RollingUpdate
-
+  ## @params indexer.images parameters for the image of the indexer.
+  ##
   images:
+    ## @param indexer.images.repository name of the image used. If you use your own image registry
+    ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-indexer
+    ##
     repository: wazuh/wazuh-indexer
+    ## @param indexer.images.tag Tag of the image.
+    ##
     tag: "4.11.1"
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false
       secret: {}
-
+  ## @params indexer.resources Allows to configure the resources allocated to the indexer.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ##
   resources:
     requests:
       cpu: 500m
       memory: 1Gi
     limits:
       memory: 2Gi
-
+  ## @params indexer.pdb Allows to configure the pod disruption budget of the indexer.
+  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  ##
   pdb:
     enabled: true
     maxUnavailable: 1
-
+  ## @params indexer.livenessProbe Parameter to configure the livenessProbe.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ##
   livenessProbe:
     periodSeconds: 20
     timeoutSeconds: 5
@@ -76,7 +100,9 @@ indexer:
     initialDelaySeconds: 10
     tcpSocket:
       port: 9200
-
+  ## @params indexer.readinessProbe Parameter to configure the readinessProbe.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ##
   readinessProbe:
     periodSeconds: 20
     timeoutSeconds: 5
@@ -85,22 +111,19 @@ indexer:
     initialDelaySeconds: 10
     tcpSocket:
       port: 9200
-
+  ## @params indexer.securityContext Parameter to configure the securityContext of the pod.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ##
   securityContext:
     fsGroup: 1000
-
+  ## @params indexer.networkPolicy Network Policies for restricting the traffic in the cluster.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+  ##
   networkPolicy:
     enabled: true
-
-  initContainers:
-    volumeMountHack:
-      resources:
-        limits:
-          memory: 256Mi
-        requests:
-          cpu: 50m
-          memory: 128Mi
-
+  ## @params indexer.additionalEnv Possibility to define additional env vars in the pod.
+  ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  ##
   additionalEnv: []
 
   config:
