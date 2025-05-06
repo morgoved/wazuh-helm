@@ -125,7 +125,8 @@ indexer:
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
   additionalEnv: []
-
+  ## @params indexer.config Configuration of the indexer parameters, this should not be changed.
+  ##
   config:
     opensearch: |-
       {{ include "wazuh.indexer.opensearchConfig" . }}
@@ -137,14 +138,13 @@ indexer:
       {{ include "wazuh.indexer.rolesMapping" . }}
     roles: |-
       {{ include "wazuh.indexer.roles" . }}
-
+  ## @params indexer.env Configuration of the indexer env vars, this should be only changed if needed.
+  ##
   env:
     OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"
     CLUSTER_NAME: "wazuh"
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
-
-  plugins: []
 
   storageSize: 50Gi
   storageClass: null
