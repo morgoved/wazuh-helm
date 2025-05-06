@@ -49,14 +49,6 @@ indexer:
   ## @param indexer.annotations additional annotations set on statefulset.
   ##
   annotations: {}
-  ## @params indexer.service settings for svc resource.
-  ##
-  service:
-    type: ClusterIP
-    annotations: {}
-    httpPort: 9200
-    nodes: 9300
-    metrics: 9600
   ## @param indexer.updateStrategy updateStrategy for the statefulset.
   ##
   updateStrategy: RollingUpdate
@@ -71,6 +63,7 @@ indexer:
     ##
     tag: "4.11.1"
     pullPolicy: IfNotPresent
+    ## TODO: rework imagePullSecretes
     imagePullSecrets:
       enabled: false
       secret: {}
@@ -82,6 +75,7 @@ indexer:
       cpu: 500m
       memory: 1Gi
     limits:
+      cpu: 1000m
       memory: 2Gi
   ## @params indexer.pdb Allows to configure the pod disruption budget of the indexer.
   ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
@@ -121,6 +115,14 @@ indexer:
   ##
   networkPolicy:
     enabled: true
+  ## @params indexer.service settings for svc resource.
+  ##
+  service:
+    type: ClusterIP
+    annotations: {}
+    httpPort: 9200
+    nodes: 9300
+    metrics: 9600
   ## @params indexer.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
@@ -145,38 +147,57 @@ indexer:
     CLUSTER_NAME: "wazuh"
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
-
+  ## @param indexer.storageSize Defines the size of the pvc used by the statefulset.
+  ##
   storageSize: 50Gi
+  ## @param indexer.storageClass Defines the storageClass of the pvc used by the statefulset.
+  ##
   storageClass: null
-
+  ## @params indexer.cred Configuration of the credentials for the indexer. 
+  ##
   cred:
     existingSecret: ""
     username: "admin"
     password: "SecretPassword"
 
-# Kibana for elasticsearch with Wazuh plugins pre-installed
+## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins pre-installed
+##
 dashboard:
+  ## @param dashboard.replicas number of replicas used in deployment.
+  ##
   replicas: 1
-
+  ## @param dashboard.annotations additional annotations set on deployment.
+  ##
   annotations: {}
-
+  ## @params dashboard.images parameters for the image of the dashboard.
+  ##
   images:
+    ## @param dashboard.images.repository name of the image used. If you use your own image registry
+    ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-dashboard
+    ##
     repository: wazuh/wazuh-dashboard
     tag: "4.11.1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
-
+  ## @params dashboard.resources Allows to configure the resources allocated to the dashboard.
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ##
   resources:
-    limits:
-      memory: 1Gi
     requests:
       cpu: 500m
       memory: 512Mi
-
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  ## @params dashboard.pdb Allows to configure the pod disruption budget of the dashboard.
+  ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  ##
   pdb:
     enabled: false
     maxUnavailable: 1
-
+  ## @params dashboard.livenessProbe Parameter to configure the livenessProbe.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ##
   livenessProbe:
     periodSeconds: 20
     timeoutSeconds: 5
@@ -186,7 +207,9 @@ dashboard:
     httpGet:
       path: /api/status
       port: 5601
-
+  ## @params dashboard.readinessProbe Parameter to configure the readinessProbe.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ##
   readinessProbe:
     periodSeconds: 20
     timeoutSeconds: 5
@@ -196,43 +219,66 @@ dashboard:
     httpGet:
       path: /api/status
       port: 5601
-
+  ## @params dashboard.securityContext Parameter to configure the securityContext of the pod.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ##
   securityContext: {}
-
+  ## @params dashboard.networkPolicy Network Policies for restricting the traffic in the cluster.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+  ##
   networkPolicy:
     enabled: true
-
-  # with this you will be able to access kibana on http port instead of https
-  # if you use Ambassador edgestack this is necessary becasue
-  # with `true` route will close unexpectedly
-  # when accessing via ambassador external url
-  enable_ssl: false
-
+  ## @params dashboard.service settings for svc resource.
+  ##
   service:
     annotations: {}
     httpPort: 5601
     type: ClusterIP
-
+  ## @param dashboard.enable_ssl with this you will be able to access kibana on http port instead of https
+  ## if you use Ambassador edge stack this is necessary because with `true` route will close unexpectedly
+  ## when accessing via ambassador external url
+  ##
+  enable_ssl: false
+  ## @params dashboard.additionalEnv Possibility to define additional env vars in the pod.
+  ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  ##
+  additionalEnv: []
+  ## @params dashboard.config Configuration of the dashboard parameters, this should not be changed.
+  ##
+  config: |
+    {{ include "wazuh.dashboard.config" . }}
+  ## @params indexer.cred Configuration of the credentials for the indexer. 
+  ##
   cred:
     existingSecret: ""
     username: "kibanaserver"
     password: "kibanaserver"
-
-  additionalEnv: []
-
-  config: |
-    {{ include "wazuh.dashboard.config" . }}
-
+  ## @param dashboard.ingress Ingress parameters for the dashboard
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  ##
   ingress:
     enabled: false
+    ## @param dashboard.ingress.className Defines the ingress class name used.
+    ##
     className: ""
+    ## @param dashboard.ingress.tls Allows to use specific tls certificate.
+    ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+    ## Example:
+    ##  - secretName: wazuh-tls
+    ##    hosts:
+    ##      - wazuh.example.com
+    ##
     tls: []
-    # - secretName: wazuh-tls
-    #   hosts:
-    #     - wazuh.example.com
+    ## @param dashboard.ingress.annotations Used for detailed configuration.
+    ## ref: https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/advanced-configuration-with-annotations/
+    ## Eg: cert-manager.io/cluster-issuer: letsencrypt-prod
+    ##
     annotations: {}
+    ## @params dashboard.ingress.host Defines the hostname and URL under which the dashboard gets exposed.
+    ##
     host: "wazuh.example.com"
-
+## @section wazuh configuration of the wazuh core component.
+##
 wazuh:
   syslog_enable: true
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
