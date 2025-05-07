@@ -32,6 +32,10 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.indexer.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
       - name: admin-certs
         secret:
@@ -78,10 +82,6 @@ spec:
           {{- end }}
           {{- with .Values.indexer.readinessProbe }}
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.indexer.securityContext }}
-          securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
