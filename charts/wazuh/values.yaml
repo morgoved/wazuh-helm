@@ -111,7 +111,7 @@ indexer:
       port: 9200
   ## @params indexer.securityContext Parameter to configure the securityContext of the pod.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  ##
+  ## TODO Pod and container security Contexts
   securityContext:
     fsGroup: 1000
   ## @params indexer.networkPolicy Network Policies for restricting the traffic in the cluster.

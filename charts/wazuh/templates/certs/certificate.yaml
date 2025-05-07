@@ -2,6 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "wazuh.fullname" . }}-admin
+  namespace: {{ .Release.Namespace }}
 spec:
   # Secret names are always required.
   secretName: admin-tls
@@ -29,7 +30,7 @@ spec:
     name: {{ .Values.certificates.issuer.name | default (print (include "wazuh.fullname" .) "-ca-issuer") }}
     {{- if eq .Values.certificates.issuer.type "ClusterIssuer" -}}
     kind: ClusterIssuer
-    {{- end -}}
+    {{- end }}
     # We can reference ClusterIssuers by changing the kind here.
     # The default value is Issuer (i.e. a locally namespaced Issuer)
 ---
@@ -65,7 +66,7 @@ spec:
     name: {{ .Values.certificates.issuer.name | default (print (include "wazuh.fullname" .) "-ca-issuer") }}
     {{- if eq .Values.certificates.issuer.type "ClusterIssuer" -}}
     kind: ClusterIssuer
-    {{- end -}}
+    {{- end }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -132,4 +133,4 @@ spec:
     name: {{ .Values.certificates.issuer.name | default (print (include "wazuh.fullname" .) "-ca-issuer") }}
     {{- if eq .Values.certificates.issuer.type "ClusterIssuer" -}}
     kind: ClusterIssuer
-    {{- end -}}
+    {{- end }}

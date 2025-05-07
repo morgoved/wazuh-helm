@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "wazuh.indexer.fullname" . }}-indexer
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.indexer.fullname" . }}-indexer
   annotations:

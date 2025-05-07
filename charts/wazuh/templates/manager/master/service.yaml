@@ -1,8 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  # Name is only "wazuh" because of Certicates commonName
+  # Name is only "wazuh" because of Certificates commonName
   name: wazuh
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: master
