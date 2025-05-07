@@ -2123,3 +2123,14 @@ config:
   #        max_blocked_clients: 100000
   #        max_tracked_clients: 100000
 {{- end }}
+
+{{/*
+Sysctl set if less then
+*/}}
+{{- define "wazuh.sysctlIfLess" -}}
+CURRENT=`sysctl -n {{ .key }}`;
+DESIRED="{{ .value }}";
+if [ "$DESIRED" -gt "$CURRENT" ]; then
+    sysctl -w {{ .key }}={{ .value }};
+fi;
+{{- end -}}

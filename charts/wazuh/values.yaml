@@ -149,6 +149,23 @@ indexer:
       {{ include "wazuh.indexer.rolesMapping" . }}
     roles: |-
       {{ include "wazuh.indexer.roles" . }}
+  ## @params indexer.sysctlImage
+  ##
+  sysctlImage:
+    ## @param indexer.sysctlImage.enabled Enable kernel settings modifier image
+    ##
+    enabled: false
+    ## @params indexer.sysctlImage.images parameters for the image of the indexer.
+    ##
+    images:
+      ## @param indexer.sysctlImage.images.repository name of the image used. If you use your own image registry
+      ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-indexer
+      ##
+      repository: bitnami/os-shell
+      ## @param indexer.sysctlImage.images.tag Tag of the image.
+      ## @param indexer.sysctlImage.images.pullPolicy pullPolicy of the image.
+      ##
+      tag: 12-debian-12-r43
   ## @params indexer.env Configuration of the indexer env vars, this should be only changed if needed.
   ##
   env:
@@ -168,7 +185,6 @@ indexer:
     existingSecret: ""
     username: "admin"
     password: "SecretPassword"
-
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed
 ##

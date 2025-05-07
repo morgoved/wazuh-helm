@@ -36,6 +36,26 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if and .Values.indexer.sysctlImage.enabled }}
+      initContainers:
+        ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)
+        - name: sysctl
+          image: "{{ .Values.indexer.sysctlImage.images.repository }}:{{ .Values.indexer.sysctlImage.images.tag }}"
+          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              {{- include "wazuh.sysctlIfLess" (dict "key" "vm.max_map_count" "value" "262144") | nindent 14 }}
+              {{- include "wazuh.sysctlIfLess" (dict "key" "fs.file-max" "value" "65536") | nindent 14 }}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          {{- with .Values.indexer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- end }}
       volumes:
       - name: admin-certs
         secret:
