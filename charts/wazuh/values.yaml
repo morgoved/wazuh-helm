@@ -414,11 +414,11 @@ wazuh:
         memory: 1Gi
     ## @params wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-    ##
+    ## TODO
     livenessProbe: {}
     ## @params wazuh.master.readinessProbe Parameter to configure the readinessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-    ##
+    ## TODO
     readinessProbe: {}
     ## @params wazuh.master.securityContext Parameter to configure the securityContext of the pod.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -434,8 +434,9 @@ wazuh:
     ## @param wazuh.master.storageSize Defines the size of the pvc used by the statefulset.
     ##
     storageSize: 50Gi
-    ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the statefulset.
-    ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+    ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the
+    ## statefulset. If undefined (the default) or set to null, no storageClassName spec is set,
+    ## choosing the default provisioner.
     ##
     storageClass: null
     ## @param wazuh.master.conf Config for the wazuh master, do not change!
@@ -445,44 +446,67 @@ wazuh:
     ## @param wazuh.master.extraConf Gets appended to the wazuh.master.conf.
     ##
     extraConf: ""
-
+  ## @section wazuh.worker configuration of the wazuh worker component.
+  ##
   worker:
+    ## @param wazuh.worker.replicas number of replicas used in statefulset.
+    ##
     replicas: 2
-
+    ## @param wazuh.worker.annotations additional annotations set on deployment.
+    ##
     annotations: {}
-
+    ## @params wazuh.worker.service settings for svc resource.
+    ##
     service:
       type: ClusterIP
       annotations: {}
       ports:
         agentEvents: 1514
-
+    ## @params wazuh.worker.resources Allows to configure the resources allocated to the worker.
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ##
     resources:
       limits:
         memory: 1Gi
       requests:
         cpu: 500m
         memory: 512Mi
-
+    ## @params wazuh.worker.pdb Allows to configure the pod disruption budget of the worker.
+    ## Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    ##
     pdb:
       enabled: true
       maxUnavailable: 1
-
+    ## @params wazuh.worker.livenessProbe Parameter to configure the livenessProbe.
+    ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+    ## TODO
     livenessProbe: {}
-
+    ## @params wazuh.worker.readinessProbe Parameter to configure the readinessProbe.
+    ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+    ## TODO
     readinessProbe: {}
-
+    ## @params wazuh.worker.securityContext Parameter to configure the securityContext of the pod.
+    ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ##
     securityContext:
       capabilities:
         add: ["SYS_CHROOT"]
-
+    ## @params wazuh.worker.networkPolicy Network Policies for restricting the traffic in the cluster.
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+    ##
     networkPolicy:
       enabled: true
-
-    storageClass: null
+    ## @param wazuh.worker.storageSize Defines the size of the pvc used by the statefulset.
+    ##
     storageSize: 50Gi
-
+    ## @param wazuh.worker.storageClass Defines the storageClass of the pvc used by the statefulset.
+    ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
+    ##
+    storageClass: null
+    ## @param wazuh.worker.conf Config for the wazuh worker, do not change!
+    ##
     conf: |
       {{ include "wazuh.worker.conf" . }}
-    # To be appended to the worker.conf
+    ## @param wazuh.worker.extraConf Gets appended to the wazuh.worker.conf.
+    ##
     extraConf: ""
