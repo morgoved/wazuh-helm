@@ -19,6 +19,10 @@ spec:
         job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
     spec:
       restartPolicy: OnFailure
+      {{- with .Values.indexer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - command:
         - sh

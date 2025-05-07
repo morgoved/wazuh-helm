@@ -127,6 +127,11 @@ indexer:
     httpPort: 9200
     nodes: 9300
     metrics: 9600
+  ## @params indexer.nodeSelector
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
+  ##
+  nodeSelector: {}
   ## @params indexer.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
@@ -237,6 +242,11 @@ dashboard:
   ##
   networkPolicy:
     enabled: true
+  ## @params dashboard.nodeSelector
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
+  ##
+  nodeSelector: {}
   ## @params dashboard.service settings for svc resource.
   ##
   service:
@@ -310,6 +320,11 @@ wazuh:
     pullPolicy: IfNotPresent
     ## TODO: rework imagePullSecrets
     pullSecret: regcred
+  ## @params wazuh.nodeSelector
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
+  ##
+  nodeSelector: {}
   ## @params wazuh.service settings for svc resource.
   ##
   service:

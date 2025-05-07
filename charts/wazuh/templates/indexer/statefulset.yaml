@@ -28,6 +28,10 @@ spec:
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.indexer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
       - name: admin-certs
         secret:

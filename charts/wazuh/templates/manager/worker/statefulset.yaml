@@ -31,6 +31,10 @@ spec:
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.wazuh.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

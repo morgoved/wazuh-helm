@@ -27,6 +27,10 @@ spec:
         {{- end }}
       name: {{ include "wazuh.fullname" . }}-dashboard
     spec:
+      {{- with .Values.dashboard.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - configMap:
             name: {{ include "wazuh.fullname" . }}-dashboard-config
