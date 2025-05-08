@@ -1,7 +1,7 @@
 # wazuh-kubernetes-helm-chart
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.0.1-informational?style=flat-square)
-![AppVersion: 4.11.1](https://img.shields.io/badge/AppVersion-4.8.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square)
+![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm)](https://artifacthub.io/packages/search?repo=wazuh-helm)
 
 Wazuh is a centralized Security Information and Event Management (SIEM) platform offering vulnerability intelligence and threat monitoring capabilities.
@@ -15,7 +15,7 @@ To generate the necessary certificates, refer to the instructions available [her
 To retrieve hashes, execute the following command:
 
 ```bash
-docker run --rm -ti wazuh/wazuh-indexer:4.11.1 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh`
+docker run --rm -ti wazuh/wazuh-indexer:4.12.0 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh`
 ```
 
 ### Automatic Configuration Updates
@@ -24,7 +24,7 @@ Any changes made to the indexer configuration or secrets will be automatically a
 
 ### Compatibility
 
-This Helm chart has been tested with Wazuh version 4.11.1. Please note:
+This Helm chart has been tested with Wazuh version 4.12.0. Please note:
 
 Wazuh supports only a single master node and multiple worker nodes. Although the configuration is prepared for a multi-master setup, Wazuh does not currently support this feature.
 All XML configuration files are automatically updated through init containers.
@@ -48,7 +48,7 @@ This fork welcomes contributions and is open to transitioning into the official 
 | dashboard.images.resources.limits.memory                           | string | `"1Gi"`                                               |             |
 | dashboard.images.resources.requests.cpu                            | string | `"500m"`                                              |             |
 | dashboard.images.resources.requests.memory                         | string | `"512Mi"`                                             |             |
-| dashboard.images.tag                                               | string | `"4.11.1"`                                            |             |
+| dashboard.images.tag                                               | string | `"4.12.0"`                                            |             |
 | dashboard.images.updateStrategy                                    | string | `"OnDelete"`                                          |             |
 | dashboard.replicas                                                 | int    | `1`                                                   |             |
 | dashboard.service.httpPort                                         | int    | `5601`                                                |             |
@@ -73,7 +73,7 @@ This fork welcomes contributions and is open to transitioning into the official 
 | indexer.images.resources.limits.memory                             | string | `"2Gi"`                                               |             |
 | indexer.images.resources.requests.cpu                              | string | `"500m"`                                              |             |
 | indexer.images.resources.requests.memory                           | string | `"1Gi"`                                               |             |
-| indexer.images.tag                                                 | string | `"4.11.1"`                                            |             |
+| indexer.images.tag                                                 | string | `"4.12.0"`                                            |             |
 | indexer.images.updateStrategy                                      | string | `"RollingUpdate"`                                     |             |
 | indexer.plugins                                                    | list   | `[]`                                                  |             |
 | indexer.replicas                                                   | int    | `3`                                                   |             |
@@ -97,7 +97,7 @@ This fork welcomes contributions and is open to transitioning into the official 
 | wazuh.images.resources.limits.memory                               | string | `"1Gi"`                                               |             |
 | wazuh.images.resources.requests.cpu                                | string | `"500m"`                                              |             |
 | wazuh.images.resources.requests.memory                             | string | `"500Mi"`                                             |             |
-| wazuh.images.tag                                                   | string | `"4.11.1"`                                            |             |
+| wazuh.images.tag                                                   | string | `"4.12.0"`                                            |             |
 | wazuh.images.worker_resources.limits.cpu                           | string | `"1500m"`                                             |             |
 | wazuh.images.worker_resources.limits.memory                        | string | `"2Gi"`                                               |             |
 | wazuh.images.worker_resources.requests.cpu                         | string | `"1000m"`                                             |             |

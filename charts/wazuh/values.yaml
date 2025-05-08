@@ -65,7 +65,7 @@ indexer:
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.11.1"
+    tag: "4.12.0"
     pullPolicy: IfNotPresent
     ## TODO: rework imagePullSecrets
     imagePullSecrets:
@@ -206,7 +206,7 @@ dashboard:
     ## @param dashboard.images.pullPolicy pullPolicy of the image.
     ## @param dashboard.images.updateStrategy updateStrategy of the image.
     ##
-    tag: "4.11.1"
+    tag: "4.12.0"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## @params dashboard.resources Allows to configure the resources allocated to the dashboard.
@@ -332,7 +332,7 @@ wazuh:
     ## @param wazuh.images.tag Tag of the image.
     ## @param wazuh.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.11.1"
+    tag: "4.12.0"
     pullPolicy: IfNotPresent
     ## TODO: rework imagePullSecrets
     pullSecret: regcred
