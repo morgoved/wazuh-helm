@@ -907,7 +907,7 @@ wazuh_clusterd.debug=0
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
-        <node>wazuh-manager-master-0.wazuh-manager-cluster</node>
+        <node>{{ include "wazuh.fullname" . }}-manager-master-0.{{ include "wazuh.fullname" . }}-manager-cluster</node>
     </nodes>
     <hidden>no</hidden>
     <disabled>no</disabled>
@@ -1254,7 +1254,7 @@ wazuh_clusterd.debug=0
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
         <!-- Kubernetes Service Pointing to Master node -->
-        <node>wazuh-manager-master-0.wazuh-manager-cluster</node>
+        <node>{{ include "wazuh.fullname" . }}-manager-master-0.{{ include "wazuh.fullname" . }}-manager-cluster</node>
     </nodes>
     <hidden>no</hidden>
     <disabled>no</disabled>
