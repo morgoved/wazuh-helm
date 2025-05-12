@@ -4,7 +4,7 @@ nameOverride: null
 ## @param fullnameOverride String to fully override the fullname of the components.
 ##
 fullnameOverride: null
-## @param autoreload if enabled annotations will be added to recreated the statefulset on config
+## @param autoreload.enabled if enabled annotations will be added to recreated the statefulset on config
 ## changes.
 autoreload:
   enabled: false
@@ -20,7 +20,7 @@ cert-manager:
 ## @section certificates If cert-manager is present, the certificates can be generated automatically.
 ##
 certificates:
-  ## @param certificates.issuer possible configs for the issuer.
+  ## Parameters for the issuer.
   ##
   issuer:
     ## @param certificates.issuer.name of the issuer used for signing the certificates. If this is null
@@ -37,7 +37,9 @@ certificates:
   ## @param certificates.renewBefore timeframe before the cert gets renewed.
   ##
   renewBefore: 360h # 15d
-  ## @param certificates.subject details mentioned in the certificate.
+  ## @param certificates.subject.organization Organization for the internal certificate.
+  ## @param certificates.subject.country Country for the internal certificate.
+  ## @param certificates.subject.locality Locality for the internal certificate.
   ##
   subject:
     organization: Company
@@ -55,7 +57,7 @@ indexer:
   ## @param indexer.updateStrategy updateStrategy for the statefulset.
   ##
   updateStrategy: RollingUpdate
-  ## @params indexer.images parameters for the image of the indexer.
+  ## Parameters for the image of the indexer.
   ##
   images:
     ## @param indexer.images.repository name of the image used. If you use your own image registry
@@ -67,12 +69,19 @@ indexer:
     ##
     tag: "4.12.0"
     pullPolicy: IfNotPresent
-    ## TODO: rework imagePullSecrets
+    ## Parameter to set the imagePullSecret TODO
+    ## @skip indexer.images.imagePullSecrets.enabled 
+    ## @skip indexer.images.imagePullSecrets.secret
+    ##
     imagePullSecrets:
       enabled: false
       secret: {}
-  ## @params indexer.resources Allows to configure the resources allocated to the indexer.
+  ## Parameters to configure the resources allocated to the indexer.
   ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param indexer.resources.requests.cpu Minimum CPU assigned to the pod.
+  ## @param indexer.resources.requests.memory Minimum memory assigned to the pod.
+  ## @param indexer.resources.limits.cpu Maximum CPU used by the pod.
+  ## @param indexer.resources.limits.memory Maximum memory used by the pod.
   ##
   resources:
     requests:
@@ -81,14 +90,22 @@ indexer:
     limits:
       cpu: 1000m
       memory: 2Gi
-  ## @params indexer.pdb Allows to configure the pod disruption budget of the indexer.
-  ## Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  ## Allows to configure the pod disruption budget of the indexer. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  ## @param indexer.pdb.enabled Enables pdb for indexer.
+  ## @skip indexer.pdb.maxUnavailable
   ##
   pdb:
     enabled: true
     maxUnavailable: 1
-  ## @params indexer.livenessProbe Parameter to configure the livenessProbe.
+  ## Parameters to configure the livenessProbe.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ## @param indexer.livenessProbe.periodSeconds How often to perform the probe.
+  ## @param indexer.livenessProbe.timeoutSeconds When the probe times out.
+  ## @param indexer.livenessProbe.failureThreshold Minimum failures for the probe to be considered failed after having succeeded.
+  ## @param indexer.livenessProbe.successThreshold Minimum successes for the probe to be considered successful
+  ## after having failed.
+  ## @param indexer.livenessProbe.initialDelaySeconds Delay before liveness probe is initiated.
+  ## @skip indexer.livenessProbe.tcpSocket
   ##
   livenessProbe:
     periodSeconds: 20
@@ -98,8 +115,15 @@ indexer:
     initialDelaySeconds: 10
     tcpSocket:
       port: 9200
-  ## @params indexer.readinessProbe Parameter to configure the readinessProbe.
+  ## Parameters to configure the readinessProbe.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ## @param indexer.readinessProbe.periodSeconds How often to perform the probe.
+  ## @param indexer.readinessProbe.timeoutSeconds When the probe times out.
+  ## @param indexer.readinessProbe.failureThreshold Minimum failures for the probe to be considered failed after having succeeded.
+  ## @param indexer.readinessProbe.successThreshold Minimum successes for the probe to be considered successful
+  ## after having failed.
+  ## @param indexer.readinessProbe.initialDelaySeconds Delay before liveness probe is initiated.
+  ## @skip indexer.readinessProbe.tcpSocket
   ##
   readinessProbe:
     periodSeconds: 20
@@ -109,17 +133,24 @@ indexer:
     initialDelaySeconds: 10
     tcpSocket:
       port: 9200
-  ## @params indexer.securityContext Parameter to configure the securityContext of the pod.
+  ## Parameter to configure the securityContext of the pod.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  ## TODO Pod and container security Contexts
+  ## @param indexer.securityContext.fsGroup Set the pods Security Context fsGroup.
+  ##
   securityContext:
     fsGroup: 1000
-  ## @params indexer.networkPolicy Network Policies for restricting the traffic in the cluster.
+  ## Network Policies for restricting the traffic in the cluster.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+  ## @param indexer.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
   ##
   networkPolicy:
     enabled: true
-  ## @params indexer.service settings for svc resource.
+  ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
+  ## @param indexer.service.type Type of the created service.
+  ## @param indexer.service.annotations Annotations of the created service.
+  ## @param indexer.service.httpPort Port for the http endpoint.
+  ## @param indexer.service.nodes Port for the nodes endpoint.
+  ## @param indexer.service.metrics Port for the metrics endpoint.
   ##
   service:
     type: ClusterIP
@@ -127,16 +158,21 @@ indexer:
     httpPort: 9200
     nodes: 9300
     metrics: 9600
-  ## @params indexer.nodeSelector
+  ## @param indexer.nodeSelector
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
   ##
   nodeSelector: {}
-  ## @params indexer.additionalEnv Possibility to define additional env vars in the pod.
+  ## @param indexer.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
   additionalEnv: []
-  ## @params indexer.config Configuration of the indexer parameters, this should not be changed.
+  ## Configuration of the indexer parameters, this should not be changed.
+  ## @param indexer.config.opensearch Configuration of opensearch.yml.
+  ## @param indexer.config.internalUsers Configuration of internalUsers of the indexer.
+  ## @param indexer.config.securityConfig Configuration of securityConfig of the indexer.
+  ## @param indexer.config.rolesMapping Configuration of rolesMapping of the indexer.
+  ## @param indexer.config.roles Configuration of roles of the indexer.
   ##
   config:
     opensearch: |-
@@ -149,24 +185,26 @@ indexer:
       {{ include "wazuh.indexer.rolesMapping" . }}
     roles: |-
       {{ include "wazuh.indexer.roles" . }}
-  ## @params indexer.sysctlImage
+  ## Parameters for the sysctlImage initContainer.
   ##
   sysctlImage:
     ## @param indexer.sysctlImage.enabled Enable kernel settings modifier image
     ##
     enabled: false
-    ## @params indexer.sysctlImage.images parameters for the image of the indexer.
+    ## Parameters for the image of the indexer.
     ##
     images:
       ## @param indexer.sysctlImage.images.repository name of the image used. If you use your own image registry
       ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-indexer
+      ## @param indexer.sysctlImage.images.tag Tag of the image.
       ##
       repository: bitnami/os-shell
-      ## @param indexer.sysctlImage.images.tag Tag of the image.
-      ## @param indexer.sysctlImage.images.pullPolicy pullPolicy of the image.
-      ##
       tag: 12-debian-12-r43
-  ## @params indexer.env Configuration of the indexer env vars, this should be only changed if needed.
+  ## Configuration of the indexer env vars, this should be only changed if needed.
+  ## @skip indexer.env.OPENSEARCH_JAVA_OPTS
+  ## @skip indexer.env.CLUSTER_NAME
+  ## @skip indexer.env.NETWORK_HOST
+  ## @skip indexer.env.DISABLE_INSTALL_DEMO_CONFIG
   ##
   env:
     OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"
@@ -174,12 +212,15 @@ indexer:
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
   ## @param indexer.storageSize Defines the size of the pvc used by the statefulset.
-  ##
-  storageSize: 50Gi
   ## @param indexer.storageClass Defines the storageClass of the pvc used by the statefulset.
   ##
+  storageSize: 50Gi
   storageClass: null
-  ## @params indexer.cred Configuration of the credentials for the indexer. 
+  ## Configuration of the credentials for the indexer.
+  ## @param indexer.cred.existingSecret Name of the existingSecret with username and password Expected keys are:
+  ## "username" and "password".
+  ## @param indexer.cred.username Name of the user.
+  ## @param indexer.cred.password Value of the password.
   ##
   cred:
     existingSecret: ""
@@ -195,7 +236,7 @@ dashboard:
   ## @param dashboard.annotations additional annotations set on deployment.
   ##
   annotations: {}
-  ## @params dashboard.images parameters for the image of the dashboard.
+  ## Parameters for the image of the dashboard.
   ##
   images:
     ## @param dashboard.images.repository name of the image used. If you use your own image registry
@@ -209,8 +250,12 @@ dashboard:
     tag: "4.12.0"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
-  ## @params dashboard.resources Allows to configure the resources allocated to the dashboard.
+  ## Parameters to configure the resources allocated to the dashboard.
   ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param dashboard.resources.requests.cpu Minimum CPU assigned to the pod.
+  ## @param dashboard.resources.requests.memory Minimum memory assigned to the pod.
+  ## @param dashboard.resources.limits.cpu Maximum CPU used by the pod.
+  ## @param dashboard.resources.limits.memory Maximum memory used by the pod.
   ##
   resources:
     requests:
@@ -219,14 +264,22 @@ dashboard:
     limits:
       cpu: 1000m
       memory: 1Gi
-  ## @params dashboard.pdb Allows to configure the pod disruption budget of the dashboard.
-  ## Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  ## Allows to configure the pod disruption budget of the dashboard. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+  ## @param dashboard.pdb.enabled Enables pdb for dashboard.
+  ## @skip dashboard.pdb.maxUnavailable
   ##
   pdb:
     enabled: false
     maxUnavailable: 1
-  ## @params dashboard.livenessProbe Parameter to configure the livenessProbe.
+  ## Parameters to configure the livenessProbe.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ## @param dashboard.livenessProbe.periodSeconds How often to perform the probe.
+  ## @param dashboard.livenessProbe.timeoutSeconds When the probe times out.
+  ## @param dashboard.livenessProbe.failureThreshold Minimum failures for the probe to be considered failed after having succeeded.
+  ## @param dashboard.livenessProbe.successThreshold Minimum successes for the probe to be considered successful
+  ## after having failed.
+  ## @param dashboard.livenessProbe.initialDelaySeconds Delay before liveness probe is initiated.
+  ## @skip dashboard.livenessProbe.httpGet
   ##
   livenessProbe:
     periodSeconds: 20
@@ -237,8 +290,15 @@ dashboard:
     httpGet:
       path: /api/status
       port: 5601
-  ## @params dashboard.readinessProbe Parameter to configure the readinessProbe.
+  ## Parameters to configure the readinessProbe.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ## @param dashboard.readinessProbe.periodSeconds How often to perform the probe.
+  ## @param dashboard.readinessProbe.timeoutSeconds When the probe times out.
+  ## @param dashboard.readinessProbe.failureThreshold Minimum failures for the probe to be considered failed after having succeeded.
+  ## @param dashboard.readinessProbe.successThreshold Minimum successes for the probe to be considered successful
+  ## after having failed.
+  ## @param dashboard.readinessProbe.initialDelaySeconds Delay before liveness probe is initiated.
+  ## @skip dashboard.readinessProbe.httpGet
   ##
   readinessProbe:
     periodSeconds: 20
@@ -249,47 +309,55 @@ dashboard:
     httpGet:
       path: /api/status
       port: 5601
-  ## @params dashboard.securityContext Parameter to configure the securityContext of the pod.
+  ## @param dashboard.securityContext Parameter to configure the securityContext of the pod.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   ##
   securityContext: {}
-  ## @params dashboard.networkPolicy Network Policies for restricting the traffic in the cluster.
+  ## Network Policies for restricting the traffic in the cluster.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+  ## @param dashboard.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
   ##
   networkPolicy:
     enabled: true
-  ## @params dashboard.nodeSelector
+  ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
+  ## @param dashboard.service.type Type of the created service.
+  ## @param dashboard.service.annotations Annotations of the created service.
+  ## @param dashboard.service.httpPort Port for the http endpoint.
+  ##
+  service:
+    type: ClusterIP
+    annotations: {}
+    httpPort: 5601
+  ## @param dashboard.nodeSelector
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
   ##
   nodeSelector: {}
-  ## @params dashboard.service settings for svc resource.
+  ## @param dashboard.additionalEnv Possibility to define additional env vars in the pod.
+  ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
-  service:
-    annotations: {}
-    httpPort: 5601
-    type: ClusterIP
+  additionalEnv: []
   ## @param dashboard.enable_ssl with this you will be able to access kibana on http port instead of
   ## https if you use Ambassador edge stack this is necessary because with `true` route will close
   ## unexpectedly when accessing via ambassador external url
   ##
   enable_ssl: false
-  ## @params dashboard.additionalEnv Possibility to define additional env vars in the pod.
-  ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
-  ##
-  additionalEnv: []
-  ## @params dashboard.config Configuration of the dashboard parameters, this should not be changed.
+  ## @param dashboard.config Configuration of the dashboard parameters, this should not be changed.
   ##
   config: |
     {{ include "wazuh.dashboard.config" . }}
-  ## @params indexer.cred Configuration of the credentials for the indexer. 
+  ## Configuration of the credentials for the dashboard.
+  ## @param dashboard.cred.existingSecret Name of the existingSecret with username and password Expected keys are:
+  ## "username" and "password".
+  ## @param dashboard.cred.username Name of the user.
+  ## @param dashboard.cred.password Value of the password.
   ##
   cred:
     existingSecret: ""
     username: "kibanaserver"
     password: "kibanaserver"
-  ## @param dashboard.ingress Ingress parameters for the dashboard
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  ## Ingress parameters for the dashboard Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  ## @param dashboard.ingress.enabled Enable ingress record generation for dashboard.
   ##
   ingress:
     enabled: false
@@ -309,7 +377,7 @@ dashboard:
     ## Eg: cert-manager.io/cluster-issuer: letsencrypt-prod
     ##
     annotations: {}
-    ## @params dashboard.ingress.host Defines the hostname and URL under which the dashboard gets
+    ## @param dashboard.ingress.host Defines the hostname and URL under which the dashboard gets
     ## exposed.
     ##
     host: "wazuh.example.com"
@@ -322,7 +390,7 @@ wazuh:
   ## @param wazuh.key Defines the key of the wazuh cluster.
   ##
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
-  ## @params wazuh.images parameters for the image of the indexer.
+  ## Parameters for the image of the manager.
   ##
   images:
     ## @param wazuh.images.repository name of the image used. If you use your own image registry
@@ -334,49 +402,48 @@ wazuh:
     ##
     tag: "4.12.0"
     pullPolicy: IfNotPresent
-    ## TODO: rework imagePullSecrets
+    ## @skip wazuh.images.pullSecret TODO
+    ##
     pullSecret: regcred
-  ## @params wazuh.nodeSelector
-  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
-  ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
-  ##
-  nodeSelector: {}
-  ## @params wazuh.service settings for svc resource.
+  ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
+  ## @param wazuh.service.annotations Annotations of the created service.
+  ## @param wazuh.service.port Port for the http endpoint.
   ##
   service:
     annotations: {}
     port: 1516
-  ## @params wazuh.env Configuration of the indexer env vars, this should be only changed if needed.
+  ## @param wazuh.nodeSelector
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ## Example: nodeSelector: { kubernetes.io/arch: amd64 }
+  ##
+  nodeSelector: {}
+  ## @skip wazuh.env Configuration of the indexer env vars, this should be only changed if needed.
   ##
   env:
     FILEBEAT_SSL_VERIFICATION_MODE: full
-  ## @params wazuh.apiCred Configuration of the api credentials. You have 3 possible options to set
-  ## the credentials:
-  ## 1. Set existing secret name
-  ## 2. Set username and password manually
-  ## 3. Let secret be generated automatically (all empty)
+  ## Configuration of the api credentials. If username and password are left empty, they will be generated automatically.
+  ## @param wazuh.apiCred.existingSecret name of the existingSecret in the namespace.
+  ## @param wazuh.apiCred.username name of the username.
+  ## @param wazuh.apiCred.password password of the user. Note that the password must have a length
+  ## between 8 and 64 characters and contain at least one upper and lower case letter, a number
+  ## and a symbol(.*+?-).
   ##
   apiCred:
-    ## @param wazuh.apiCred.existingSecret name of the existingSecret in the namespace.
-    ##
     existingSecret: ""
-    ## @param wazuh.apiCred.username name of the username.
-    ##
     username: "wazuh-wui"
-    ## @param wazuh.apiCred.password password of the user. Note that the password must have a length
-    ## between 8 and 64 characters and contain at least one upper and lower case letter, a number
-    ## and a symbol(.*+?-).
-    ##
     password: "MyS3cr37P450r.*-"
-  ## @params wazuh.authd Parameters to the authd service.
+  ## Parameters to the authd service.
+  ## @param wazuh.authd.existingSecret name of the existingSecret in the namespace.
+  ## @param wazuh.authd.pass password of the authd.
   ##
   authd:
-    ## @param wazuh.authd.existingSecret name of the existingSecret in the namespace.
-    ## @param wazuh.apiCred.pass password of the authd.
-    ##
     existingSecret: ""
     pass: "password"
-  ## @params wazuh.initContainer.resources Parameters for the resources of the initContainer.
+  ## Parameters for the resources of the initContainer.
+  ## @param wazuh.initContainer.resources.requests.cpu Minimum CPU assigned to the pod.
+  ## @param wazuh.initContainer.resources.requests.memory Minimum memory assigned to the pod.
+  ## @param wazuh.initContainer.resources.limits.cpu Maximum CPU used by the pod.
+  ## @param wazuh.initContainer.resources.limits.memory Maximum memory used by the pod.
   ##
   initContainer:
     resources:
@@ -386,19 +453,21 @@ wazuh:
       limits:
         cpu: 1000m
         memory: 1Gi
-  ## @params wazuh.localDecoder Configuration of the local decoder.
+  ## @param wazuh.localDecoder Configuration of the local decoder.
   ##
   localDecoder: |
     {{ include "wazuh.localDecoder" . }}
-  ## @params wazuh.localRules Configuration of the local rules.
+  ## @param wazuh.localRules Configuration of the local rules.
   ##
   localRules: |
     {{ include "wazuh.localRules" . }}
-  ## @params wazuh.internalOptions Configuration of the internal option.
+  ## @param wazuh.internalOptions Configuration of the internal option.
   ##
   internalOptions: |
     {{ include "wazuh.internalOptions" . }}
-  ## @params wazuh.agentGroupConf Configuration of the agent group.
+  ## Parameters for configuration of the agent group.
+  ## @skip wazuh.agentGroupConf[0].name
+  ## @skip wazuh.agentGroupConf[0].agent
   ##
   agentGroupConf:
     - name: example
@@ -425,16 +494,12 @@ wazuh:
     ## @param wazuh.master.annotations additional annotations set on statefulset.
     ##
     annotations: {}
-    ## @params wazuh.master.service settings for svc resource.
-    ##
-    service:
-      type: ClusterIP
-      annotations: {}
-      ports:
-        registration: 1515
-        api: 55000
-    ## @params wazuh.master.resources Allows to configure the resources allocated to the master.
+    ## Parameters to configure the resources allocated to the master.
     ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param wazuh.master.resources.requests.cpu Minimum CPU assigned to the pod.
+    ## @param wazuh.master.resources.requests.memory Minimum memory assigned to the pod.
+    ## @param wazuh.master.resources.limits.cpu Maximum CPU used by the pod.
+    ## @param wazuh.master.resources.limits.memory Maximum memory used by the pod.
     ##
     resources:
       requests:
@@ -443,32 +508,44 @@ wazuh:
       limits:
         cpu: 1000m
         memory: 1Gi
-    ## @params wazuh.master.livenessProbe Parameter to configure the livenessProbe.
+    ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
+    ## @param wazuh.master.service.type Type of the created service.
+    ## @param wazuh.master.service.annotations Annotations of the created service.
+    ## @param wazuh.master.service.ports.registration Port for the registration endpoint.
+    ## @param wazuh.master.service.ports.api Port for the api endpoint.
+    ##
+    service:
+      type: ClusterIP
+      annotations: {}
+      ports:
+        registration: 1515
+        api: 55000
+    ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
     livenessProbe: {}
-    ## @params wazuh.master.readinessProbe Parameter to configure the readinessProbe.
+    ## @param wazuh.master.readinessProbe Parameter to configure the readinessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
     readinessProbe: {}
-    ## @params wazuh.master.securityContext Parameter to configure the securityContext of the pod.
+    ## Parameter to configure the securityContext of the pod.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ## @param wazuh.master.securityContext.capabilities.add Additional capabilities.
     ##
     securityContext:
       capabilities:
         add: ["SYS_CHROOT"]
-    ## @params wazuh.master.networkPolicy Network Policies for restricting the traffic in the cluster.
+    ## Network Policies for restricting the traffic in the cluster.
     ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+    ## @param wazuh.master.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
     ##
     networkPolicy:
       enabled: true
     ## @param wazuh.master.storageSize Defines the size of the pvc used by the statefulset.
+    ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the statefulset.
+    ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
     ##
     storageSize: 50Gi
-    ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the
-    ## statefulset. If undefined (the default) or set to null, no storageClassName spec is set,
-    ## choosing the default provisioner.
-    ##
     storageClass: null
     ## @param wazuh.master.conf Config for the wazuh master, do not change!
     ##
@@ -486,53 +563,63 @@ wazuh:
     ## @param wazuh.worker.annotations additional annotations set on deployment.
     ##
     annotations: {}
-    ## @params wazuh.worker.service settings for svc resource.
+    ## Parameters to configure the resources allocated to the worker.
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param wazuh.worker.resources.requests.cpu Minimum CPU assigned to the pod.
+    ## @param wazuh.worker.resources.requests.memory Minimum memory assigned to the pod.
+    ## @param wazuh.worker.resources.limits.cpu Maximum CPU used by the pod.
+    ## @param wazuh.worker.resources.limits.memory Maximum memory used by the pod.
+    ##
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
+    ## @param wazuh.worker.service.type Type of the created service.
+    ## @param wazuh.worker.service.annotations Annotations of the created service.
+    ## @param wazuh.worker.service.ports.agentEvents Port for the agentEvents endpoint.
     ##
     service:
       type: ClusterIP
       annotations: {}
       ports:
         agentEvents: 1514
-    ## @params wazuh.worker.resources Allows to configure the resources allocated to the worker.
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-    ##
-    resources:
-      limits:
-        memory: 1Gi
-      requests:
-        cpu: 500m
-        memory: 512Mi
-    ## @params wazuh.worker.pdb Allows to configure the pod disruption budget of the worker.
-    ## Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    ## Allows to configure the pod disruption budget of the worker. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    ## @param wazuh.worker.pdb.enabled Enables pdb for worker.
+    ## @skip wazuh.worker.pdb.maxUnavailable
     ##
     pdb:
       enabled: true
       maxUnavailable: 1
-    ## @params wazuh.worker.livenessProbe Parameter to configure the livenessProbe.
+    ## @param wazuh.worker.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
     livenessProbe: {}
-    ## @params wazuh.worker.readinessProbe Parameter to configure the readinessProbe.
+    ## @param wazuh.worker.readinessProbe Parameter to configure the readinessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
     readinessProbe: {}
-    ## @params wazuh.worker.securityContext Parameter to configure the securityContext of the pod.
+    ## Parameter to configure the securityContext of the pod.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ## @param wazuh.worker.securityContext.capabilities.add Additional capabilities.
     ##
     securityContext:
       capabilities:
         add: ["SYS_CHROOT"]
-    ## @params wazuh.worker.networkPolicy Network Policies for restricting the traffic in the cluster.
+    ## Network Policies for restricting the traffic in the cluster.
     ## Ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+    ## @param wazuh.worker.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
     ##
     networkPolicy:
       enabled: true
     ## @param wazuh.worker.storageSize Defines the size of the pvc used by the statefulset.
-    ##
-    storageSize: 50Gi
     ## @param wazuh.worker.storageClass Defines the storageClass of the pvc used by the statefulset.
     ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
     ##
+    storageSize: 50Gi
     storageClass: null
     ## @param wazuh.worker.conf Config for the wazuh worker, do not change!
     ##

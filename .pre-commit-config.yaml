@@ -1,0 +1,8 @@
+repos:
+  - repo: https://github.com/bitnami/readme-generator-for-helm
+    rev: "main"
+    hooks:
+      - id: helm-readme-generator
+        pass_filenames: false
+        always_run: true
+        args: [--readme=charts/wazuh/README.md, --values=charts/wazuh/values.yaml]
