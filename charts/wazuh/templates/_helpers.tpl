@@ -1325,7 +1325,6 @@ cluster.routing.allocation.disk.threshold_enabled: false
 compatibility.override_main_response_version: true
 {{- end }}
 
-
 {{- define "wazuh.indexer.internalUsers"}}
 ---
 # This is the internal user database
@@ -1338,16 +1337,15 @@ _meta:
 # Define your internal users here
 
 ## Demo users
-
 admin:
-  hash: "$2y$12$K/SpwjtB.wOHJ/Nc6GVRDuc1h0rM1DfvziFRNPtk27P.c4yDr9njO"
+  hash: "{{ .Values.indexer.cred.passwordHash }}"
   reserved: true
   backend_roles:
   - "admin"
   description: "Demo admin user"
 
 kibanaserver:
-  hash: "$2a$12$4AcgAt3xwOWadA5s5blL6ev39OXDNhmOesEoo33eZtrq2N0YrU3H."
+  hash: "{{ .Values.dashboard.cred.passwordHash }}"
   reserved: true
   description: "Demo kibanaserver user"
 

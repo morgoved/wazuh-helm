@@ -217,15 +217,16 @@ indexer:
   storageSize: 50Gi
   storageClass: null
   ## Configuration of the credentials for the indexer.
-  ## @param indexer.cred.existingSecret Name of the existingSecret with username and password Expected keys are:
-  ## "username" and "password".
-  ## @param indexer.cred.username Name of the user.
-  ## @param indexer.cred.password Value of the password.
+  ## @param indexer.cred.existingSecret Name of the existingSecret which holds the key "INDEXER_PASSWORD".
+  ## @param indexer.cred.password Value of the password for the admin user.
+  ## @param indexer.cred.passwordHash Hash of the password for the admin user. To create this, follow the README.
+  ## TODO this is only needed, as the corresponding helm feature to create bcrypt hashes with 12 rounds is
+  ## still not published. So this acts as a workaround until then.
   ##
   cred:
     existingSecret: ""
-    username: "admin"
-    password: "SecretPassword"
+    passwordHash: "$2a$12$zGWIT7wkPKT/zww3bmMyp.KuWXH4RzgxiB91Q8NGFcqpyPy.R2Rcq"
+    password: "WazuhSecretPassword"
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed
 ##
@@ -347,15 +348,16 @@ dashboard:
   config: |
     {{ include "wazuh.dashboard.config" . }}
   ## Configuration of the credentials for the dashboard.
-  ## @param dashboard.cred.existingSecret Name of the existingSecret with username and password Expected keys are:
-  ## "username" and "password".
-  ## @param dashboard.cred.username Name of the user.
-  ## @param dashboard.cred.password Value of the password.
+  ## @param dashboard.cred.existingSecret Name of the existingSecret which holds the key "DASHBOARD_PASSWORD".
+  ## @param dashboard.cred.password Value of the password for the kibanaserver user.
+  ## @param dashboard.cred.passwordHash Hash of the password for the kibanaserver user. To create this, follow the README.
+  ## TODO this is only needed, as the corresponding helm feature to create bcrypt hashes with 12 rounds is
+  ## still not published. So this acts as a workaround until then.
   ##
   cred:
     existingSecret: ""
-    username: "kibanaserver"
     password: "kibanaserver"
+    passwordHash: "$2a$12$7NCZ.l9ntPhou5zNjZIU4uqXNNWMF7SyF6Y6mcjhHTB6Z1eQubHC."
   ## Ingress parameters for the dashboard Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ## @param dashboard.ingress.enabled Enable ingress record generation for dashboard.
   ##
@@ -422,7 +424,8 @@ wazuh:
   env:
     FILEBEAT_SSL_VERIFICATION_MODE: full
   ## Configuration of the api credentials. If username and password are left empty, they will be generated automatically.
-  ## @param wazuh.apiCred.existingSecret name of the existingSecret in the namespace.
+  ## @param wazuh.apiCred.existingSecret name of the existingSecret in the namespace. Expected keys are 'API_USERNAME' and
+  ## 'API_PASSWORD'
   ## @param wazuh.apiCred.username name of the username.
   ## @param wazuh.apiCred.password password of the user. Note that the password must have a length
   ## between 8 and 64 characters and contain at least one upper and lower case letter, a number

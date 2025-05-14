@@ -70,6 +70,9 @@ spec:
         - name: wazuh-indexer
           imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
+          envFrom:
+            - secretRef:
+                name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
           env:
             - name: OPENSEARCH_JAVA_OPTS
               value: {{ .Values.indexer.env.OPENSEARCH_JAVA_OPTS | quote }}

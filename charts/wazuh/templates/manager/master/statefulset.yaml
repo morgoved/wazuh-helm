@@ -28,6 +28,8 @@ spec:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/manager/configmap.yaml") . | sha256sum }}
         checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
+        checksum/api-secret: {{ include (print $.Template.BasePath "/manager/secret-api-cred.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.wazuh.master.annotations }}
             {{- toYaml . | nindent 8 }}
@@ -91,9 +93,6 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          securityContext:
-            capabilities:
-              add: ["SYS_CHROOT"]
           volumeMounts:
             # Wazuh Config
             - mountPath: /wazuh-config-mount/etc/
@@ -176,19 +175,14 @@ spec:
               name: cluster
             - containerPort: {{ .Values.wazuh.master.service.ports.api }}
               name: api
+          envFrom:
+            - secretRef:
+                name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
+            - secretRef:
+                name: {{ .Values.wazuh.apiCred.existingSecret | default "wazuh-api-cred" }}
           env:
             - name: INDEXER_URL
               value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
-            - name: INDEXER_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
-            - name: INDEXER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
             - name: FILEBEAT_SSL_VERIFICATION_MODE
               value: {{ .Values.wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | quote }}
             # Certs
@@ -198,16 +192,6 @@ spec:
               value: /etc/ssl/filebeat.pem
             - name: SSL_KEY
               value: /etc/ssl/filebeat.key
-            - name: API_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: {{ .Values.wazuh.apiCred.existingSecret | default "wazuh-api-cred" }}
-            - name: API_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: {{ .Values.wazuh.apiCred.existingSecret | default "wazuh-api-cred" }}
             - name: WAZUH_CLUSTER_KEY
               valueFrom:
                 secretKeyRef:

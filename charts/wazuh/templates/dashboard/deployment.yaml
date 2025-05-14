@@ -20,7 +20,9 @@ spec:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/dashboard/configmap.yaml") . | sha256sum }}
         checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/dashboard/secret.yaml") . | sha256sum }}
+        checksum/dashboard-secret: {{ include (print $.Template.BasePath "/dashboard/secret.yaml") . | sha256sum }}
+        checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
+        checksum/api-secret: {{ include (print $.Template.BasePath "/manager/secret-api-cred.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.indexer.annotations }}
             {{- toYaml . | nindent 8 }}
@@ -80,29 +82,16 @@ spec:
           ports:
             - containerPort: {{ .Values.dashboard.service.httpPort }}
               name: dashboard
+          envFrom:
+            - secretRef:
+                name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
+            - secretRef:
+                name: {{ .Values.wazuh.apiCred.existingSecret | default "wazuh-api-cred" }}
+            - secretRef:
+                name: {{ .Values.dashboard.cred.existingSecret | default "dashboard-cred" }}
           env:
             - name: INDEXER_URL
               value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
-            - name: INDEXER_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
-            - name: INDEXER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
-            - name: DASHBOARD_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: {{ .Values.dashboard.cred.existingSecret | default "dashboard-cred" }}
-            - name: DASHBOARD_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: {{ .Values.dashboard.cred.existingSecret | default "dashboard-cred" }}
             - name: SERVER_SSL_ENABLED
               value: {{ .Values.dashboard.enable_ssl | quote }}
             - name: SERVER_SSL_CERTIFICATE
@@ -111,16 +100,6 @@ spec:
               value: /usr/share/wazuh-dashboard/certs/key.pem
             - name: WAZUH_API_URL
               value: "https://wazuh"
-            - name: API_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: wazuh-api-cred
-            - name: API_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: wazuh-api-cred
           {{- with .Values.dashboard.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
