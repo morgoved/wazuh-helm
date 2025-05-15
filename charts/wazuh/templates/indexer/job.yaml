@@ -5,7 +5,7 @@ metadata:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   name: {{ include "wazuh.indexer.fullname" . }}-indexer
-  namespace: wazuh
+  namespace: {{ .Release.Namespace }}
 spec:
   backoffLimit: 6
   completionMode: NonIndexed
@@ -19,6 +19,10 @@ spec:
         job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
     spec:
       restartPolicy: OnFailure
+      {{- with .Values.indexer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - command:
         - sh

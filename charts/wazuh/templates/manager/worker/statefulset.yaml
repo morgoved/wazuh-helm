@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "wazuh.fullname" . }}-manager-worker
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: worker
@@ -25,11 +26,16 @@ spec:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/manager/configmap.yaml") . | sha256sum }}
         checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.wazuh.worker.annotations }}
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.wazuh.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -155,19 +161,12 @@ spec:
               name: agents-events
             - containerPort: {{ .Values.wazuh.service.port }}
               name: cluster
+          envFrom:
+            - secretRef:
+                name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
           env:
             - name: INDEXER_URL
               value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
-            - name: INDEXER_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
-            - name: INDEXER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
             - name: FILEBEAT_SSL_VERIFICATION_MODE
               value: {{ .Values.wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | quote }}
             - name: WAZUH_CLUSTER_KEY

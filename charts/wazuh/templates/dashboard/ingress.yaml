@@ -3,6 +3,7 @@ apiVersion:  networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "wazuh.fullname" . }}-dashboard
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.fullname" . }}-dashboard
   annotations:

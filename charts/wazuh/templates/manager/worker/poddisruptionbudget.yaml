@@ -3,6 +3,7 @@ kind: PodDisruptionBudget
 apiVersion: policy/v1
 metadata:
   name: {{ include "wazuh.fullname" . }}-manager-worker
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:

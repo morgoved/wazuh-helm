@@ -1,6 +1,8 @@
 # wazuh
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.11.1](https://img.shields.io/badge/AppVersion-4.11.1-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
+
+## Introduction
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
@@ -8,182 +10,228 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 
 ## Maintainers
 
-| Name | Email | Url |
-| ---- | ------ | --- |
-| Dani | <andre.gomes@promptlyhealth.com> | <https://github.com/Ca-moes> |
-| Morgoved |  | <https://github.com/morgoved> |
-| 71g3pf4c3 |  | <https://github.com/71g3pf4c3> |
+| Name      | Email                            | Url                            |
+| --------- | -------------------------------- | ------------------------------ |
+| Dani      | <andre.gomes@promptlyhealth.com> | <https://github.com/Ca-moes>   |
+| Morgoved  |                                  | <https://github.com/morgoved>  |
+| 71g3pf4c3 |                                  | <https://github.com/71g3pf4c3> |
 
 ## Source Code
 
-* <https://github.com/morgoved/wazuh-helm>
+- <https://github.com/morgoved/wazuh-helm>
 
-## Requirements
+## Prerequisites
 
-| Repository | Name | Version |
-|------------|------|---------|
-| https://charts.jetstack.io | cert-manager | 1.16.3 |
+- Kubernetes 1.23+
+- Helm 3.8.0+
+- PV provisioner support in the underlying infrastructure
 
-## Values
+## Get Helm Repository Info
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| autoreload.enabled | bool | `false` |  |
-| cert-manager.enabled | bool | `false` |  |
-| certificates.duration | string | `"2160h"` |  |
-| certificates.renewBefore | string | `"360h"` |  |
-| certificates.subject.country | string | `"US"` |  |
-| certificates.subject.locality | string | `"California"` |  |
-| certificates.subject.organization | string | `"Company"` |  |
-| dashboard.additionalEnv | list | `[]` |  |
-| dashboard.annotations | object | `{}` |  |
-| dashboard.config | string | `"{{ include \"wazuh.dashboard.config\" . }}\n"` |  |
-| dashboard.cred.existingSecret | string | `""` |  |
-| dashboard.cred.password | string | `"kibanaserver"` |  |
-| dashboard.cred.username | string | `"kibanaserver"` |  |
-| dashboard.enable_ssl | bool | `false` |  |
-| dashboard.images.pullPolicy | string | `"IfNotPresent"` |  |
-| dashboard.images.repository | string | `"wazuh/wazuh-dashboard"` |  |
-| dashboard.images.tag | string | `"4.11.1"` |  |
-| dashboard.images.updateStrategy | string | `"OnDelete"` |  |
-| dashboard.ingress.annotations | object | `{}` |  |
-| dashboard.ingress.className | string | `""` |  |
-| dashboard.ingress.enabled | bool | `false` |  |
-| dashboard.ingress.host | string | `"wazuh.example.com"` |  |
-| dashboard.ingress.tls | list | `[]` |  |
-| dashboard.livenessProbe.failureThreshold | int | `10` |  |
-| dashboard.livenessProbe.httpGet.path | string | `"/api/status"` |  |
-| dashboard.livenessProbe.httpGet.port | int | `5601` |  |
-| dashboard.livenessProbe.initialDelaySeconds | int | `10` |  |
-| dashboard.livenessProbe.periodSeconds | int | `20` |  |
-| dashboard.livenessProbe.successThreshold | int | `1` |  |
-| dashboard.livenessProbe.timeoutSeconds | int | `5` |  |
-| dashboard.networkPolicy.enabled | bool | `true` |  |
-| dashboard.pdb.enabled | bool | `false` |  |
-| dashboard.pdb.maxUnavailable | int | `1` |  |
-| dashboard.readinessProbe.failureThreshold | int | `10` |  |
-| dashboard.readinessProbe.httpGet.path | string | `"/api/status"` |  |
-| dashboard.readinessProbe.httpGet.port | int | `5601` |  |
-| dashboard.readinessProbe.initialDelaySeconds | int | `10` |  |
-| dashboard.readinessProbe.periodSeconds | int | `20` |  |
-| dashboard.readinessProbe.successThreshold | int | `1` |  |
-| dashboard.readinessProbe.timeoutSeconds | int | `5` |  |
-| dashboard.replicas | int | `1` |  |
-| dashboard.resources.limits.memory | string | `"1Gi"` |  |
-| dashboard.resources.requests.cpu | string | `"500m"` |  |
-| dashboard.resources.requests.memory | string | `"512Mi"` |  |
-| dashboard.securityContext | object | `{}` |  |
-| dashboard.service.annotations | object | `{}` |  |
-| dashboard.service.httpPort | int | `5601` |  |
-| dashboard.service.type | string | `"ClusterIP"` |  |
-| fullnameOverride | string | `nil` |  |
-| indexer.additionalEnv | list | `[]` |  |
-| indexer.annotations | object | `{}` |  |
-| indexer.config.internalUsers | string | `"{{ include \"wazuh.indexer.internalUsers\" . }}"` |  |
-| indexer.config.opensearch | string | `"{{ include \"wazuh.indexer.opensearchConfig\" . }}"` |  |
-| indexer.config.roles | string | `"{{ include \"wazuh.indexer.roles\" . }}"` |  |
-| indexer.config.rolesMapping | string | `"{{ include \"wazuh.indexer.rolesMapping\" . }}"` |  |
-| indexer.config.securityConfig | string | `"{{ include \"wazuh.indexer.securityConfig\" . }}"` |  |
-| indexer.cred.existingSecret | string | `""` |  |
-| indexer.cred.password | string | `"SecretPassword"` |  |
-| indexer.cred.username | string | `"admin"` |  |
-| indexer.env.CLUSTER_NAME | string | `"wazuh"` |  |
-| indexer.env.DISABLE_INSTALL_DEMO_CONFIG | string | `"true"` |  |
-| indexer.env.NETWORK_HOST | string | `"0.0.0.0"` |  |
-| indexer.env.OPENSEARCH_JAVA_OPTS | string | `"-Xms1g -Xmx1g -Dlog4j2.formatMsgNoLookups=true"` |  |
-| indexer.images.imagePullSecrets.enabled | bool | `false` |  |
-| indexer.images.imagePullSecrets.secret | object | `{}` |  |
-| indexer.images.pullPolicy | string | `"IfNotPresent"` |  |
-| indexer.images.repository | string | `"wazuh/wazuh-indexer"` |  |
-| indexer.images.tag | string | `"4.11.1"` |  |
-| indexer.initContainers.volumeMountHack.resources.limits.memory | string | `"256Mi"` |  |
-| indexer.initContainers.volumeMountHack.resources.requests.cpu | string | `"50m"` |  |
-| indexer.initContainers.volumeMountHack.resources.requests.memory | string | `"128Mi"` |  |
-| indexer.livenessProbe.failureThreshold | int | `10` |  |
-| indexer.livenessProbe.initialDelaySeconds | int | `10` |  |
-| indexer.livenessProbe.periodSeconds | int | `20` |  |
-| indexer.livenessProbe.successThreshold | int | `1` |  |
-| indexer.livenessProbe.tcpSocket.port | int | `9200` |  |
-| indexer.livenessProbe.timeoutSeconds | int | `5` |  |
-| indexer.networkPolicy.enabled | bool | `true` |  |
-| indexer.pdb.enabled | bool | `true` |  |
-| indexer.pdb.maxUnavailable | int | `1` |  |
-| indexer.plugins | list | `[]` |  |
-| indexer.readinessProbe.failureThreshold | int | `10` |  |
-| indexer.readinessProbe.initialDelaySeconds | int | `10` |  |
-| indexer.readinessProbe.periodSeconds | int | `20` |  |
-| indexer.readinessProbe.successThreshold | int | `1` |  |
-| indexer.readinessProbe.tcpSocket.port | int | `9200` |  |
-| indexer.readinessProbe.timeoutSeconds | int | `5` |  |
-| indexer.replicas | int | `3` |  |
-| indexer.resources.limits.memory | string | `"2Gi"` |  |
-| indexer.resources.requests.cpu | string | `"500m"` |  |
-| indexer.resources.requests.memory | string | `"1Gi"` |  |
-| indexer.securityContext.fsGroup | int | `1000` |  |
-| indexer.service.annotations | object | `{}` |  |
-| indexer.service.httpPort | int | `9200` |  |
-| indexer.service.metrics | int | `9600` |  |
-| indexer.service.nodes | int | `9300` |  |
-| indexer.service.type | string | `"ClusterIP"` |  |
-| indexer.storageClass | string | `nil` |  |
-| indexer.storageSize | string | `"50Gi"` |  |
-| indexer.updateStrategy | string | `"RollingUpdate"` |  |
-| nameOverride | string | `nil` |  |
-| wazuh.agentGroupConf[0].agent | string | `"<agent_config>\n  <localfile>\n    <location>journald</location>\n    <log_format>journald</log_format>\n  </localfile>\n  <localfile>\n    <location>/var/log/falco.log</location>\n    <log_format>json</log_format>\n  </localfile>\n  <wodle name=\"docker-listener\">\n    <interval>10m</interval>\n    <attempts>5</attempts>\n    <run_on_start>no</run_on_start>\n    <disabled>no</disabled>\n  </wodle>\n</agent_config>\n"` |  |
-| wazuh.agentGroupConf[0].merged | string | `"#cloud\n!228 ar.conf\nrestart-ossec0 - restart-ossec.sh - 0\nrestart-ossec0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-ossec.sh - 0\nrestart-wazuh0 - restart-ossec.cmd - 0\nrestart-wazuh0 - restart-wazuh - 0\nrestart-wazuh0 - restart-wazuh.exe - 0\n!435 agent.conf\n  <agent_config>\n    <localfile>\n      <location>journald</location>\n      <log_format>journald</log_format>\n    </localfile>\n    <localfile>\n      <location>/var/log/falco.log</location>\n      <log_format>json</log_format>\n    </localfile>\n    <wodle name=\"docker-listener\">\n      <interval>10m</interval>\n      <attempts>5</attempts>\n      <run_on_start>no</run_on_start>\n      <disabled>no</disabled>\n    </wodle>\n  </agent_config>\n"` |  |
-| wazuh.agentGroupConf[0].name | string | `"example"` |  |
-| wazuh.apiCred.existingSecret | string | `""` |  |
-| wazuh.apiCred.password | string | `"MyS3cr37P450r.*-"` |  |
-| wazuh.apiCred.username | string | `"wazuh-wui"` |  |
-| wazuh.authd.existingSecret | string | `""` |  |
-| wazuh.authd.pass | string | `"password"` |  |
-| wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | string | `"full"` |  |
-| wazuh.images.pullPolicy | string | `"IfNotPresent"` |  |
-| wazuh.images.pullSecret | string | `"regcred"` |  |
-| wazuh.images.repository | string | `"wazuh/wazuh-manager"` |  |
-| wazuh.images.tag | string | `"4.11.1"` |  |
-| wazuh.initContainer.resources | object | `{}` |  |
-| wazuh.internalOptions | string | `"{{ include \"wazuh.internalOptions\" . }}\n"` |  |
-| wazuh.key | string | `"c98b62a9b6169ac5f67dae55ae4a9088"` |  |
-| wazuh.localDecoder | string | `"{{ include \"wazuh.localDecoder\" . }}\n"` |  |
-| wazuh.localRules | string | `"{{ include \"wazuh.localRules\" . }}\n"` |  |
-| wazuh.master.annotations | object | `{}` |  |
-| wazuh.master.conf | string | `"{{ include \"wazuh.master.conf\" . }}\n"` |  |
-| wazuh.master.extraConf | string | `""` |  |
-| wazuh.master.livenessProbe | object | `{}` |  |
-| wazuh.master.networkPolicy.enabled | bool | `true` |  |
-| wazuh.master.readinessProbe | object | `{}` |  |
-| wazuh.master.resources.limits.memory | string | `"1Gi"` |  |
-| wazuh.master.resources.requests.cpu | string | `"500m"` |  |
-| wazuh.master.resources.requests.memory | string | `"512Mi"` |  |
-| wazuh.master.securityContext.capabilities.add[0] | string | `"SYS_CHROOT"` |  |
-| wazuh.master.service.annotations | object | `{}` |  |
-| wazuh.master.service.ports.api | int | `55000` |  |
-| wazuh.master.service.ports.registration | int | `1515` |  |
-| wazuh.master.service.type | string | `"ClusterIP"` |  |
-| wazuh.master.storageClass | string | `nil` |  |
-| wazuh.master.storageSize | string | `"50Gi"` |  |
-| wazuh.service.annotations | object | `{}` |  |
-| wazuh.service.port | int | `1516` |  |
-| wazuh.syslog_enable | bool | `true` |  |
-| wazuh.worker.annotations | object | `{}` |  |
-| wazuh.worker.conf | string | `"{{ include \"wazuh.worker.conf\" . }}\n"` |  |
-| wazuh.worker.extraConf | string | `""` |  |
-| wazuh.worker.livenessProbe | object | `{}` |  |
-| wazuh.worker.networkPolicy.enabled | bool | `true` |  |
-| wazuh.worker.pdb.enabled | bool | `true` |  |
-| wazuh.worker.pdb.maxUnavailable | int | `1` |  |
-| wazuh.worker.readinessProbe | object | `{}` |  |
-| wazuh.worker.replicas | int | `2` |  |
-| wazuh.worker.resources.limits.memory | string | `"1Gi"` |  |
-| wazuh.worker.resources.requests.cpu | string | `"500m"` |  |
-| wazuh.worker.resources.requests.memory | string | `"512Mi"` |  |
-| wazuh.worker.securityContext.capabilities.add[0] | string | `"SYS_CHROOT"` |  |
-| wazuh.worker.service.annotations | object | `{}` |  |
-| wazuh.worker.service.ports.agentEvents | int | `1514` |  |
-| wazuh.worker.service.type | string | `"ClusterIP"` |  |
-| wazuh.worker.storageClass | string | `nil` |  |
-| wazuh.worker.storageSize | string | `"50Gi"` |  |
+```shell
+helm repo add wazuh-helm https://promptlylabs.github.io/wazuh-helm-chart/
+helm repo update
+```
 
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
+## Install Helm Chart
+
+```shell
+helm install [RELEASE_NAME] wazuh-helm/wazuh
+```
+
+### Installation with changing credentials
+
+> NOTE!
+> Currently changing the parameters still involve manual password hashing, as the hash has to be entered in the internal_users.yml of wazuh.
+> The current implementation should only be a temporary solution, as the helm engine might get the ability to create bcrypt hashes with setting rounds / costs as part of the already existing bcrypt function.
+
+When changing `indexer.cred.password` you also have to adjust `indexer.cred.passwordHash` in order to get the correct value, you have to hash the password with bcrypt and 12 rounds / costs. You can do so via CLI or some online converter in the web.
+
+Same applies when changing `dashboard.cred.password`
+
+## Parameters
+
+### cert-manager This are the parameters for the official sub-chart for cert-manager, here you
+
+| Name                   | Description                                              | Value   |
+| ---------------------- | -------------------------------------------------------- | ------- |
+| `cert-manager.enabled` | this enabled or disables the sub-chart getting deployed. | `false` |
+
+### certificates If cert-manager is present, the certificates can be generated automatically.
+
+| Name                                | Description                                                      | Value        |
+| ----------------------------------- | ---------------------------------------------------------------- | ------------ |
+| `certificates.issuer.name`          | of the issuer used for signing the certificates. If this is null | `nil`        |
+| `certificates.issuer.type`          | defines the type of the issuer, possible values are issuer and   | `issuer`     |
+| `certificates.duration`             | timeframe for validity of cert.                                  | `2160h`      |
+| `certificates.renewBefore`          | timeframe before the cert gets renewed.                          | `360h`       |
+| `certificates.subject.organization` | Organization for the internal certificate.                       | `Company`    |
+| `certificates.subject.country`      | Country for the internal certificate.                            | `US`         |
+| `certificates.subject.locality`     | Locality for the internal certificate.                           | `California` |
+
+### indexer configuration of the wazuh indexer.
+
+| Name                                         | Description                                                                    | Value                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `indexer.replicas`                           | number of replicas used in statefulset.                                        | `3`                                                            |
+| `indexer.annotations`                        | additional annotations set on statefulset.                                     | `{}`                                                           |
+| `indexer.updateStrategy`                     | updateStrategy for the statefulset.                                            | `RollingUpdate`                                                |
+| `indexer.images.repository`                  | name of the image used. If you use your own image registry                     | `wazuh/wazuh-indexer`                                          |
+| `indexer.images.tag`                         | Tag of the image.                                                              | `4.12.0`                                                       |
+| `indexer.images.pullPolicy`                  | pullPolicy of the image.                                                       | `IfNotPresent`                                                 |
+| `indexer.resources.requests.cpu`             | Minimum CPU assigned to the pod.                                               | `500m`                                                         |
+| `indexer.resources.requests.memory`          | Minimum memory assigned to the pod.                                            | `1Gi`                                                          |
+| `indexer.resources.limits.cpu`               | Maximum CPU used by the pod.                                                   | `1000m`                                                        |
+| `indexer.resources.limits.memory`            | Maximum memory used by the pod.                                                | `2Gi`                                                          |
+| `indexer.pdb.enabled`                        | Enables pdb for indexer.                                                       | `true`                                                         |
+| `indexer.livenessProbe.periodSeconds`        | How often to perform the probe.                                                | `20`                                                           |
+| `indexer.livenessProbe.timeoutSeconds`       | When the probe times out.                                                      | `5`                                                            |
+| `indexer.livenessProbe.failureThreshold`     | Minimum failures for the probe to be considered failed after having succeeded. | `10`                                                           |
+| `indexer.livenessProbe.successThreshold`     | Minimum successes for the probe to be considered successful                    | `1`                                                            |
+| `indexer.livenessProbe.initialDelaySeconds`  | Delay before liveness probe is initiated.                                      | `10`                                                           |
+| `indexer.readinessProbe.periodSeconds`       | How often to perform the probe.                                                | `20`                                                           |
+| `indexer.readinessProbe.timeoutSeconds`      | When the probe times out.                                                      | `5`                                                            |
+| `indexer.readinessProbe.failureThreshold`    | Minimum failures for the probe to be considered failed after having succeeded. | `10`                                                           |
+| `indexer.readinessProbe.successThreshold`    | Minimum successes for the probe to be considered successful                    | `1`                                                            |
+| `indexer.readinessProbe.initialDelaySeconds` | Delay before liveness probe is initiated.                                      | `10`                                                           |
+| `indexer.securityContext.fsGroup`            | Set the pods Security Context fsGroup.                                         | `1000`                                                         |
+| `indexer.networkPolicy.enabled`              | Specifies whether a NetworkPolicy should be created.                           | `true`                                                         |
+| `indexer.service.type`                       | Type of the created service.                                                   | `ClusterIP`                                                    |
+| `indexer.service.annotations`                | Annotations of the created service.                                            | `{}`                                                           |
+| `indexer.service.httpPort`                   | Port for the http endpoint.                                                    | `9200`                                                         |
+| `indexer.service.nodes`                      | Port for the nodes endpoint.                                                   | `9300`                                                         |
+| `indexer.service.metrics`                    | Port for the metrics endpoint.                                                 | `9600`                                                         |
+| `indexer.nodeSelector`                       |                                                                                | `{}`                                                           |
+| `indexer.additionalEnv`                      | Possibility to define additional env vars in the pod.                          | `[]`                                                           |
+| `indexer.config.opensearch`                  | Configuration of opensearch.yml.                                               | `{{ include "wazuh.indexer.opensearchConfig" . }}`             |
+| `indexer.config.internalUsers`               | Configuration of internalUsers of the indexer.                                 | `{{ include "wazuh.indexer.internalUsers" . }}`                |
+| `indexer.config.securityConfig`              | Configuration of securityConfig of the indexer.                                | `{{ include "wazuh.indexer.securityConfig" . }}`               |
+| `indexer.config.rolesMapping`                | Configuration of rolesMapping of the indexer.                                  | `{{ include "wazuh.indexer.rolesMapping" . }}`                 |
+| `indexer.config.roles`                       | Configuration of roles of the indexer.                                         | `{{ include "wazuh.indexer.roles" . }}`                        |
+| `indexer.sysctlImage.enabled`                | Enable kernel settings modifier image                                          | `false`                                                        |
+| `indexer.sysctlImage.images.repository`      | name of the image used. If you use your own image registry                     | `bitnami/os-shell`                                             |
+| `indexer.sysctlImage.images.tag`             | Tag of the image.                                                              | `12-debian-12-r43`                                             |
+| `indexer.storageSize`                        | Defines the size of the pvc used by the statefulset.                           | `50Gi`                                                         |
+| `indexer.storageClass`                       | Defines the storageClass of the pvc used by the statefulset.                   | `nil`                                                          |
+| `indexer.cred.existingSecret`                | Name of the existingSecret which holds the key "INDEXER_PASSWORD".             | `""`                                                           |
+| `indexer.cred.password`                      | Value of the password for the admin user.                                      | `WazuhSecretPassword`                                          |
+| `indexer.cred.passwordHash`                  | Hash of the password for the admin user. To create this, follow the README.    | `$2a$12$zGWIT7wkPKT/zww3bmMyp.KuWXH4RzgxiB91Q8NGFcqpyPy.R2Rcq` |
+
+### indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
+
+| Name                                           | Description                                                                        | Value                                                          |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `dashboard.replicas`                           | number of replicas used in deployment.                                             | `1`                                                            |
+| `dashboard.annotations`                        | additional annotations set on deployment.                                          | `{}`                                                           |
+| `dashboard.images.repository`                  | name of the image used. If you use your own image registry                         | `wazuh/wazuh-dashboard`                                        |
+| `dashboard.images.tag`                         | Tag of the image.                                                                  | `4.12.0`                                                       |
+| `dashboard.images.pullPolicy`                  | pullPolicy of the image.                                                           | `IfNotPresent`                                                 |
+| `dashboard.images.updateStrategy`              | updateStrategy of the image.                                                       | `OnDelete`                                                     |
+| `dashboard.resources.requests.cpu`             | Minimum CPU assigned to the pod.                                                   | `500m`                                                         |
+| `dashboard.resources.requests.memory`          | Minimum memory assigned to the pod.                                                | `512Mi`                                                        |
+| `dashboard.resources.limits.cpu`               | Maximum CPU used by the pod.                                                       | `1000m`                                                        |
+| `dashboard.resources.limits.memory`            | Maximum memory used by the pod.                                                    | `1Gi`                                                          |
+| `dashboard.pdb.enabled`                        | Enables pdb for dashboard.                                                         | `false`                                                        |
+| `dashboard.livenessProbe.periodSeconds`        | How often to perform the probe.                                                    | `20`                                                           |
+| `dashboard.livenessProbe.timeoutSeconds`       | When the probe times out.                                                          | `5`                                                            |
+| `dashboard.livenessProbe.failureThreshold`     | Minimum failures for the probe to be considered failed after having succeeded.     | `10`                                                           |
+| `dashboard.livenessProbe.successThreshold`     | Minimum successes for the probe to be considered successful                        | `1`                                                            |
+| `dashboard.livenessProbe.initialDelaySeconds`  | Delay before liveness probe is initiated.                                          | `10`                                                           |
+| `dashboard.readinessProbe.periodSeconds`       | How often to perform the probe.                                                    | `20`                                                           |
+| `dashboard.readinessProbe.timeoutSeconds`      | When the probe times out.                                                          | `5`                                                            |
+| `dashboard.readinessProbe.failureThreshold`    | Minimum failures for the probe to be considered failed after having succeeded.     | `10`                                                           |
+| `dashboard.readinessProbe.successThreshold`    | Minimum successes for the probe to be considered successful                        | `1`                                                            |
+| `dashboard.readinessProbe.initialDelaySeconds` | Delay before liveness probe is initiated.                                          | `10`                                                           |
+| `dashboard.securityContext`                    | Parameter to configure the securityContext of the pod.                             | `{}`                                                           |
+| `dashboard.networkPolicy.enabled`              | Specifies whether a NetworkPolicy should be created.                               | `true`                                                         |
+| `dashboard.service.type`                       | Type of the created service.                                                       | `ClusterIP`                                                    |
+| `dashboard.service.annotations`                | Annotations of the created service.                                                | `{}`                                                           |
+| `dashboard.service.httpPort`                   | Port for the http endpoint.                                                        | `5601`                                                         |
+| `dashboard.nodeSelector`                       |                                                                                    | `{}`                                                           |
+| `dashboard.additionalEnv`                      | Possibility to define additional env vars in the pod.                              | `[]`                                                           |
+| `dashboard.enable_ssl`                         | with this you will be able to access kibana on http port instead of                | `false`                                                        |
+| `dashboard.config`                             | Configuration of the dashboard parameters, this should not be changed.             | `{{ include "wazuh.dashboard.config" . }}
+`                    |
+| `dashboard.cred.existingSecret`                | Name of the existingSecret which holds the key "DASHBOARD_PASSWORD".               | `""`                                                           |
+| `dashboard.cred.password`                      | Value of the password for the kibanaserver user.                                   | `kibanaserver`                                                 |
+| `dashboard.cred.passwordHash`                  | Hash of the password for the kibanaserver user. To create this, follow the README. | `$2a$12$7NCZ.l9ntPhou5zNjZIU4uqXNNWMF7SyF6Y6mcjhHTB6Z1eQubHC.` |
+| `dashboard.ingress.enabled`                    | Enable ingress record generation for dashboard.                                    | `false`                                                        |
+| `dashboard.ingress.className`                  | Defines the ingress class name used.                                               | `""`                                                           |
+| `dashboard.ingress.tls`                        | Allows to use specific tls certificate.                                            | `[]`                                                           |
+| `dashboard.ingress.annotations`                | Used for detailed configuration.                                                   | `{}`                                                           |
+| `dashboard.ingress.host`                       | Defines the hostname and URL under which the dashboard gets                        | `wazuh.example.com`                                            |
+
+### wazuh configuration of the wazuh core component.
+
+| Name                                            | Description                                                                       | Value                                      |
+| ----------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------ |
+| `wazuh.syslog_enable`                           | Enables the syslog of the wazuh instance.                                         | `true`                                     |
+| `wazuh.key`                                     | Defines the key of the wazuh cluster.                                             | `c98b62a9b6169ac5f67dae55ae4a9088`         |
+| `wazuh.images.repository`                       | name of the image used. If you use your own image registry                        | `wazuh/wazuh-manager`                      |
+| `wazuh.images.tag`                              | Tag of the image.                                                                 | `4.12.0`                                   |
+| `wazuh.images.pullPolicy`                       | pullPolicy of the image.                                                          | `IfNotPresent`                             |
+| `wazuh.service.annotations`                     | Annotations of the created service.                                               | `{}`                                       |
+| `wazuh.service.port`                            | Port for the http endpoint.                                                       | `1516`                                     |
+| `wazuh.nodeSelector`                            |                                                                                   | `{}`                                       |
+| `wazuh.apiCred.existingSecret`                  | name of the existingSecret in the namespace. Expected keys are 'API_USERNAME' and | `""`                                       |
+| `wazuh.apiCred.username`                        | name of the username.                                                             | `wazuh-wui`                                |
+| `wazuh.apiCred.password`                        | password of the user. Note that the password must have a length                   | `MyS3cr37P450r.*-`                         |
+| `wazuh.authd.existingSecret`                    | name of the existingSecret in the namespace.                                      | `""`                                       |
+| `wazuh.authd.pass`                              | password of the authd.                                                            | `password`                                 |
+| `wazuh.initContainer.resources.requests.cpu`    | Minimum CPU assigned to the pod.                                                  | `250m`                                     |
+| `wazuh.initContainer.resources.requests.memory` | Minimum memory assigned to the pod.                                               | `512Mi`                                    |
+| `wazuh.initContainer.resources.limits.cpu`      | Maximum CPU used by the pod.                                                      | `1000m`                                    |
+| `wazuh.initContainer.resources.limits.memory`   | Maximum memory used by the pod.                                                   | `1Gi`                                      |
+| `wazuh.localDecoder`                            | Configuration of the local decoder.                                               | `{{ include "wazuh.localDecoder" . }}
+`    |
+| `wazuh.localRules`                              | Configuration of the local rules.                                                 | `{{ include "wazuh.localRules" . }}
+`      |
+| `wazuh.internalOptions`                         | Configuration of the internal option.                                             | `{{ include "wazuh.internalOptions" . }}
+` |
+
+### wazuh.master configuration of the wazuh master component.
+
+| Name                                            | Description                                                  | Value                                  |
+| ----------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| `wazuh.master.annotations`                      | additional annotations set on statefulset.                   | `{}`                                   |
+| `wazuh.master.resources.requests.cpu`           | Minimum CPU assigned to the pod.                             | `500m`                                 |
+| `wazuh.master.resources.requests.memory`        | Minimum memory assigned to the pod.                          | `512Mi`                                |
+| `wazuh.master.resources.limits.cpu`             | Maximum CPU used by the pod.                                 | `1000m`                                |
+| `wazuh.master.resources.limits.memory`          | Maximum memory used by the pod.                              | `1Gi`                                  |
+| `wazuh.master.service.type`                     | Type of the created service.                                 | `ClusterIP`                            |
+| `wazuh.master.service.annotations`              | Annotations of the created service.                          | `{}`                                   |
+| `wazuh.master.service.ports.registration`       | Port for the registration endpoint.                          | `1515`                                 |
+| `wazuh.master.service.ports.api`                | Port for the api endpoint.                                   | `55000`                                |
+| `wazuh.master.livenessProbe`                    | Parameter to configure the livenessProbe.                    | `{}`                                   |
+| `wazuh.master.readinessProbe`                   | Parameter to configure the readinessProbe.                   | `{}`                                   |
+| `wazuh.master.securityContext.capabilities.add` | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
+| `wazuh.master.networkPolicy.enabled`            | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
+| `wazuh.master.storageSize`                      | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
+| `wazuh.master.storageClass`                     | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
+| `wazuh.master.conf`                             | Config for the wazuh master, do not change!                  | `{{ include "wazuh.master.conf" . }}
+` |
+| `wazuh.master.extraConf`                        | Gets appended to the wazuh.master.conf.                      | `""`                                   |
+
+### wazuh.worker configuration of the wazuh worker component.
+
+| Name                                            | Description                                                  | Value                                  |
+| ----------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| `wazuh.worker.replicas`                         | number of replicas used in statefulset.                      | `2`                                    |
+| `wazuh.worker.annotations`                      | additional annotations set on deployment.                    | `{}`                                   |
+| `wazuh.worker.resources.requests.cpu`           | Minimum CPU assigned to the pod.                             | `500m`                                 |
+| `wazuh.worker.resources.requests.memory`        | Minimum memory assigned to the pod.                          | `512Mi`                                |
+| `wazuh.worker.resources.limits.cpu`             | Maximum CPU used by the pod.                                 | `1000m`                                |
+| `wazuh.worker.resources.limits.memory`          | Maximum memory used by the pod.                              | `1Gi`                                  |
+| `wazuh.worker.service.type`                     | Type of the created service.                                 | `ClusterIP`                            |
+| `wazuh.worker.service.annotations`              | Annotations of the created service.                          | `{}`                                   |
+| `wazuh.worker.service.ports.agentEvents`        | Port for the agentEvents endpoint.                           | `1514`                                 |
+| `wazuh.worker.pdb.enabled`                      | Enables pdb for worker.                                      | `true`                                 |
+| `wazuh.worker.livenessProbe`                    | Parameter to configure the livenessProbe.                    | `{}`                                   |
+| `wazuh.worker.readinessProbe`                   | Parameter to configure the readinessProbe.                   | `{}`                                   |
+| `wazuh.worker.securityContext.capabilities.add` | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
+| `wazuh.worker.networkPolicy.enabled`            | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
+| `wazuh.worker.storageSize`                      | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
+| `wazuh.worker.storageClass`                     | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
+| `wazuh.worker.conf`                             | Config for the wazuh worker, do not change!                  | `{{ include "wazuh.worker.conf" . }}
+` |
+| `wazuh.worker.extraConf`                        | Gets appended to the wazuh.worker.conf.                      | `""`                                   |

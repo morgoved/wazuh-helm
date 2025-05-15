@@ -907,7 +907,7 @@ wazuh_clusterd.debug=0
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
-        <node>wazuh-manager-master-0.wazuh-manager-cluster</node>
+        <node>{{ include "wazuh.fullname" . }}-manager-master-0.{{ include "wazuh.fullname" . }}-manager-cluster</node>
     </nodes>
     <hidden>no</hidden>
     <disabled>no</disabled>
@@ -1254,7 +1254,7 @@ wazuh_clusterd.debug=0
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
         <!-- Kubernetes Service Pointing to Master node -->
-        <node>wazuh-manager-master-0.wazuh-manager-cluster</node>
+        <node>{{ include "wazuh.fullname" . }}-manager-master-0.{{ include "wazuh.fullname" . }}-manager-cluster</node>
     </nodes>
     <hidden>no</hidden>
     <disabled>no</disabled>
@@ -1325,7 +1325,6 @@ cluster.routing.allocation.disk.threshold_enabled: false
 compatibility.override_main_response_version: true
 {{- end }}
 
-
 {{- define "wazuh.indexer.internalUsers"}}
 ---
 # This is the internal user database
@@ -1338,16 +1337,15 @@ _meta:
 # Define your internal users here
 
 ## Demo users
-
 admin:
-  hash: "$2y$12$K/SpwjtB.wOHJ/Nc6GVRDuc1h0rM1DfvziFRNPtk27P.c4yDr9njO"
+  hash: "{{ .Values.indexer.cred.passwordHash }}"
   reserved: true
   backend_roles:
   - "admin"
   description: "Demo admin user"
 
 kibanaserver:
-  hash: "$2a$12$4AcgAt3xwOWadA5s5blL6ev39OXDNhmOesEoo33eZtrq2N0YrU3H."
+  hash: "{{ .Values.dashboard.cred.passwordHash }}"
   reserved: true
   description: "Demo kibanaserver user"
 
@@ -2123,3 +2121,14 @@ config:
   #        max_blocked_clients: 100000
   #        max_tracked_clients: 100000
 {{- end }}
+
+{{/*
+Sysctl set if less then
+*/}}
+{{- define "wazuh.sysctlIfLess" -}}
+CURRENT=`sysctl -n {{ .key }}`;
+DESIRED="{{ .value }}";
+if [ "$DESIRED" -gt "$CURRENT" ]; then
+    sysctl -w {{ .key }}={{ .value }};
+fi;
+{{- end -}}

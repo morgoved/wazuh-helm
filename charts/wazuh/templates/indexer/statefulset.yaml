@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "wazuh.indexer.fullname" . }}-indexer
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.indexer.fullname" . }}-indexer
   annotations:
@@ -27,6 +28,34 @@ spec:
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.indexer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.indexer.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.indexer.sysctlImage.enabled }}
+      initContainers:
+        ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)
+        - name: sysctl
+          image: "{{ .Values.indexer.sysctlImage.images.repository }}:{{ .Values.indexer.sysctlImage.images.tag }}"
+          imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              {{- include "wazuh.sysctlIfLess" (dict "key" "vm.max_map_count" "value" "262144") | nindent 14 }}
+              {{- include "wazuh.sysctlIfLess" (dict "key" "fs.file-max" "value" "65536") | nindent 14 }}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          {{- with .Values.indexer.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- end }}
       volumes:
       - name: admin-certs
         secret:
@@ -41,6 +70,9 @@ spec:
         - name: wazuh-indexer
           imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
+          envFrom:
+            - secretRef:
+                name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
           env:
             - name: OPENSEARCH_JAVA_OPTS
               value: {{ .Values.indexer.env.OPENSEARCH_JAVA_OPTS | quote }}
@@ -73,10 +105,6 @@ spec:
           {{- end }}
           {{- with .Values.indexer.readinessProbe }}
           readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.indexer.securityContext }}
-          securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:

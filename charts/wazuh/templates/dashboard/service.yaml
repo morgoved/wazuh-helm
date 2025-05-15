@@ -3,6 +3,7 @@ kind: Service
 metadata:
   # Name is only "dashboard" because of Certicates commonName
   name: {{ include "wazuh.fullname" . }}-dashboard
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.fullname" . }}-dashboard
   annotations:
