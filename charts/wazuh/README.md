@@ -29,7 +29,7 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 ## Get Helm Repository Info
 
 ```shell
-helm repo add wazuh-helm https://promptlylabs.github.io/wazuh-helm-chart/
+helm repo add wazuh-helm https://morgoved.github.io/wazuh-helm/
 helm repo update
 ```
 
