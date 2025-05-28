@@ -94,6 +94,7 @@ spec:
           mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
           subPath: config.yml
           readOnly: true
+      {{- end }}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: admin-certs
