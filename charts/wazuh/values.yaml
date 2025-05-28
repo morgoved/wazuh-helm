@@ -152,6 +152,14 @@ indexer:
   ## @param indexer.service.nodes Port for the nodes endpoint.
   ## @param indexer.service.metrics Port for the metrics endpoint.
   ##
+  job:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 2000m
+        memory: 5Gi
   service:
     type: ClusterIP
     annotations: {}
