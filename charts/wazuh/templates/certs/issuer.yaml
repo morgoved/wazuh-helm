@@ -7,7 +7,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   selfSigned: {}
-  subject: #! What to add here? TODO
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
