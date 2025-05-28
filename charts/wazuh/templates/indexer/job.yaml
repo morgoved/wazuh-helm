@@ -45,6 +45,10 @@ spec:
         image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
         imagePullPolicy: IfNotPresent
         name: wazuh-indexer
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         env:
