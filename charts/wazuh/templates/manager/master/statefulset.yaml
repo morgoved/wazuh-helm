@@ -52,7 +52,7 @@ spec:
             secretName: wazuh-authd-pass
         - emptyDir: {}
           name: result-config
-      {{- with .Values.wazuh.worker.additionalVolumes }}
+      {{- with .Values.wazuh.master.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
