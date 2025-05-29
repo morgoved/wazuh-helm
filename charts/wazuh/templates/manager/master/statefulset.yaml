@@ -52,6 +52,9 @@ spec:
             secretName: wazuh-authd-pass
         - emptyDir: {}
           name: result-config
+      {{- with .Values.wazuh.worker.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: update-index
           image: alpine
@@ -162,6 +165,9 @@ spec:
             - name: {{ include "wazuh.fullname" . }}-manager-master
               mountPath: /var/lib/filebeat
               subPath: filebeat/var/lib/filebeat
+            {{- with .Values.wazuh.master.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
             # Agent groups configuration
             {{- range .Values.wazuh.agentGroupConf }}
             - name: config
@@ -197,6 +203,9 @@ spec:
                 secretKeyRef:
                   key: key
                   name: "wazuh-cluster-key"
+          {{- with .Values.wazuh.master.additionalEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
   volumeClaimTemplates:
     - metadata:
         name: {{ include "wazuh.fullname" . }}-manager-master
