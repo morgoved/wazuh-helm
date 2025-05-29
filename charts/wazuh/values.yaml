@@ -531,6 +531,18 @@ wazuh:
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
     readinessProbe: {}
+    ## @param wazuh.master.additionalEnv Possibility to define additional env vars in the pod.
+    ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    ##
+    additionalEnv: []
+    ## @param wazuh.master.additionalVolumes Possibility to define additional volumes in the pod.
+    ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+    ##
+    additionalVolumes: []
+    ## @param wazuh.master.additionalVolumeMounts Possibility to define additional volumeMounts in the pod.
+    ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+    ##
+    additionalVolumeMounts: []
     ## Parameter to configure the securityContext of the pod.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     ## @param wazuh.master.securityContext.capabilities.add Additional capabilities.
@@ -605,6 +617,18 @@ wazuh:
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
     readinessProbe: {}
+    ## @param wazuh.master.additionalEnv Possibility to define additional env vars in the pod.
+    ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    ##
+    additionalEnv: []
+    ## @param wazuh.master.additionalVolumes Possibility to define additional volumes vars in the pod.
+    ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+    ##
+    additionalVolumes: []
+    ## @param wazuh.master.additionalVolumeMounts Possibility to define additional volumeMounts vars in the pod.
+    ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+    ##
+    additionalVolumeMounts: []
     ## Parameter to configure the securityContext of the pod.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     ## @param wazuh.worker.securityContext.capabilities.add Additional capabilities.

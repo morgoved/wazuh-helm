@@ -56,6 +56,9 @@ spec:
             secretName: filebeat-tls
         - name: result-config
           emptyDir: {}
+      {{- with .Values.wazuh.worker.additionalVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         fsGroup: 101
       initContainers:
@@ -150,6 +153,9 @@ spec:
             - name: {{ include "wazuh.fullname" . }}-manager-worker
               mountPath: /var/lib/filebeat
               subPath: filebeat/var/lib/filebeat
+            {{- with .Values.wazuh.worker.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
             # Agent groups configuration
             {{- range .Values.wazuh.agentGroupConf }}
             - name: config
@@ -181,6 +187,9 @@ spec:
               value: /etc/ssl/filebeat.pem
             - name: SSL_KEY
               value: /etc/ssl/filebeat.key
+          {{- with .Values.wazuh.worker.additionalEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
   volumeClaimTemplates:
     - metadata:
         name: {{ include "wazuh.fullname" . }}-manager-worker
