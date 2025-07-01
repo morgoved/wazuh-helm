@@ -25,7 +25,7 @@ spec:
       - {{ .Values.certificates.subject.locality }}
   privateKey:
     algorithm: RSA
-    size: 2048
+    size: 4096
   duration: 87600h # 3650d
   issuerRef:
     name: {{ include "wazuh.fullname" . }}-selfsigned-issuer
