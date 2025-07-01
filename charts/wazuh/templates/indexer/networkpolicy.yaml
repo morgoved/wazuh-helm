@@ -32,6 +32,9 @@ spec:
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.indexer.fullname" . }}-indexer
+        - podSelector:
+            matchLabels:
+              job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
   egress:
     - ports:
         - protocol: TCP
