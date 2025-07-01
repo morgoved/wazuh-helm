@@ -27,8 +27,8 @@ spec:
       - {{ .Values.certificates.subject.locality }}
 
   issuerRef:
-    name: {{ .Values.certificates.issuer.name | default (print (include "wazuh.fullname" .) "-ca-issuer") }}
-    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" -}}
+    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}
+    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}
     kind: ClusterIssuer
     {{- end }}
     # We can reference ClusterIssuers by changing the kind here.
@@ -63,8 +63,8 @@ spec:
 
   # Issuer references are always required.
   issuerRef:
-    name: {{ .Values.certificates.issuer.name | default (print (include "wazuh.fullname" .) "-ca-issuer") }}
-    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" -}}
+    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}
+    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}
     kind: ClusterIssuer
     {{- end }}
 ---
@@ -130,7 +130,7 @@ spec:
 
   # Issuer references are always required.
   issuerRef:
-    name: {{ .Values.certificates.issuer.name | default (print (include "wazuh.fullname" .) "-ca-issuer") }}
-    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" -}}
+    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}
+    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}
     kind: ClusterIssuer
     {{- end }}
