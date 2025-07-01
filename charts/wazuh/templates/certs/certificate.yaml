@@ -17,7 +17,7 @@ spec:
 
   isCA: false
 
-  commonName: admin
+  commonName: {{ .Values.certificates.commonNames.admin }}
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}
@@ -52,7 +52,7 @@ spec:
 
   isCA: false
 
-  commonName: {{ include "wazuh.fullname" . }}-dashboard
+  commonName: {{ .Values.certificates.commonNames.dashboard }}
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}
@@ -86,7 +86,7 @@ spec:
 
   isCA: false
 
-  commonName: {{ include "wazuh.indexer.fullname" . }}-indexer
+  commonName: {{ .Values.certificates.commonNames.node }}
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}
@@ -119,7 +119,7 @@ spec:
 
   isCA: false
 
-  commonName: filebeat
+  commonName: {{ .Values.certificates.commonNames.filebeat }}
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}
