@@ -27,11 +27,12 @@ certificates:
     ## @param certificates.issuer.name of the issuer used for signing the certificates. If this is null
     ## a new selfsigned issuer will be created with the chart.
     ##
-    name: null
+#    name: null
+    name: self
     ## @param certificates.issuer.type defines the type of the issuer, possible values are issuer and
     ## ClusterIssuer.
     ##
-    type: ClusterIssuer
+    type: issuer
   ## @param certificates.duration timeframe for validity of cert.
   ##
   duration: 2160h # 90d
