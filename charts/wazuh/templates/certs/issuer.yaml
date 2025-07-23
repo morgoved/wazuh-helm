@@ -1,4 +1,6 @@
 # https://cert-manager.io/docs/configuration/selfsigned/
+{{- if .Values.certificates.enabled }}
+# If the issuer is not specified, a self-signed issuer will be created
 {{- if not .Values.certificates.issuer.name }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -8,6 +10,7 @@ metadata:
 spec:
   selfSigned: {}
   subject: #! What to add here? TODO
+{{- end -}}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -29,7 +32,10 @@ spec:
     size: 2048
   duration: 87600h # 3650d
   issuerRef:
-    name: {{ include "wazuh.fullname" . }}-selfsigned-issuer
+    name: {{ .Values.certificates.issuer.name | default (printf "%s-selfsigned-issuer" (include "wazuh.fullname" .)) }}
+    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}
+    kind: ClusterIssuer
+    {{- end }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -38,4 +44,4 @@ metadata:
 spec:
   ca:
     secretName: root-secret
-{{- end -}}
+{{- end }}

@@ -20,6 +20,7 @@ cert-manager:
 ## @section certificates If cert-manager is present, the certificates can be generated automatically.
 ##
 certificates:
+  enabled: true
   ## Parameters for the issuer.
   ##
   issuer:
@@ -30,7 +31,7 @@ certificates:
     ## @param certificates.issuer.type defines the type of the issuer, possible values are issuer and
     ## ClusterIssuer.
     ##
-    type: issuer
+    type: ClusterIssuer
   ## @param certificates.duration timeframe for validity of cert.
   ##
   duration: 2160h # 90d
