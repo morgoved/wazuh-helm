@@ -27,8 +27,7 @@ certificates:
     ## @param certificates.issuer.name of the issuer used for signing the certificates. If this is null
     ## a new selfsigned issuer will be created with the chart.
     ##
-#    name: null
-    name: self
+    name: null
     ## @param certificates.issuer.type defines the type of the issuer, possible values are issuer and
     ## ClusterIssuer.
     ##
