@@ -1,5 +1,4 @@
 # https://cert-manager.io/docs/configuration/selfsigned/
-{{- if .Values.certificates.enabled }}
 # If the issuer is not specified, a self-signed issuer will be created
 {{- if not .Values.certificates.issuer.name }}
 apiVersion: cert-manager.io/v1
@@ -44,4 +43,3 @@ metadata:
 spec:
   ca:
     secretName: root-secret
-{{- end }}
