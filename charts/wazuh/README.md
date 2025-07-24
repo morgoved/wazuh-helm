@@ -59,15 +59,16 @@ Same applies when changing `dashboard.cred.password`
 
 ### certificates If cert-manager is present, the certificates can be generated automatically.
 
-| Name                                | Description                                                      | Value        |
-| ----------------------------------- | ---------------------------------------------------------------- | ------------ |
-| `certificates.issuer.name`          | of the issuer used for signing the certificates. If this is null | `nil`        |
-| `certificates.issuer.type`          | defines the type of the issuer, possible values are issuer and   | `issuer`     |
-| `certificates.duration`             | timeframe for validity of cert.                                  | `2160h`      |
-| `certificates.renewBefore`          | timeframe before the cert gets renewed.                          | `360h`       |
-| `certificates.subject.organization` | Organization for the internal certificate.                       | `Company`    |
-| `certificates.subject.country`      | Country for the internal certificate.                            | `US`         |
-| `certificates.subject.locality`     | Locality for the internal certificate.                           | `California` |
+| Name                                 | Description                                                      | Value        |
+|--------------------------------------|------------------------------------------------------------------|--------------|
+| `certificates.requestPolicy.enabled` | RequestPolicy for the certificates.                              | `false`      |
+| `certificates.issuer.name`           | of the issuer used for signing the certificates. If this is null | `nil`        |
+| `certificates.issuer.type`           | defines the type of the issuer, possible values are issuer and   | `issuer`     |
+| `certificates.duration`              | timeframe for validity of cert.                                  | `2160h`      |
+| `certificates.renewBefore`           | timeframe before the cert gets renewed.                          | `360h`       |
+| `certificates.subject.organization`  | Organization for the internal certificate.                       | `Company`    |
+| `certificates.subject.country`       | Country for the internal certificate.                            | `US`         |
+| `certificates.subject.locality`      | Locality for the internal certificate.                           | `California` |
 
 ### indexer configuration of the wazuh indexer.
 

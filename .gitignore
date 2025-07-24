@@ -5,6 +5,7 @@
 # Chart dependencies
 **/charts/*.tgz
 **/Chart.lock
+**/wazuh-*.tgz
 
 # VSCode
 .vscode
