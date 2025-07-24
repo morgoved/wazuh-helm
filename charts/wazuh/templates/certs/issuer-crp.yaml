@@ -1,0 +1,30 @@
+{{- if and .Values.certificates.requestPolicy.enabled (not .Values.certificates.issuer.name) }}
+apiVersion: policy.cert-manager.io/v1alpha1
+kind: CertificateRequestPolicy
+metadata:
+  name: {{ include "wazuh.fullname" . }}-root-ca-policy
+  annotations:
+    "helm.sh/hook": pre-install
+spec:
+  selector:
+    issuerRef:
+      name: {{ include "wazuh.fullname" . }}-selfsigned-issuer
+  allowed:
+    isCA: true
+    commonName:
+      value: "root-ca"
+      required: true
+    subject:
+      organizations:
+        values:
+          - {{ .Values.certificates.subject.organization }}
+        required: true
+      countries:
+        values:
+          - {{ .Values.certificates.subject.country }}
+        required: true
+      localities:
+        values:
+          - {{ .Values.certificates.subject.locality }}
+        required: true
+{{- end }}

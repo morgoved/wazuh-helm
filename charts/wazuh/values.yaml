@@ -20,6 +20,8 @@ cert-manager:
 ## @section certificates If cert-manager is present, the certificates can be generated automatically.
 ##
 certificates:
+  requestPolicy:
+    enabled: false
   ## Parameters for the issuer.
   ##
   issuer:
