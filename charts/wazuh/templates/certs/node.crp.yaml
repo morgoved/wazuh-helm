@@ -1,19 +1,22 @@
-{{- if and .Values.certificates.requestPolicy.enabled (not .Values.certificates.issuer.name) }}
+{{- if .Values.certificates.requestPolicy.enabled }}
 apiVersion: policy.cert-manager.io/v1alpha1
 kind: CertificateRequestPolicy
 metadata:
-  name: {{ include "wazuh.fullname" . }}-root-ca-policy
+  name: {{ include "wazuh.fullname" . }}-node-policy
   annotations:
     "helm.sh/hook": pre-install
 spec:
   selector:
     issuerRef:
-      name: {{ include "wazuh.fullname" . }}-selfsigned-issuer
+      name: {{ include "wazuh.fullname" . }}-ca-issuer
   allowed:
-    isCA: true
+    # ── This policy is ONLY for end-entity certs, not for CAs
+    isCA: false
+    # ── Accept any Common Name (admin, dashboard, node, filebeat, …)
     commonName:
-      value: "root-ca"
+      value: "*"
       required: true
+    # ── Subject must match your values.yaml
     subject:
       organizations:
         values:

@@ -9,6 +9,9 @@ metadata:
   annotations:
     {{- toYaml .Values.wazuh.master.annotations | nindent 4 }}
 spec:
+  {{- with .Values.wazuh.master.extraSpec.statefulSet }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
   replicas: 1
   selector:
     matchLabels:
@@ -35,6 +38,9 @@ spec:
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.wazuh.master.extraSpec.pod }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- with .Values.wazuh.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -78,6 +84,9 @@ spec:
               subPath: script.sh
       containers:
         - name: wazuh-manager
+          {{- with .Values.wazuh.master.extraSpec.container }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
           image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
           imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}
           {{- with .Values.wazuh.master.resources }}

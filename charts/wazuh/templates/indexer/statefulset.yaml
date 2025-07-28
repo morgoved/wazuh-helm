@@ -8,6 +8,9 @@ metadata:
   annotations:
     {{- toYaml .Values.indexer.annotations | nindent 4 }}
 spec:
+  {{- with .Values.indexer.extraSpec.statefulSet }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
   serviceName: {{ include "wazuh.indexer.fullname" . }}-indexer-nodes
   replicas: {{ .Values.indexer.replicas }}
   updateStrategy:
@@ -28,6 +31,9 @@ spec:
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- with .Values.indexer.extraSpec.pod }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- with .Values.indexer.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -68,6 +74,9 @@ spec:
         name: indexer-conf
       containers:
         - name: wazuh-indexer
+          {{- with .Values.indexer.extraSpec.container }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
           imagePullPolicy: {{ .Values.indexer.images.pullPolicy }}
           image: "{{ .Values.indexer.images.repository }}:{{ .Values.indexer.images.tag }}"
           envFrom:
