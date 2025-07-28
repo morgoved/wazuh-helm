@@ -8,6 +8,9 @@ metadata:
   annotations:
     {{- toYaml .Values.dashboard.annotations | nindent 4 }}
 spec:
+  {{- with .Values.dashboard.extraSpec.deployment }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
   replicas: {{ .Values.dashboard.replicas }}
   selector:
     matchLabels:
@@ -29,6 +32,9 @@ spec:
         {{- end }}
       name: {{ include "wazuh.fullname" . }}-dashboard
     spec:
+      {{- with .Values.dashboard.extraSpec.pod }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- with .Values.dashboard.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -44,6 +50,9 @@ spec:
         - name: wazuh-dashboard
           imagePullPolicy: {{ .Values.dashboard.images.pullPolicy }}
           image: "{{ .Values.dashboard.images.repository }}:{{ .Values.dashboard.images.tag }}"
+          {{- with .Values.dashboard.extraSpec.container }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
           {{- with .Values.dashboard.resources }}
           resources:
             {{- toYaml . | nindent 12 }}

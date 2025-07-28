@@ -20,8 +20,6 @@ cert-manager:
 ## @section certificates If cert-manager is present, the certificates can be generated automatically.
 ##
 certificates:
-  ## @param certificates.requestPolicy.enabled if enabled the request policy will be generated automatically.
-  ##
   requestPolicy:
     enabled: false
   ## Parameters for the issuer.
@@ -231,6 +229,17 @@ indexer:
     existingSecret: ""
     passwordHash: "$2a$12$zGWIT7wkPKT/zww3bmMyp.KuWXH4RzgxiB91Q8NGFcqpyPy.R2Rcq"
     password: "WazuhSecretPassword"
+
+  ## Extra configuration for the indexer
+  ## @param indexer.extraSpec This section is less prioritized than the others
+  ## @param indexer.extraSpec.statefulSet Extra configuration for the indexer statefulset
+  ## @param indexer.extraSpec.pod Extra configuration for the indexer pod
+  ## @param indexer.extraSpec.container Extra configuration for the indexer container
+  extraSpec:
+    statefulSet: {}
+    pod: {}
+    container: {}
+
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed
 ##
@@ -387,6 +396,16 @@ dashboard:
     ## exposed.
     ##
     host: "wazuh.example.com"
+
+  ## Extra configuration for the dashboard
+  ## @param dashboard.extraSpec This section is less prioritized than the others
+  ## @param dashboard.extraSpec.statefulSet Extra configuration for the indexer statefulset
+  ## @param dashboard.extraSpec.pod Extra configuration for the indexer pod
+  ## @param dashboard.extraSpec.container Extra configuration for the indexer container
+  extraSpec:
+    deployment: {}
+    pod: {}
+    container: {}
 ## @section wazuh configuration of the wazuh core component.
 ##
 wazuh:
@@ -573,6 +592,15 @@ wazuh:
     ## @param wazuh.master.extraConf Gets appended to the wazuh.master.conf.
     ##
     extraConf: ""
+    ## Extra configuration for the wazuh master
+    ## @param wazuh.master.extraSpec This section is less prioritized than the others
+    ## @param wazuh.master.extraSpec.statefulSet Extra configuration for the wazuh master statefulset
+    ## @param wazuh.master.extraSpec.pod Extra configuration for the wazuh master pod
+    ## @param wazuh.master.extraSpec.container Extra configuration for the wazuh master container
+    extraSpec:
+      statefulSet: {}
+      pod: {}
+      container: {}
   ## @section wazuh.worker configuration of the wazuh worker component.
   ##
   worker:
@@ -659,3 +687,13 @@ wazuh:
     ## @param wazuh.worker.extraConf Gets appended to the wazuh.worker.conf.
     ##
     extraConf: ""
+
+    ## Extra configuration for the wazuh worker
+    ## @param wazuh.worker.extraSpec This section is less prioritized than the others
+    ## @param wazuh.worker.extraSpec.statefulSet Extra configuration for the wazuh worker statefulset
+    ## @param wazuh.worker.extraSpec.pod Extra configuration for the wazuh worker pod
+    ## @param wazuh.worker.extraSpec.container Extra configuration for the wazuh worker container
+    extraSpec:
+      statefulSet: {}
+      pod: {}
+      container: {}
