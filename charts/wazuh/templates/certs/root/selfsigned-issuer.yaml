@@ -1,0 +1,11 @@
+# https://cert-manager.io/docs/configuration/selfsigned/
+{{- if not .Values.certificates.issuer.name }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "wazuh.fullname" . }}-selfsigned-issuer
+  namespace: {{ .Release.Namespace }}
+spec:
+  selfSigned: {}
+  subject: #! What to add here? TODO
+{{- end -}}
