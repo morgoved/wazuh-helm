@@ -22,7 +22,9 @@ spec:
       - {{ .Values.certificates.subject.locality }}
   # Issuer references are always required.
   issuerRef:
-    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}
-    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}
-    kind: ClusterIssuer
-    {{- end }}
+    # Admin Issuer have to use the CA Issuer so that the certificate can be validated with node-tls secret
+    name: {{ include "wazuh.fullname" . }}-ca-issuer
+{{/*    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}*/}}
+{{/*    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}*/}}
+{{/*    kind: ClusterIssuer*/}}
+{{/*    {{- end }}*/}}

@@ -697,3 +697,177 @@ wazuh:
       statefulSet: {}
       pod: {}
       container: {}
+
+agent:
+  ## @param wazuh.agent.enabled Enable the agent
+  enabled: false
+
+  service:
+    port: 5000
+    type: ClusterIP
+
+  ## @param wazuh.agent.labels Extra labels for the agent
+  labels: {}
+
+  ## @param wazuh.agent.annotations Extra annotations for the agent
+  annotations: {}
+
+  ## @param wazuh.agent.podAnnotations Extra annotations for the agent
+  podAnnotations: {}
+
+  ## Parameters to configure the resources allocated to the agent.
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param wazuh.agent.resources.requests.cpu Minimum CPU assigned to the pod.
+  ## @param wazuh.agent.resources.requests.memory Minimum memory assigned to the pod.
+  ## @param wazuh.agent.resources.limits.cpu Maximum CPU used by the pod.
+  ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
+  ##
+  images:
+    repository: kennyopennix/wazuh-agent
+    tag: "4.11.1"
+    pullPolicy: IfNotPresent
+
+  ## Parameters to configure securityContext of the daemonSet
+  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ## @param wazuh.agent.securityContext Additional capabilities.
+  securityContext:
+    privileged: true
+
+  ## Parameters to configure securityContext of the pod.
+  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ## @param wazuh.agent.podSecurityContext Additional capabilities.
+  podSecurityContext:
+    privileged: true
+
+  ## Parameters to configure the resources allocated to the agent.
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param wazuh.agent.resources.requests.cpu Minimum CPU assigned to the pod.
+  ## @param wazuh.agent.resources.requests.memory Minimum memory assigned to the pod.
+  ## @param wazuh.agent.resources.limits.cpu Maximum CPU used by the pod.
+  ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
+  ##
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+  ## Parameters to configure the nodeSelector.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ## @param wazuh.agent.nodeSelector nodeSelector
+  nodeSelector: {}
+
+  ## Parameters to configure the affinity.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ## @param wazuh.agent.affinity
+  affinity: {}
+
+  ## Parameters to configure the tolerations.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ## @param wazuh.agent.tolerations
+  tolerations: []
+
+  ## Parameters to configure the join manager.
+  ## @param wazuh.agent.joinManager.scheme Join manager scheme
+  joinManager:
+    scheme: https
+    wazuh:
+      group: default
+
+  ## Parameters to configure the livenessProbe.
+  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  ## @param wazuh.agent.livenessProbe.periodSeconds How often to perform the probe.
+  ## @param wazuh.agent.livenessProbe.timeoutSeconds When the probe times out.
+  ## @param wazuh.agent.livenessProbe.failureThreshold Minimum failures for the probe to be considered failed after having succeeded.
+  ## @param wazuh.agent.livenessProbe.successThreshold Minimum successes for the probe to be considered successful
+  ## after having failed.
+  ## @param wazuh.agent.livenessProbe.initialDelaySeconds Delay before liveness probe is initiated.
+  livenessProbe: {}
+#    httpGet:
+#      path: /healz
+#      port: 5000
+#    initialDelaySeconds: 40
+#    periodSeconds: 10
+#    timeoutSeconds: 10
+#    failureThreshold: 5
+
+  ## Parameters to configure the volumes.
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ## @param wazuh.agent.volumes List of volumes
+  volumes:
+#    - name: docker-socket-mount
+#      hostPath:
+#        path: /var/run/docker.sock
+    - name: var-run
+      hostPath:
+        path: /var/run
+    - name: dev
+      hostPath:
+        path: /dev
+    - name: sys
+      hostPath:
+        path: /sys
+    - name: proc
+      hostPath:
+        path: /proc
+    - name: etc
+      hostPath:
+        path: /etc
+    - name: boot
+      hostPath:
+        path: /boot
+    - name: usr
+      hostPath:
+        path: /usr
+    - name: modules
+      hostPath:
+        path: /lib/modules
+    - name: log
+      hostPath:
+        path: /var/log
+
+  ## Parameters to configure the volume mounts.
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ## @param wazuh.agent.volumeMounts List of volume mounts
+  volumeMounts:
+    - mountPath: /var/run
+      name: var-run
+    - mountPath: /host/dev
+      name: dev
+    - mountPath: /host/sys
+      name: sys
+      readOnly: true
+    - mountPath: /host/proc
+      name: proc
+      readOnly: true
+    - mountPath: /host/etc
+      name: etc
+      readOnly: true
+#    - mountPath: /var/run/docker.sock
+#      name: docker-socket-mount
+#    - mountPath: /host/var/run/docker.sock
+#      name: docker-socket-mount
+    - mountPath: /host/boot
+      name: boot
+      readOnly: true
+    - mountPath: /host/usr
+      name: usr
+      readOnly: true
+    - mountPath: /host/lib/modules
+      name: modules
+      readOnly: true
+    - mountPath: /host/var/log
+      name: log
+      readOnly: true
+
+  ## Extra configuration for the agent
+  ## @param agent.extraSpec This section is less prioritized than the others
+  ## @param agent.extraSpec.daemonSet Extra configuration for the agent daemonSet
+  ## @param agent.extraSpec.pod Extra configuration for the agent pod
+  ## @param agent.extraSpec.container Extra configuration for the agent container
+  extraSpec:
+    daemonSet: {}
+    pod: {}
+    container: {}
