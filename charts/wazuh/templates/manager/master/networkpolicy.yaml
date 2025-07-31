@@ -23,6 +23,10 @@ spec:
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.fullname" . }}-dashboard
+        - podSelector:
+            matchLabels:
+              app: {{ include "wazuh.fullname" . }}-agent
+              node-type: agent
     - ports:
         - protocol: TCP
           port: {{ .Values.wazuh.service.port }}

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Name is only "wazuh" because of Certificates commonName
+  name: {{ include "wazuh.fullname" . }}-agent
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-agent
+    node-type: agent
+  annotations:
+    {{- toYaml .Values.wazuh.master.service.annotations | nindent 4 }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.agent.service.port }}
+      targetPort: {{ .Values.agent.service.port }}
+  selector:
+    app: {{ include "wazuh.fullname" . }}-agent
+    node-type: agent
+  type: {{ .Values.agent.service.type }}
