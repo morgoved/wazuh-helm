@@ -15,6 +15,9 @@ spec:
     - ports:
       - protocol: TCP
         port: {{ .Values.dashboard.service.httpPort }}
+    {{- with .Values.dashboard.networkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   egress:
     # Indexer
     - ports:
@@ -44,4 +47,7 @@ spec:
           podSelector:
             matchLabels:
               k8s-app: kube-dns
+    {{- with .Values.dashboard.networkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end -}}
