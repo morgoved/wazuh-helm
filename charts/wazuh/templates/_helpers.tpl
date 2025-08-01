@@ -45,6 +45,35 @@ server.ssl.key: "/usr/share/wazuh-dashboard/certs/key.pem"
 server.ssl.certificate: "/usr/share/wazuh-dashboard/certs/cert.pem"
 opensearch.ssl.certificateAuthorities: ["/usr/share/wazuh-dashboard/certs/root-ca.pem"]
 uiSettings.overrides.defaultRoute: /app/wz-home
+
+{{- $authType := list }}
+{{- if .Values.dashboard.sso.oidc.enabled }}
+{{-   $authType = append $authType "openid" }}
+{{- end }}
+{{- if .Values.dashboard.basicAuth.enabled }}
+{{-   $authType = append $authType "basicauth" }}
+{{- end }}
+opensearch_security.auth.multiple_auth_enabled: {{ gt ($authType | len) 1 }}
+opensearch_security.auth.type: {{ $authType | toJson }}
+
+{{- if .Values.dashboard.sso.oidc.enabled }}
+{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl | default .Values.dashboard.ingress.host }}
+opensearch_security.openid.connect_url: {{ required "dashboard.sso.oidc.url is required" .Values.dashboard.sso.oidc.url }}
+opensearch_security.openid.logout_url: {{ required "dashboard.sso.oidc.logoutUrl is required" .Values.dashboard.sso.oidc.logoutUrl }}
+opensearch_security.openid.base_redirect_url: {{ required "dashboard.sso.oidc.baseRedirectUrl is required" $baseRedirectUrl }}
+opensearch_security.openid.scope: {{ .Values.dashboard.sso.oidc.scope }}
+opensearch_security.openid.client_id: ${OPENSEARCH_OIDC_CLIENT_ID}
+opensearch_security.openid.client_secret: ${OPENSEARCH_OIDC_CLIENT_SECRET}
+
+{{- if .Values.dashboard.sso.oidc.customizeLoginButton.enabled }}
+opensearch_security.ui.openid.login.buttonname: {{ .Values.dashboard.sso.oidc.customizeLoginButton.text }}
+{{- if .Values.dashboard.sso.oidc.customizeLoginButton.showImage }}
+opensearch_security.ui.openid.login.brandimage: {{ required "dashboard.sso.oidc.customizeLoginButton.imageUrl is required" .Values.dashboard.sso.oidc.customizeLoginButton.imageUrl }}
+opensearch_security.ui.openid.login.showbrandimage: {{ .Values.dashboard.sso.oidc.customizeLoginButton.showImage }}
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- end }}
 
 
@@ -1400,7 +1429,10 @@ all_access:
   reserved: true
   hidden: false
   backend_roles:
-  - "admin"
+    - "admin"
+  {{- if .Values.dashboard.sso.oidc.roleMappings.allAccess.backendRoles }}
+    {{- toYaml .Values.dashboard.sso.oidc.roleMappings.allAccess.backendRoles | nindent 4 }}
+  {{- end }}
   hosts: []
   users: []
   and_backend_roles: []
@@ -1446,7 +1478,12 @@ manage_snapshots:
 kibana_server:
   reserved: true
   hidden: false
+  {{- if .Values.dashboard.sso.oidc.roleMappings.kibanaServer.backendRoles }}
+  backend_roles:
+    {{- toYaml .Values.dashboard.sso.oidc.roleMappings.kibanaServer.backendRoles | nindent 4 }}
+  {{- else }}
   backend_roles: []
+  {{- end }}
   hosts: []
   users:
   - "kibanaserver"
@@ -1456,7 +1493,10 @@ kibana_user:
   reserved: false
   hidden: false
   backend_roles:
-  - "kibanauser"
+    - "kibanauser"
+  {{- if .Values.dashboard.sso.oidc.roleMappings.kibanaUser.backendRoles }}
+    {{- toYaml .Values.dashboard.sso.oidc.roleMappings.kibanaUser.backendRoles | nindent 4 }}
+  {{- end }}
   hosts: []
   users: []
   and_backend_roles: []
@@ -1471,6 +1511,11 @@ manage_wazuh_index:
   users:
   - "kibanaserver"
   and_backend_roles: []
+
+
+{{- with .Values.dashboard.sso.oidc.extraRoleMappings }}
+{{- toYaml . | nindent 0 }}
+{{- end }}
 {{- end }}
 
 {{- define "wazuh.indexer.roles"}}
@@ -1956,6 +2001,31 @@ config:
         ###### and here https://tools.ietf.org/html/rfc7239
         ###### and https://tomcat.apache.org/tomcat-8.0-doc/config/valve.html#Remote_IP_Valve
     authc:
+      {{- if .Values.dashboard.sso.oidc.enabled }}
+      openid_auth_domain:
+        http_enabled: true
+        transport_enabled: true
+        order: {{ .Values.dashboard.sso.oidc.order }}
+        http_authenticator:
+          type: openid
+          challenge: {{ not .Values.dashboard.sso.oidc.primary }}
+          config:
+            subject_key: {{ .Values.dashboard.sso.oidc.config.subjectKey }}
+            roles_key: {{ .Values.dashboard.sso.oidc.config.rolesKey }}
+            openid_connect_url: {{ .Values.dashboard.sso.oidc.url }}
+            {{- with .Values.dashboard.sso.oidc.issuer }}
+            required_issuer: {{ . }}
+            {{- end }}
+            {{- if .Values.dashboard.sso.oidc.idp.enableSSL }}
+            openid_connect_idp:
+              enable_ssl: {{ .Values.dashboard.sso.oidc.idp.enableSSL }}
+              pemtrustedcas_filepath: {{ .Values.dashboard.sso.oidc.idp.pemtrustedcasFilePath }}
+            {{- end }}
+            client_id: ${env.OPENSEARCH_OIDC_CLIENT_ID}
+            client_secret: ${env.OPENSEARCH_OIDC_CLIENT_SECRET}
+        authentication_backend:
+          type: noop
+      {{- end }}
       kerberos_auth_domain:
         http_enabled: false
         transport_enabled: false
@@ -1974,10 +2044,10 @@ config:
         description: "Authenticate via HTTP Basic against internal users database"
         http_enabled: true
         transport_enabled: true
-        order: 4
+        order: {{ .Values.dashboard.basicAuth.order }}
         http_authenticator:
           type: basic
-          challenge: true
+          challenge: {{ not .Values.dashboard.sso.oidc.primary }}
         authentication_backend:
           type: intern
       proxy_auth_domain:
