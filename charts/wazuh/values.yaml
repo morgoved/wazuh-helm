@@ -383,6 +383,7 @@ dashboard:
   basicAuth:
     enabled: true
     order: 4
+    challenge: true
 
   sso:
     oidc:

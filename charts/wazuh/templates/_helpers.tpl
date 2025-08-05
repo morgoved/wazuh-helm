@@ -2047,7 +2047,7 @@ config:
         order: {{ .Values.dashboard.basicAuth.order }}
         http_authenticator:
           type: basic
-          challenge: {{ not .Values.dashboard.sso.oidc.primary }}
+          challenge: {{ .Values.dashboard.basicAuth.challenge }}
         authentication_backend:
           type: intern
       proxy_auth_domain:
