@@ -109,6 +109,18 @@ spec:
               value: /usr/share/wazuh-dashboard/certs/key.pem
             - name: WAZUH_API_URL
               value: "https://wazuh"
+            {{- if .Values.dashboard.sso.oidc.enabled }}
+            - name: OPENSEARCH_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "dashboard.sso.oidc.existingSecret is required" .Values.dashboard.sso.oidc.existingSecret }}
+                  key: {{ .Values.dashboard.sso.oidc.clientIdKey }}
+            - name: OPENSEARCH_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "dashboard.sso.oidc.existingSecret is required" .Values.dashboard.sso.oidc.existingSecret }}
+                  key: {{ .Values.dashboard.sso.oidc.clientSecretKey }}
+            {{- end }}
           {{- with .Values.dashboard.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

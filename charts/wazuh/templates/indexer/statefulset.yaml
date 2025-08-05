@@ -101,6 +101,18 @@ spec:
                   fieldPath: metadata.namespace
             - name: DISABLE_INSTALL_DEMO_CONFIG
               value: {{ .Values.indexer.env.DISABLE_INSTALL_DEMO_CONFIG | quote }}
+            {{- if .Values.dashboard.sso.oidc.enabled }}
+            - name: OPENSEARCH_OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "dashboard.sso.oidc.existingSecret is required" .Values.dashboard.sso.oidc.existingSecret }}
+                  key: {{ .Values.dashboard.sso.oidc.clientIdKey }}
+            - name: OPENSEARCH_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "dashboard.sso.oidc.existingSecret is required" .Values.dashboard.sso.oidc.existingSecret }}
+                  key: {{ .Values.dashboard.sso.oidc.clientSecretKey }}
+            {{- end }}
           {{- with .Values.indexer.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
