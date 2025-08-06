@@ -4,6 +4,8 @@ description: Wazuh is a free and open source security platform that unifies XDR 
 type: application
 appVersion: 4.12.0
 version: 0.2.0
+annotations:
+  artifacthub.io/prerelease: "false"
 home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
