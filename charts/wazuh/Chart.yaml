@@ -8,11 +8,12 @@ home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
 maintainers:
+  - name: Morgoved
+    email: morgyes@gmail.com
+    url: https://github.com/morgoved
   - name: Dani
     email: andre.gomes@promptlyhealth.com
     url: https://github.com/Ca-moes
-  - name: Morgoved
-    url: https://github.com/morgoved
   - name: 71g3pf4c3
     url: https://github.com/71g3pf4c3
 icon: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/icon.png
