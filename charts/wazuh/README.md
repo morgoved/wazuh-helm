@@ -7,13 +7,16 @@
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 
 **Homepage:** <https://wazuh.com/>
-
+  - name: Kaslie
+    email: jinyi_lie@yahoo.com
+    url: https://github.com/Kaslie
 ## Maintainers
 
 | Name      | Email                            | Url                            |
 | --------- | -------------------------------- | ------------------------------ |
-| Morgoved  | <morgyes@gmail.com>              | <https://github.com/morgoved>   |
-| Dani      | <andre.gomes@promptlyhealth.com> | <https://github.com/Ca-moes>  |
+| Morgoved  | <morgyes@gmail.com>              | <https://github.com/morgoved>  |
+| Kaslie    | <jinyi_lie@yahoo.com>            | <https://github.com/Kaslie>    |
+| Dani      | <andre.gomes@promptlyhealth.com> | <https://github.com/Ca-moes>   |
 | 71g3pf4c3 |                                  | <https://github.com/71g3pf4c3> |
 
 ## Source Code
