@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -195,28 +195,30 @@ Same applies when changing `dashboard.cred.password`
 
 ### wazuh.master configuration of the wazuh master component.
 
-| Name                                            | Description                                                  | Value                                  |
-| ----------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
-| `wazuh.master.annotations`                      | additional annotations set on statefulset.                   | `{}`                                   |
-| `wazuh.master.resources.requests.cpu`           | Minimum CPU assigned to the pod.                             | `500m`                                 |
-| `wazuh.master.resources.requests.memory`        | Minimum memory assigned to the pod.                          | `512Mi`                                |
-| `wazuh.master.resources.limits.cpu`             | Maximum CPU used by the pod.                                 | `1000m`                                |
-| `wazuh.master.resources.limits.memory`          | Maximum memory used by the pod.                              | `1Gi`                                  |
-| `wazuh.master.service.type`                     | Type of the created service.                                 | `ClusterIP`                            |
-| `wazuh.master.service.annotations`              | Annotations of the created service.                          | `{}`                                   |
-| `wazuh.master.service.ports.registration`       | Port for the registration endpoint.                          | `1515`                                 |
-| `wazuh.master.service.ports.api`                | Port for the api endpoint.                                   | `55000`                                |
-| `wazuh.master.livenessProbe`                    | Parameter to configure the livenessProbe.                    | `{}`                                   |
-| `wazuh.master.readinessProbe`                   | Parameter to configure the readinessProbe.                   | `{}`                                   |
-| `wazuh.master.securityContext.capabilities.add` | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
-| `wazuh.master.additionalEnv`                    | Possibility to define additional env vars in the pod.        | `[]`                                   |
-| `wazuh.master.additionalVolumes`                | Possibility to define additional volumes in the pod.         | `[]`                                   |
-| `wazuh.master.additionalVolumeMounts`           | Possibility to define additional volumeMounts in the pod.    | `[]`                                   |
-| `wazuh.master.networkPolicy.enabled`            | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
-| `wazuh.master.storageSize`                      | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
-| `wazuh.master.storageClass`                     | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
-| `wazuh.master.conf`                             | Config for the wazuh master, do not change!                  | `{{ include "wazuh.master.conf" . }} ` |
-| `wazuh.master.extraConf`                        | Gets appended to the wazuh.master.conf.                      | `""`                                   |
+| Name                                               | Description                                                  | Value                                  |
+| -------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| `wazuh.master.annotations`                         | additional annotations set on statefulset.                   | `{}`                                   |
+| `wazuh.master.resources.requests.cpu`              | Minimum CPU assigned to the pod.                             | `500m`                                 |
+| `wazuh.master.resources.requests.memory`           | Minimum memory assigned to the pod.                          | `512Mi`                                |
+| `wazuh.master.resources.limits.cpu`                | Maximum CPU used by the pod.                                 | `1000m`                                |
+| `wazuh.master.resources.limits.memory`             | Maximum memory used by the pod.                              | `1Gi`                                  |
+| `wazuh.master.service.type`                        | Type of the created service.                                 | `ClusterIP`                            |
+| `wazuh.master.service.annotations`                 | Annotations of the created service.                          | `{}`                                   |
+| `wazuh.master.service.ports.registration.port`     | Port for the registration endpoint.                          | `1515`                                 |
+| `wazuh.master.service.ports.registration.nodePort` | nodePort for the registration endpoint.                      | `""`                                   |
+| `wazuh.master.service.ports.api.port`              | Port for the api endpoint.                                   | `55000`                                |
+| `wazuh.master.service.ports.api.nodePort`          | nodePort for the api endpoint.                               | `""`                                   |
+| `wazuh.master.livenessProbe`                       | Parameter to configure the livenessProbe.                    | `{}`                                   |
+| `wazuh.master.readinessProbe`                      | Parameter to configure the readinessProbe.                   | `{}`                                   |
+| `wazuh.master.securityContext.capabilities.add`    | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
+| `wazuh.master.additionalEnv`                       | Possibility to define additional env vars in the pod.        | `[]`                                   |
+| `wazuh.master.additionalVolumes`                   | Possibility to define additional volumes in the pod.         | `[]`                                   |
+| `wazuh.master.additionalVolumeMounts`              | Possibility to define additional volumeMounts in the pod.    | `[]`                                   |
+| `wazuh.master.networkPolicy.enabled`               | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
+| `wazuh.master.storageSize`                         | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
+| `wazuh.master.storageClass`                        | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
+| `wazuh.master.conf`                                | Config for the wazuh master, do not change!                  | `{{ include "wazuh.master.conf" . }} ` |
+| `wazuh.master.extraConf`                           | Gets appended to the wazuh.master.conf.                      | `""`                                   |
 
 ### wazuh.worker configuration of the wazuh worker component.
 

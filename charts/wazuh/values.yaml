@@ -603,15 +603,21 @@ wazuh:
     ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
     ## @param wazuh.master.service.type Type of the created service.
     ## @param wazuh.master.service.annotations Annotations of the created service.
-    ## @param wazuh.master.service.ports.registration Port for the registration endpoint.
-    ## @param wazuh.master.service.ports.api Port for the api endpoint.
+    ## @param wazuh.master.service.ports.registration.port Port for the registration endpoint.
+    ## @param wazuh.master.service.ports.registration.nodePort nodePort for the registration endpoint.
+    ## @param wazuh.master.service.ports.api.port Port for the api endpoint.
+    ## @param wazuh.master.service.ports.api.nodePort nodePort for the api endpoint.
     ##
     service:
       type: ClusterIP
       annotations: {}
       ports:
-        registration: 1515
-        api: 55000
+        registration:
+          port: 1515
+          nodePort: ""
+        api:
+          port: 55000
+          nodePort: ""
     ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO

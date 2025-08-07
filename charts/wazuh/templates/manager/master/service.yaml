@@ -12,11 +12,13 @@ metadata:
 spec:
   ports:
     - name: registration
-      port: {{ .Values.wazuh.master.service.ports.registration }}
-      targetPort: {{ .Values.wazuh.master.service.ports.registration }}
+      port: {{ .Values.wazuh.master.service.ports.registration.port }}
+      targetPort: 1515
+      nodePort: {{ .Values.wazuh.master.service.ports.registration.nodePort }}
     - name: api
-      port: {{ .Values.wazuh.master.service.ports.api }}
-      targetPort: {{ .Values.wazuh.master.service.ports.api }}
+      port: {{ .Values.wazuh.master.service.ports.api.port }}
+      targetPort: 55000
+      nodePort: {{ .Values.wazuh.master.service.ports.api.nodePort }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: master

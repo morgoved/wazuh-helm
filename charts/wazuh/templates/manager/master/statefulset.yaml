@@ -184,11 +184,11 @@ spec:
               subPath: {{ .name }}-agent.conf
             {{- end }}
           ports:
-            - containerPort: {{ .Values.wazuh.master.service.ports.registration }}
+            - containerPort: {{ .Values.wazuh.master.service.ports.registration.port }}
               name: registration
             - containerPort: {{ .Values.wazuh.service.port }}
               name: cluster
-            - containerPort: {{ .Values.wazuh.master.service.ports.api }}
+            - containerPort: {{ .Values.wazuh.master.service.ports.api.port }}
               name: api
           envFrom:
             - secretRef:

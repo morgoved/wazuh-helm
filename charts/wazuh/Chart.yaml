@@ -3,9 +3,29 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.12.0
-version: 0.2.0
+version: 0.2.1
 annotations:
   artifacthub.io/prerelease: "false"
+  artifacthub.io/category: security
+  artifacthub.io/changes: |
+    - kind: added
+      description: "Add support for cert-manager"
+    - kind: changed
+      description: "Refactor whole chart"
+    - kind: changed
+      description: "Bump wazuh-manager to 4.10.1"
+  artifacthub.io/links: |
+    - name: application source
+      url: https://github.com/wazuh/wazuh
+    - name: kustomize source
+      url: https://github.com/wazuh/wazuh-kubernetes
+  artifacthub.io/screenshots: |
+    - title: Home Page
+      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/dashboard.png
+    - title: Agent Deployment
+      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/agent-deploy.png
+    - title: Threat Hunting
+      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/threat-hunting.png
 home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
@@ -36,25 +56,3 @@ dependencies:
     version: 1.16.3
     repository: https://charts.jetstack.io
     condition: cert-manager.enabled
-annotations:
-  artifacthub.io/category: security
-  artifacthub.io/changes: |
-    - kind: added
-      description: "Add support for cert-manager"
-    - kind: changed
-      description: "Refactor whole chart"
-    - kind: changed
-      description: "Bump wazuh-manager to 4.10.1"
-  artifacthub.io/links: |
-    - name: application source
-      url: https://github.com/wazuh/wazuh
-    - name: kustomize source
-      url: https://github.com/wazuh/wazuh-kubernetes
-  artifacthub.io/prerelease: "true"
-  artifacthub.io/screenshots: |
-    - title: Home Page
-      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/dashboard.png
-    - title: Agent Deployment
-      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/agent-deploy.png
-    - title: Threat Hunting
-      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/threat-hunting.png
