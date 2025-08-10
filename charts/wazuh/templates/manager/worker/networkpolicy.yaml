@@ -19,7 +19,7 @@ spec:
     {{- if .Values.wazuh.syslog_enable }}
     - ports:
         - protocol: TCP
-          port: 1514
+          port: 514
     {{- end }}
     - ports:
         - protocol: TCP
