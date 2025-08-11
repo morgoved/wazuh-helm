@@ -15,10 +15,10 @@ spec:
   ingress:
     - ports:
         - protocol: TCP
-          port: {{ .Values.wazuh.master.service.ports.registration }}
+          port: {{ .Values.wazuh.master.service.ports.registration.port }}
     - ports:
         - protocol: TCP
-          port: {{ .Values.wazuh.master.service.ports.api }}
+          port: {{ .Values.wazuh.master.service.ports.api.port }}
       from:
         - podSelector:
             matchLabels:
