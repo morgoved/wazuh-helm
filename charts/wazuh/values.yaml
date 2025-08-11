@@ -337,6 +337,10 @@ dashboard:
   ##
   networkPolicy:
     enabled: true
+    ## @param dashboard.networkPolicy.extraIngresses specify additional ingress rules for the NetworkPolicy.
+    extraIngresses: []
+    ## @param dashboard.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
+    extraEgresses: []
   ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
   ## @param dashboard.service.type Type of the created service.
   ## @param dashboard.service.annotations Annotations of the created service.
@@ -364,6 +368,7 @@ dashboard:
   ##
   config: |
     {{ include "wazuh.dashboard.config" . }}
+
   ## Configuration of the credentials for the dashboard.
   ## @param dashboard.cred.existingSecret Name of the existingSecret which holds the key "DASHBOARD_PASSWORD".
   ## @param dashboard.cred.password Value of the password for the kibanaserver user.
@@ -376,6 +381,67 @@ dashboard:
     username: "kibanaserver"
     password: "kibanaserver"
     passwordHash: "$2a$12$7NCZ.l9ntPhou5zNjZIU4uqXNNWMF7SyF6Y6mcjhHTB6Z1eQubHC."
+
+  ## @param dashboard.multiAuth.basicAuth.enabled Enable basicAuth
+  ## This has to be enabled to resolve oidc logout bugs
+  ## Without basicAuth, the oidc will automatically login the user without showing the login page
+  basicAuth:
+    enabled: true
+    order: 4
+    challenge: true
+
+  sso:
+    oidc:
+      ## @param dashboard.sso.oidc.enabled Enable OpenID Connect
+      ## ref: https://docs.opensearch.org/latest/security/authentication-backends/openid-connect/
+      enabled: false
+      primary: false
+      ## @param dashboard.sso.oidc.url OpenID Connect URL
+      ## Remember to add additional extraEgresses to the NetworkPolicy on dashboard and indexer
+      url: ""
+      logoutUrl: ""
+      ## @param dashboard.sso.oidc.baseRedirectUrl OpenID Connect base redirect URL
+      ## default to dashboard.ingress.host
+      ## else Required
+      baseRedirectUrl: ""
+      scope: "openid profile email address phone"
+      ## @param dashboard.sso.oidc.issuer OpenID Connect issuer.
+      issuer: ""
+      order: 1
+      ## @param dashboard.sso.oidc.existingSecret Name of the existingSecret.
+      existingSecret: ""
+      ## @param dashboard.sso.oidc.clientIdKey Key of the client id in the secret.
+      clientIdKey: "OPENSEARCH_OIDC_CLIENT_ID"
+      ## @param dashboard.sso.oidc.clientSecretKey Key of the client secret in the secret.
+      clientSecretKey: "OPENSEARCH_OIDC_CLIENT_SECRET"
+      config:
+        subjectKey: "preferred_username"
+        rolesKey: "roles"
+      roleMappings:
+        allAccess:
+          backendRoles: []
+        kibanaServer:
+          backendRoles: []
+        kibanaUser:
+          backendRoles: []
+      extraRoleMappings: {}
+#        testingUser:
+#          reserved: false
+#          hidden: false
+#          backend_roles: []
+#          hosts: []
+#          users: []
+#          and_backend_roles: []
+#          description: "Allow full access to an index named like the username"
+      customizeLoginButton:
+        enabled: false
+        text: "Log In with Single sign-on (OIDC)"
+        imageUrl: ""
+        showImage: false
+      idp:
+        enableSSL: false
+        pemtrustedcasFilePath: ""
+
   ## Ingress parameters for the dashboard Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ## @param dashboard.ingress.enabled Enable ingress record generation for dashboard.
   ##
@@ -728,7 +794,7 @@ agent:
   ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
   ##
   images:
-    repository: kennyopennix/wazuh-agent
+    repository: opennix/wazuh-agent
     tag: "4.11.1"
     pullPolicy: IfNotPresent
 

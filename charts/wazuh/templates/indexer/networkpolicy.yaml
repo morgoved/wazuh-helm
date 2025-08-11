@@ -36,6 +36,9 @@ spec:
         - podSelector:
             matchLabels:
               job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
+    {{- with .Values.indexer.networkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   egress:
     - ports:
         - protocol: TCP
@@ -54,5 +57,8 @@ spec:
           podSelector:
             matchLabels:
               k8s-app: kube-dns
+    {{- with .Values.indexer.networkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end -}}
 {{- end }}
