@@ -74,6 +74,8 @@ Same applies when changing `dashboard.cred.password`
 
 | Name                                         | Description                                                                    | Value                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `indexer.enabled`                            | defines if we deploy indexer or not (if we use external indexer or not)        | `true`                                                         |
+| `indexer.host`                               | defines external indexer address                                               | `wazuh-indexer.example.com:9200`                               |
 | `indexer.replicas`                           | number of replicas used in statefulset.                                        | `3`                                                            |
 | `indexer.annotations`                        | additional annotations set on statefulset.                                     | `{}`                                                           |
 | `indexer.updateStrategy`                     | updateStrategy for the statefulset.                                            | `RollingUpdate`                                                |
@@ -154,6 +156,7 @@ Same applies when changing `dashboard.cred.password`
 | `dashboard.config`                             | Configuration of the dashboard parameters, this should not be changed.             | `{{ include "wazuh.dashboard.config" . }}
 `                    |
 | `dashboard.cred.existingSecret`                | Name of the existingSecret which holds the key "DASHBOARD_PASSWORD".               | `""`                                                           |
+| `dashboard.cred.username`                      | Value of the username for the kibanaserver user.                                   | `kibanaserver`                                                 |
 | `dashboard.cred.password`                      | Value of the password for the kibanaserver user.                                   | `kibanaserver`                                                 |
 | `dashboard.cred.passwordHash`                  | Hash of the password for the kibanaserver user. To create this, follow the README. | `$2a$12$7NCZ.l9ntPhou5zNjZIU4uqXNNWMF7SyF6Y6mcjhHTB6Z1eQubHC.` |
 | `dashboard.ingress.enabled`                    | Enable ingress record generation for dashboard.                                    | `false`                                                        |

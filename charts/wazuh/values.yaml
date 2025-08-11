@@ -50,6 +50,10 @@ certificates:
 ## @section indexer configuration of the wazuh indexer.
 ##
 indexer:
+  ## @param indexer.enabled defines if we deploy indexer or not (if we use external indexer or not)
+  enabled: false
+  ## @param indexer.host defines external indexer address
+  host: wazuh-indexer.example.com:9200
   ## @param indexer.replicas number of replicas used in statefulset.
   ##
   replicas: 3
@@ -369,6 +373,7 @@ dashboard:
   ##
   cred:
     existingSecret: ""
+    username: "kibanaserver"
     password: "kibanaserver"
     passwordHash: "$2a$12$7NCZ.l9ntPhou5zNjZIU4uqXNNWMF7SyF6Y6mcjhHTB6Z1eQubHC."
   ## Ingress parameters for the dashboard Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/

@@ -100,7 +100,11 @@ spec:
                 name: {{ .Values.dashboard.cred.existingSecret | default "dashboard-cred" }}
           env:
             - name: INDEXER_URL
-              value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+              value: {{- if .Values.indexer.enabled }}
+                       "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+                     {{- else }}
+                       "https://{{ .Values.indexer.host }}"
+                     {{- end }}
             - name: SERVER_SSL_ENABLED
               value: {{ .Values.dashboard.enable_ssl | quote }}
             - name: SERVER_SSL_CERTIFICATE

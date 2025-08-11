@@ -181,7 +181,11 @@ spec:
                 name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}
           env:
             - name: INDEXER_URL
-              value: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+              value: {{- if .Values.indexer.enabled }}
+                       "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+                     {{- else }}
+                       "https://{{ .Values.indexer.host }}"
+                     {{- end }}
             - name: FILEBEAT_SSL_VERIFICATION_MODE
               value: {{ .Values.wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | quote }}
             - name: WAZUH_CLUSTER_KEY

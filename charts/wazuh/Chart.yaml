@@ -28,7 +28,7 @@ keywords:
 dependencies:
   - name: cert-manager
     version: 1.16.3
-    repository: https://charts.jetstack.io
+    repository: https://quay.io/jetstack/charts/cert-manager
     condition: cert-manager.enabled
 annotations:
   artifacthub.io/category: security
