@@ -97,7 +97,7 @@ spec:
             - name: JOIN_MANAGER_API_PORT
               value: {{ .Values.wazuh.master.service.ports.api.port | quote }}
             - name: JOIN_MANAGER_PORT
-              value: {{ .Values.wazuh.worker.service.ports.agentEvents | quote }}
+              value: {{ .Values.wazuh.worker.service.ports.agentEvents.port | quote }}
             - name: HEALTH_CHECK_PROCESSES
               value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd,ossec-authd"
           {{- with .Values.agent.livenessProbe }}

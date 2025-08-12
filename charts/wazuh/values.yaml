@@ -699,13 +699,16 @@ wazuh:
     ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
     ## @param wazuh.worker.service.type Type of the created service.
     ## @param wazuh.worker.service.annotations Annotations of the created service.
-    ## @param wazuh.worker.service.ports.agentEvents Port for the agentEvents endpoint.
+    ## @param wazuh.worker.service.ports.agentEvents.port Port for the agentEvents endpoint.
+    ## @param wazuh.worker.service.ports.agentEvents.nodePort nodePort for the agentEvents endpoint.
     ##
     service:
       type: ClusterIP
       annotations: {}
       ports:
-        agentEvents: 1514
+        agentEvents:
+          port: 1514
+          nodePort: ""
     ## Allows to configure the pod disruption budget of the worker. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
     ## @param wazuh.worker.pdb.enabled Enables pdb for worker.
     ## @skip wazuh.worker.pdb.maxUnavailable

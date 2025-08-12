@@ -172,7 +172,7 @@ spec:
               subPath: {{ .name }}-agent.conf
             {{- end }}
           ports:
-            - containerPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
+            - containerPort: {{ .Values.wazuh.worker.service.ports.agentEvents.port }}
               name: agents-events
             - containerPort: {{ .Values.wazuh.service.port }}
               name: cluster

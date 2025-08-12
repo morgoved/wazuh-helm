@@ -654,7 +654,7 @@ wazuh_clusterd.debug=0
 
   <remote>
     <connection>secure</connection>
-    <port>{{ .Values.wazuh.worker.service.ports.agentEvents }}</port>
+    <port>{{ .Values.wazuh.worker.service.ports.agentEvents.port }}</port>
     <protocol>tcp</protocol>
     <queue_size>131072</queue_size>
   </remote>
@@ -1000,7 +1000,7 @@ wazuh_clusterd.debug=0
 
   <remote>
     <connection>secure</connection>
-    <port>{{ .Values.wazuh.worker.service.ports.agentEvents }}</port>
+    <port>{{ .Values.wazuh.worker.service.ports.agentEvents.port }}</port>
     <protocol>tcp</protocol>
     <queue_size>131072</queue_size>
   </remote>

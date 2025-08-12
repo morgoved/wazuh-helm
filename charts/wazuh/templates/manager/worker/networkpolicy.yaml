@@ -15,7 +15,7 @@ spec:
   ingress:
     - ports:
         - protocol: TCP
-          port: {{ .Values.wazuh.worker.service.ports.agentEvents }}
+          port: {{ .Values.wazuh.worker.service.ports.agentEvents.port }}
     - ports:
         - protocol: TCP
           port: {{ .Values.wazuh.service.port }}

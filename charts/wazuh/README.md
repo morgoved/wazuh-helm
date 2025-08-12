@@ -217,32 +217,32 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.master.networkPolicy.enabled`               | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
 | `wazuh.master.storageSize`                         | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
 | `wazuh.master.storageClass`                        | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
-| `wazuh.master.conf`                                | Config for the wazuh master, do not change!                  | `{{ include "wazuh.master.conf" . }} ` |
+| `wazuh.master.conf`                                | Config for the wazuh master, do not change!                  | `{{ include "wazuh.master.conf" . }}`  |
 | `wazuh.master.extraConf`                           | Gets appended to the wazuh.master.conf.                      | `""`                                   |
 
 ### wazuh.worker configuration of the wazuh worker component.
 
-| Name                                            | Description                                                  | Value                                  |
-| ----------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
-| `wazuh.worker.replicas`                         | number of replicas used in statefulset.                      | `2`                                    |
-| `wazuh.worker.annotations`                      | additional annotations set on deployment.                    | `{}`                                   |
-| `wazuh.worker.resources.requests.cpu`           | Minimum CPU assigned to the pod.                             | `500m`                                 |
-| `wazuh.worker.resources.requests.memory`        | Minimum memory assigned to the pod.                          | `512Mi`                                |
-| `wazuh.worker.resources.limits.cpu`             | Maximum CPU used by the pod.                                 | `1000m`                                |
-| `wazuh.worker.resources.limits.memory`          | Maximum memory used by the pod.                              | `1Gi`                                  |
-| `wazuh.worker.service.type`                     | Type of the created service.                                 | `ClusterIP`                            |
-| `wazuh.worker.service.annotations`              | Annotations of the created service.                          | `{}`                                   |
-| `wazuh.worker.service.ports.agentEvents`        | Port for the agentEvents endpoint.                           | `1514`                                 |
-| `wazuh.worker.pdb.enabled`                      | Enables pdb for worker.                                      | `true`                                 |
-| `wazuh.worker.livenessProbe`                    | Parameter to configure the livenessProbe.                    | `{}`                                   |
-| `wazuh.worker.readinessProbe`                   | Parameter to configure the readinessProbe.                   | `{}`                                   |
-| `wazuh.worker.securityContext.capabilities.add` | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
-| `wazuh.worker.additionalEnv`                    | Possibility to define additional env vars in the pod.        | `[]`                                   |
-| `wazuh.worker.additionalVolumes`                | Possibility to define additional volumes in the pod.         | `[]`                                   |
-| `wazuh.worker.additionalVolumeMounts`           | Possibility to define additional volumeMounts in the pod.    | `[]`                                   |
-| `wazuh.worker.networkPolicy.enabled`            | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
-| `wazuh.worker.storageSize`                      | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
-| `wazuh.worker.storageClass`                     | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
-| `wazuh.worker.conf`                             | Config for the wazuh worker, do not change!                  | `{{ include "wazuh.worker.conf" . }}
-` |
-| `wazuh.worker.extraConf`                        | Gets appended to the wazuh.worker.conf.                      | `""`                                   |
+| Name                                              | Description                                                  | Value                                  |
+| ------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| `wazuh.worker.replicas`                           | number of replicas used in statefulset.                      | `2`                                    |
+| `wazuh.worker.annotations`                        | additional annotations set on deployment.                    | `{}`                                   |
+| `wazuh.worker.resources.requests.cpu`             | Minimum CPU assigned to the pod.                             | `500m`                                 |
+| `wazuh.worker.resources.requests.memory`          | Minimum memory assigned to the pod.                          | `512Mi`                                |
+| `wazuh.worker.resources.limits.cpu`               | Maximum CPU used by the pod.                                 | `1000m`                                |
+| `wazuh.worker.resources.limits.memory`            | Maximum memory used by the pod.                              | `1Gi`                                  |
+| `wazuh.worker.service.type`                       | Type of the created service.                                 | `ClusterIP`                            |
+| `wazuh.worker.service.annotations`                | Annotations of the created service.                          | `{}`                                   |
+| `wazuh.worker.service.ports.agentEvents.port`     | Port for the agentEvents endpoint.                           | `1514`                                 |
+| `wazuh.worker.service.ports.agentEvents.nodePort` | nodePort for the agentEvents endpoint.                       | `""`.                                  |
+| `wazuh.worker.pdb.enabled`                        | Enables pdb for worker.                                      | `true`                                 |
+| `wazuh.worker.livenessProbe`                      | Parameter to configure the livenessProbe.                    | `{}`                                   |
+| `wazuh.worker.readinessProbe`                     | Parameter to configure the readinessProbe.                   | `{}`                                   |
+| `wazuh.worker.securityContext.capabilities.add`   | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
+| `wazuh.worker.additionalEnv`                      | Possibility to define additional env vars in the pod.        | `[]`                                   |
+| `wazuh.worker.additionalVolumes`                  | Possibility to define additional volumes in the pod.         | `[]`                                   |
+| `wazuh.worker.additionalVolumeMounts`             | Possibility to define additional volumeMounts in the pod.    | `[]`                                   |
+| `wazuh.worker.networkPolicy.enabled`              | Specifies whether a NetworkPolicy should be created.         | `true`                                 |
+| `wazuh.worker.storageSize`                        | Defines the size of the pvc used by the statefulset.         | `50Gi`                                 |
+| `wazuh.worker.storageClass`                       | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
+| `wazuh.worker.conf`                               | Config for the wazuh worker, do not change!                  | `{{ include "wazuh.worker.conf" . }}`  |
+| `wazuh.worker.extraConf`                          | Gets appended to the wazuh.worker.conf.                      | `""`                                   |

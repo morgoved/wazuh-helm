@@ -11,8 +11,9 @@ metadata:
 spec:
   ports:
     - name: agents-events
-      port: {{ .Values.wazuh.worker.service.ports.agentEvents }}
-      targetPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
+      port: {{ .Values.wazuh.worker.service.ports.agentEvents.port }}
+      targetPort: 1514
+      nodePort: {{ .Values.wazuh.master.service.ports.agentEvents.nodePort }}
 {{- if .Values.wazuh.syslog_enable }}
     - name: syslog
       port: 514
