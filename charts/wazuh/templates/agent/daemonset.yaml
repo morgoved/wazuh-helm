@@ -95,7 +95,7 @@ spec:
             - name: WAZUH_GROUPS
               value: {{ .Values.agent.joinManager.wazuh.group | quote }}
             - name: JOIN_MANAGER_API_PORT
-              value: {{ .Values.wazuh.master.service.ports.api | quote }}
+              value: {{ .Values.wazuh.master.service.ports.api.port | quote }}
             - name: JOIN_MANAGER_PORT
               value: {{ .Values.wazuh.worker.service.ports.agentEvents | quote }}
             - name: HEALTH_CHECK_PROCESSES

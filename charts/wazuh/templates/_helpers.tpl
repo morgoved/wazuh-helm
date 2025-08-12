@@ -910,7 +910,7 @@ wazuh_clusterd.debug=0
   -->
   <auth>
     <disabled>no</disabled>
-    <port>{{ .Values.wazuh.master.service.ports.registration }}</port>
+    <port>{{ .Values.wazuh.master.service.ports.registration.port }}</port>
     <use_source_ip>no</use_source_ip>
     <force>
       <enabled>yes</enabled>
@@ -1256,7 +1256,7 @@ wazuh_clusterd.debug=0
   -->
   <auth>
     <disabled>no</disabled>
-    <port>{{ .Values.wazuh.master.service.ports.registration }}</port>
+    <port>{{ .Values.wazuh.master.service.ports.registration.port }}</port>
     <use_source_ip>no</use_source_ip>
     <force>
       <enabled>yes</enabled>
