@@ -188,7 +188,7 @@ spec:
               value: {{- if .Values.indexer.enabled }}
                        "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
                      {{- else }}
-                       "https://{{ .Values.indexer.host }}"
+                       "{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}"
                      {{- end }}
             - name: FILEBEAT_SSL_VERIFICATION_MODE
               value: {{ .Values.wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | quote }}

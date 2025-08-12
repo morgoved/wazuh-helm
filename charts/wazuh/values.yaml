@@ -47,18 +47,22 @@ certificates:
     organization: Company
     country: US
     locality: California
+
+## @section externalIndexer configuration of the wazuh indexer.
+##
+externalIndexer:
+  ## @param externalIndexer.enabled defines if we use external indexer or not
+  enabled: false
+  ## @param externalIndexer.host defines external indexer address
+  host: https://wazuh-indexer.example.com
+  ## @param externalIndexer.port defines external indexer port
+  port: 9200
+
 ## @section indexer configuration of the wazuh indexer.
 ##
 indexer:
   ## @param indexer.enabled defines if we deploy indexer or not 
   enabled: true
-  externalIndexer:
-    ## @param indexer.externalIndexer.enabled defines if we use external indexer or not
-    enabled: false
-    ## @param indexer.externalIndexer.host defines external indexer address
-    host: https://wazuh-indexer.example.com
-    ## @param indexer.externalIndexer.port defines external indexer port
-    port: 9200
   ## @param indexer.replicas number of replicas used in statefulset.
   ##
   replicas: 3

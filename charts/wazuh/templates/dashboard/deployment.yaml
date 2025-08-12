@@ -103,7 +103,7 @@ spec:
               value: {{- if .Values.indexer.enabled }}
                        "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
                      {{- else }}
-                       "https://{{ .Values.indexer.host }}"
+                       "{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}"
                      {{- end }}
             - name: SERVER_SSL_ENABLED
               value: {{ .Values.dashboard.enable_ssl | quote }}
