@@ -74,8 +74,10 @@ Same applies when changing `dashboard.cred.password`
 
 | Name                                         | Description                                                                    | Value                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `indexer.enabled`                            | defines if we deploy indexer or not (if we use external indexer or not)        | `true`                                                         |
-| `indexer.host`                               | defines external indexer address                                               | `wazuh-indexer.example.com:9200`                               |
+| `indexer.enabled`                            | defines if we deploy indexer or not                                            | `true`                                                         |
+| `indexer.externalIndexer.enabled`            | defines if we use external indexer or not                                      | `false`                                                        |
+| `indexer.externalIndexer.host`               | defines external indexer host and scheme                                       | `https://wazuh-indexer.example.com`                            |
+| `indexer.externalIndexer.port`               | defines external indexer port                                                  | `9200`                                                         |
 | `indexer.replicas`                           | number of replicas used in statefulset.                                        | `3`                                                            |
 | `indexer.annotations`                        | additional annotations set on statefulset.                                     | `{}`                                                           |
 | `indexer.updateStrategy`                     | updateStrategy for the statefulset.                                            | `RollingUpdate`                                                |

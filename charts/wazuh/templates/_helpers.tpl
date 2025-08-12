@@ -38,8 +38,8 @@ server.port: {{ .Values.dashboard.service.httpPort }}
 {{- if .Values.indexer.enabled }}
 opensearch.hosts: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
 {{- end }}
-{{- if not .Values.indexer.enabled }}
-opensearch.hosts: "https://{{ .Values.indexer.host }}"
+{{- if .Values.indexer.externalIndexer.enabled }}
+opensearch.hosts: "{{ .Values.indexer.externalIndexer.host }}:{{ .Values.indexer.externalIndexer.port }}"
 {{- end }}
 
 opensearch.ssl.verificationMode: none
@@ -712,8 +712,8 @@ wazuh_clusterd.debug=0
     {{- if .Values.indexer.enabled }}
       <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     {{- end }}
-    {{- if not .Values.indexer.enabled }}
-      <host>https://{{ .Values.indexer.host }}</host>
+    {{- if .Values.indexer.externalIndexer.enabled }}
+      <host>https://{{ .Values.indexer.externalIndexer.host }}:{{ .Values.indexer.externalIndexer.port }}</host>
     {{- end }}
     </hosts>
     <ssl>
@@ -1063,8 +1063,8 @@ wazuh_clusterd.debug=0
     {{- if .Values.indexer.enabled }}
       <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     {{- end }}
-    {{- if not .Values.indexer.enabled }}
-      <host>https://{{ .Values.indexer.host }}</host>
+    {{- if not .Values.indexer.externalIndexer.enabled }}
+      <host>https://{{ .Values.indexer.externalIndexer.host }}:{{ .Values.indexer.externalIndexer.port }}</host>
     {{- end }}
     </hosts>
     <ssl>
