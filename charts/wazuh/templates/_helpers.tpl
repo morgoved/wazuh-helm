@@ -37,9 +37,10 @@ server.port: {{ .Values.dashboard.service.httpPort }}
 
 {{- if .Values.indexer.enabled }}
 opensearch.hosts: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
-{{- end }}
-{{- if .Values.externalIndexer.enabled }}
+{{- else if .Values.externalIndexer.enabled }}
 opensearch.hosts: "{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}"
+{{- else }}
+{{- fail "Please enable either .Values.indexer.enabled or .Values.externalIndexer.enabled" }}
 {{- end }}
 
 opensearch.ssl.verificationMode: none
