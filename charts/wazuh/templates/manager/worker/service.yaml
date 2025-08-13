@@ -23,7 +23,7 @@ spec:
     - name: syslog
       port: 514
       targetPort: 514
-{{- end }}
+  {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: worker

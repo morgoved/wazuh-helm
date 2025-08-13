@@ -11,30 +11,38 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "wazuh.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{ .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else -}}
-{{- $name := default "wazuh" .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
+  {{- if .Values.fullnameOverride -}}
+    {{ .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+  {{- else -}}
+    {{- $name := default "wazuh" .Values.nameOverride -}}
+    {{- if contains $name .Release.Name -}}
+      {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+    {{- else -}}
+      {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}
 
 {{- define "wazuh.indexer.fullname" -}}
-{{- if .Values.indexer.fullnameOverride -}}
-{{ .Values.indexer.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else -}}
-{{ include "wazuh.fullname" . }}
-{{- end -}}
+  {{- if .Values.indexer.fullnameOverride -}}
+    {{ .Values.indexer.fullnameOverride | trunc 63 | trimSuffix "-" }}
+  {{- else -}}
+    {{ include "wazuh.fullname" . }}
+  {{- end -}}
 {{- end -}}
 
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
+
+{{- if .Values.indexer.enabled }}
 opensearch.hosts: "https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}"
+{{- else if .Values.externalIndexer.enabled }}
+opensearch.hosts: "{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}"
+{{- else }}
+{{- fail "Please enable either .Values.indexer.enabled or .Values.externalIndexer.enabled" }}
+{{- end }}
+
 opensearch.ssl.verificationMode: none
 opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
 opensearch_security.multitenancy.enabled: false
@@ -735,7 +743,12 @@ wazuh_clusterd.debug=0
   <indexer>
     <enabled>yes</enabled>
     <hosts>
+    {{- if .Values.indexer.enabled }}
       <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
+    {{- end }}
+    {{- if .Values.externalIndexer.enabled }}
+      <host>https://{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}</host>
+    {{- end }}
     </hosts>
     <ssl>
       <certificate_authorities>
@@ -1089,7 +1102,12 @@ wazuh_clusterd.debug=0
   <indexer>
     <enabled>yes</enabled>
     <hosts>
+    {{- if .Values.indexer.enabled }}
       <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
+    {{- end }}
+    {{- if not .Values.externalIndexer.enabled }}
+      <host>https://{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}</host>
+    {{- end }}
     </hosts>
     <ssl>
       <certificate_authorities>

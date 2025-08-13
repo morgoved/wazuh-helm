@@ -47,9 +47,22 @@ certificates:
     organization: Company
     country: US
     locality: California
+
+## @section externalIndexer configuration of the wazuh indexer.
+##
+externalIndexer:
+  ## @param externalIndexer.enabled defines if we use external indexer or not
+  enabled: false
+  ## @param externalIndexer.host defines external indexer address
+  host: https://wazuh-indexer.example.com
+  ## @param externalIndexer.port defines external indexer port
+  port: 9200
+
 ## @section indexer configuration of the wazuh indexer.
 ##
 indexer:
+  ## @param indexer.enabled defines if we deploy indexer or not 
+  enabled: true
   ## @param indexer.replicas number of replicas used in statefulset.
   ##
   replicas: 3
@@ -374,6 +387,7 @@ dashboard:
   ##
   cred:
     existingSecret: ""
+    username: "kibanaserver"
     password: "kibanaserver"
     passwordHash: "$2a$12$7NCZ.l9ntPhou5zNjZIU4uqXNNWMF7SyF6Y6mcjhHTB6Z1eQubHC."
 

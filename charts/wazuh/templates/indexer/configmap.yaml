@@ -1,3 +1,4 @@
+{{- if .Values.indexer.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,3 +19,4 @@ data:
     {{- tpl .Values.indexer.config.roles . | nindent 4 }}
   config.yml: |
     {{- tpl .Values.indexer.config.securityConfig . | nindent 4 }}
+{{- end }}
