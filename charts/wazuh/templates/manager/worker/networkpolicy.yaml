@@ -14,8 +14,15 @@ spec:
     - Egress
   ingress:
     - ports:
+        {{- range .Values.wazuh.worker.service.ports }}
+        - protocol: {{ .protocol | default "TCP" }}
+          port: {{ .port }}
+        {{- end }}
+    {{- if .Values.wazuh.syslog_enable }}
+    - ports:
         - protocol: TCP
-          port: {{ .Values.wazuh.worker.service.ports.agentEvents.port }}
+          port: 514
+    {{- end }}
     - ports:
         - protocol: TCP
           port: {{ .Values.wazuh.service.port }}
