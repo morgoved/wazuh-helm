@@ -709,12 +709,22 @@ wazuh:
     ## @param wazuh.worker.service.annotations Annotations of the created service.
     ## @param wazuh.worker.service.ports.agentEvents Port for the agentEvents endpoint.
     ##
+    ## You can add additional ports in ports section like this:
+    ##ports:
+    ##  - name: my-custom-remote
+    ##    protocol: TCP or UDP
+    ##    port: 1234
+    ##    targetPort: 1234
+    ## this ports will be also added to sts container ports
+
     service:
       type: ClusterIP
       annotations: {}
       ports:
-        agentEvents: 1514
-        
+        - name: agents-events
+          protocol: TCP
+          port: 1514
+          targetPort: 1514
     ## Allows to configure the pod disruption budget of the worker. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
     ## @param wazuh.worker.pdb.enabled Enables pdb for worker.
     ## @skip wazuh.worker.pdb.maxUnavailable

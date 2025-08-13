@@ -660,12 +660,16 @@ wazuh_clusterd.debug=0
     <log_format>plain</log_format>
   </logging>
 
-  <remote>
-    <connection>secure</connection>
-    <port>{{ .Values.wazuh.worker.service.ports.agentEvents }}</port>
-    <protocol>tcp</protocol>
-    <queue_size>131072</queue_size>
-  </remote>
+{{- range .Values.wazuh.worker.service.ports }}
+  {{- if eq .name "agents-events" }}
+    <remote>
+      <connection>secure</connection>
+      <port>{{ .port }}</port>
+      <protocol>tcp</protocol>
+      <queue_size>131072</queue_size>
+    </remote>
+  {{- end }}
+{{- end }}
 
   <!-- Policy monitoring -->
   <rootcheck>
@@ -1011,12 +1015,16 @@ wazuh_clusterd.debug=0
     <log_format>plain</log_format>
   </logging>
 
-  <remote>
-    <connection>secure</connection>
-    <port>{{ .Values.wazuh.worker.service.ports.agentEvents }}</port>
-    <protocol>tcp</protocol>
-    <queue_size>131072</queue_size>
-  </remote>
+{{- range .Values.wazuh.worker.service.ports }}
+  {{- if eq .name "agents-events" }}
+    <remote>
+      <connection>secure</connection>
+      <port>{{ .port }}</port>
+      <protocol>tcp</protocol>
+      <queue_size>131072</queue_size>
+    </remote>
+  {{- end }}
+{{- end }}
 
   <!-- Policy monitoring -->
   <rootcheck>

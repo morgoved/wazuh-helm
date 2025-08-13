@@ -10,14 +10,17 @@ metadata:
     {{- toYaml .Values.wazuh.worker.service.annotations | nindent 4 }}
 spec:
   ports:
-    - name: agents-events
-      port: {{ .Values.wazuh.worker.service.ports.agentEvents }}
-      targetPort: {{ .Values.wazuh.worker.service.ports.agentEvents }}
-{{- if .Values.wazuh.syslog_enable }}
+  {{- range .Values.wazuh.worker.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+  {{- end }}
+  {{- if .Values.wazuh.syslog_enable }}
     - name: syslog
       port: 514
       targetPort: 514
-{{- end }}
+  {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: worker
