@@ -11,14 +11,15 @@ metadata:
     {{- toYaml .Values.wazuh.master.service.annotations | nindent 4 }}
 spec:
   ports:
-    - name: registration
-      port: {{ .Values.wazuh.master.service.ports.registration.port }}
-      targetPort: 1515
-      nodePort: {{ .Values.wazuh.master.service.ports.registration.nodePort }}
-    - name: api
-      port: {{ .Values.wazuh.master.service.ports.api.port }}
-      targetPort: 55000
-      nodePort: {{ .Values.wazuh.master.service.ports.api.nodePort }}
+  {{- range .Values.wazuh.master.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      {{- if (and (eq .Values.wazuh.master.service.type "NodePort") (not (empty .nodePort))) }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+  {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: master

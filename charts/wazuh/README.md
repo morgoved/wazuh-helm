@@ -204,10 +204,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.master.resources.limits.memory`             | Maximum memory used by the pod.                              | `1Gi`                                  |
 | `wazuh.master.service.type`                        | Type of the created service.                                 | `ClusterIP`                            |
 | `wazuh.master.service.annotations`                 | Annotations of the created service.                          | `{}`                                   |
-| `wazuh.master.service.ports.registration.port`     | Port for the registration endpoint.                          | `1515`                                 |
-| `wazuh.master.service.ports.registration.nodePort` | nodePort for the registration endpoint.                      | `""`                                   |
-| `wazuh.master.service.ports.api.port`              | Port for the api endpoint.                                   | `55000`                                |
-| `wazuh.master.service.ports.api.nodePort`          | nodePort for the api endpoint.                               | `""`                                   |
+| `wazuh.master.service.ports`                       | Add Ports for the endpoints.                                 | ``.                                    |
 | `wazuh.master.livenessProbe`                       | Parameter to configure the livenessProbe.                    | `{}`                                   |
 | `wazuh.master.readinessProbe`                      | Parameter to configure the readinessProbe.                   | `{}`                                   |
 | `wazuh.master.securityContext.capabilities.add`    | Additional capabilities.                                     | `["SYS_CHROOT"]`                       |
@@ -232,8 +229,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.worker.resources.limits.memory`            | Maximum memory used by the pod.                              | `1Gi`                                  |
 | `wazuh.worker.service.type`                       | Type of the created service.                                 | `ClusterIP`                            |
 | `wazuh.worker.service.annotations`                | Annotations of the created service.                          | `{}`                                   |
-| `wazuh.worker.service.ports.agentEvents.port`     | Port for the agentEvents endpoint.                           | `1514`                                 |
-| `wazuh.worker.service.ports.agentEvents.nodePort` | nodePort for the agentEvents endpoint.                       | `""`.                                  |
+| `wazuh.worker.service.ports`                      | Add Ports for the endpoints.                                 | ``.                                    |
 | `wazuh.worker.pdb.enabled`                        | Enables pdb for worker.                                      | `true`                                 |
 | `wazuh.worker.livenessProbe`                      | Parameter to configure the livenessProbe.                    | `{}`                                   |
 | `wazuh.worker.readinessProbe`                     | Parameter to configure the readinessProbe.                   | `{}`                                   |

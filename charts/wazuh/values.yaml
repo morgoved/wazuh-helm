@@ -603,21 +603,29 @@ wazuh:
     ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
     ## @param wazuh.master.service.type Type of the created service.
     ## @param wazuh.master.service.annotations Annotations of the created service.
-    ## @param wazuh.master.service.ports.registration.port Port for the registration endpoint.
-    ## @param wazuh.master.service.ports.registration.nodePort nodePort for the registration endpoint.
-    ## @param wazuh.master.service.ports.api.port Port for the api endpoint.
-    ## @param wazuh.master.service.ports.api.nodePort nodePort for the api endpoint.
     ##
+    ## You can add additional ports in ports section like this:
+    ## ports:
+    ##   - name: my-custom-remote
+    ##     protocol: TCP or UDP
+    ##     port: 1234
+    ##     targetPort: 1234
+    ##     nodePort: 12345
+    ## this ports will be also added to sts container ports
     service:
       type: ClusterIP
       annotations: {}
       ports:
-        registration:
+        - name: registration
+          protocol: TCP
           port: 1515
-          nodePort: ""
-        api:
+          targetPort: 1515
+          # nodePort: 31515
+        - name: api
+          protocol: TCP
           port: 55000
-          nodePort: ""
+          targetPort: 55000
+          # nodePort: 31550
     ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
@@ -699,16 +707,24 @@ wazuh:
     ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
     ## @param wazuh.worker.service.type Type of the created service.
     ## @param wazuh.worker.service.annotations Annotations of the created service.
-    ## @param wazuh.worker.service.ports.agentEvents.port Port for the agentEvents endpoint.
-    ## @param wazuh.worker.service.ports.agentEvents.nodePort nodePort for the agentEvents endpoint.
     ##
+    ## You can add additional ports in ports section like this:
+    ## ports:
+    ##   - name: my-custom-remote
+    ##     protocol: TCP or UDP
+    ##     port: 1234
+    ##     targetPort: 1234
+    ##     nodePort: 12345
+    ## this ports will be also added to sts container ports
     service:
       type: ClusterIP
       annotations: {}
       ports:
-        agentEvents:
+        - name: agents-events
+          protocol: TCP
           port: 1514
-          nodePort: ""
+          targetPort: 1514
+          # nodePort: 31514
     ## Allows to configure the pod disruption budget of the worker. Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
     ## @param wazuh.worker.pdb.enabled Enables pdb for worker.
     ## @skip wazuh.worker.pdb.maxUnavailable

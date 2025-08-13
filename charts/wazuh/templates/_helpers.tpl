@@ -652,12 +652,16 @@ wazuh_clusterd.debug=0
     <log_format>plain</log_format>
   </logging>
 
-  <remote>
-    <connection>secure</connection>
-    <port>{{ .Values.wazuh.worker.service.ports.agentEvents.port }}</port>
-    <protocol>tcp</protocol>
-    <queue_size>131072</queue_size>
-  </remote>
+{{- range .Values.wazuh.worker.service.ports }}
+  {{- if eq .name "agents-events" }}
+    <remote>
+      <connection>secure</connection>
+      <port>{{ .port }}</port>
+      <protocol>tcp</protocol>
+      <queue_size>131072</queue_size>
+    </remote>
+  {{- end }}
+{{- end }}
 
   <!-- Policy monitoring -->
   <rootcheck>
@@ -910,7 +914,11 @@ wazuh_clusterd.debug=0
   -->
   <auth>
     <disabled>no</disabled>
-    <port>{{ .Values.wazuh.master.service.ports.registration.port }}</port>
+{{- range .Values.wazuh.master.service.ports }}
+  {{- if eq .name "registration" }}
+    <port>{{ .port }}</port>
+  {{- end }}
+{{- end }}
     <use_source_ip>no</use_source_ip>
     <force>
       <enabled>yes</enabled>
@@ -998,12 +1006,16 @@ wazuh_clusterd.debug=0
     <log_format>plain</log_format>
   </logging>
 
-  <remote>
-    <connection>secure</connection>
-    <port>{{ .Values.wazuh.worker.service.ports.agentEvents.port }}</port>
-    <protocol>tcp</protocol>
-    <queue_size>131072</queue_size>
-  </remote>
+{{- range .Values.wazuh.worker.service.ports }}
+  {{- if eq .name "agents-events" }}
+    <remote>
+      <connection>secure</connection>
+      <port>{{ .port }}</port>
+      <protocol>tcp</protocol>
+      <queue_size>131072</queue_size>
+    </remote>
+  {{- end }}
+{{- end }}
 
   <!-- Policy monitoring -->
   <rootcheck>
@@ -1256,7 +1268,11 @@ wazuh_clusterd.debug=0
   -->
   <auth>
     <disabled>no</disabled>
-    <port>{{ .Values.wazuh.master.service.ports.registration.port }}</port>
+{{- range .Values.wazuh.master.service.ports }}
+  {{- if eq .name "registration" }}
+    <port>{{ .port }}</port>
+  {{- end }}
+{{- end }}
     <use_source_ip>no</use_source_ip>
     <force>
       <enabled>yes</enabled>
