@@ -42,16 +42,33 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.wazuh.worker.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.wazuh.worker.podAntiAffinity .Values.wazuh.worker.affinity }}
       affinity:
+      {{- end }}
+        {{- with .Values.wazuh.worker.affinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if eq .Values.wazuh.worker.podAntiAffinity "hard" }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: {{ .Values.wazuh.worker.podAntiAffinityTopologyKey }}
+              labelSelector:
+                matchExpressions:
+                  - {key: app.kubernetes.io/name, operator: In, values: [{{ include "wazuh.fullname" . }}]}
+        {{- else if eq .Values.wazuh.worker.podAntiAffinity "soft" }}
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               podAffinityTerm:
-                topologyKey: kubernetes.io/hostname
+                topologyKey: {{ .Values.wazuh.worker.podAntiAffinityTopologyKey }}
                 labelSelector:
-                  matchLabels:
-                    app: {{ include "wazuh.fullname" . }}-manager-worker
-                    node-type: worker
+                  matchExpressions:
+                    - {key: app, operator: In, values: [{{ include "wazuh.fullname" . }}-manager-worker]}
+        {{- end }}
       volumes:
         - name: config
           configMap:
