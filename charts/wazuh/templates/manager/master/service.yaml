@@ -10,6 +10,7 @@ metadata:
   annotations:
     {{- toYaml .Values.wazuh.master.service.annotations | nindent 4 }}
 spec:
+  type: {{ .Values.wazuh.master.service.type }}
   ports:
   {{- range .Values.wazuh.master.service.ports }}
     - name: {{ .name }}
