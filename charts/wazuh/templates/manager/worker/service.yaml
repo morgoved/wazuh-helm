@@ -9,14 +9,18 @@ metadata:
   annotations:
     {{- toYaml .Values.wazuh.worker.service.annotations | nindent 4 }}
 spec:
+  type: {{ .Values.wazuh.worker.service.type }}
   ports:
   {{- range .Values.wazuh.worker.service.ports }}
     - name: {{ .name }}
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
+      {{- if (and (eq .Values.wazuh.worker.service.type "NodePort") (not (empty .nodePort))) }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
   {{- end }}
-  {{- if .Values.wazuh.syslog_enable }}
+{{- if .Values.wazuh.syslog_enable }}
     - name: syslog
       port: 514
       targetPort: 514

@@ -192,12 +192,12 @@ spec:
               subPath: {{ .name }}-agent.conf
             {{- end }}
           ports:
-            - containerPort: {{ .Values.wazuh.master.service.ports.registration }}
-              name: registration
+            {{- range .Values.wazuh.master.service.ports }}
+            - containerPort: {{ .port }}
+              name: {{ .name }}
+            {{- end }}
             - containerPort: {{ .Values.wazuh.service.port }}
               name: cluster
-            - containerPort: {{ .Values.wazuh.master.service.ports.api }}
-              name: api
           envFrom:
             - secretRef:
                 name: {{ .Values.indexer.cred.existingSecret | default "indexer-cred" }}

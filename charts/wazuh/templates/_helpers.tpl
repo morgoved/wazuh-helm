@@ -927,7 +927,11 @@ wazuh_clusterd.debug=0
   -->
   <auth>
     <disabled>no</disabled>
-    <port>{{ .Values.wazuh.master.service.ports.registration }}</port>
+{{- range .Values.wazuh.master.service.ports }}
+  {{- if eq .name "registration" }}
+    <port>{{ .port }}</port>
+  {{- end }}
+{{- end }}
     <use_source_ip>no</use_source_ip>
     <force>
       <enabled>yes</enabled>
@@ -1282,7 +1286,11 @@ wazuh_clusterd.debug=0
   -->
   <auth>
     <disabled>no</disabled>
-    <port>{{ .Values.wazuh.master.service.ports.registration }}</port>
+{{- range .Values.wazuh.master.service.ports }}
+  {{- if eq .name "registration" }}
+    <port>{{ .port }}</port>
+  {{- end }}
+{{- end }}
     <use_source_ip>no</use_source_ip>
     <force>
       <enabled>yes</enabled>

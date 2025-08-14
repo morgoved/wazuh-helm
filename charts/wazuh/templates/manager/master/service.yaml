@@ -10,13 +10,17 @@ metadata:
   annotations:
     {{- toYaml .Values.wazuh.master.service.annotations | nindent 4 }}
 spec:
+  type: {{ .Values.wazuh.master.service.type }}
   ports:
-    - name: registration
-      port: {{ .Values.wazuh.master.service.ports.registration }}
-      targetPort: {{ .Values.wazuh.master.service.ports.registration }}
-    - name: api
-      port: {{ .Values.wazuh.master.service.ports.api }}
-      targetPort: {{ .Values.wazuh.master.service.ports.api }}
+  {{- range .Values.wazuh.master.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      {{- if (and (eq .Values.wazuh.master.service.type "NodePort") (not (empty .nodePort))) }}
+      nodePort: {{ .nodePort }}
+      {{- end }}
+  {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: master
