@@ -49,29 +49,10 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.wazuh.master.podAntiAffinity .Values.wazuh.master.affinity }}
+      {{- with .Values.wazuh.master.affinity }}
       affinity:
-      {{- end }}
-        {{- with .Values.wazuh.master.affinity }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
-        {{- if eq .Values.wazuh.master.podAntiAffinity "hard" }}
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - topologyKey: {{ .Values.wazuh.master.podAntiAffinityTopologyKey }}
-              labelSelector:
-                matchExpressions:
-                  - {key: app.kubernetes.io/name, operator: In, values: [{{ include "wazuh.name" . }}]}
-        {{- else if eq .Values.wazuh.master.podAntiAffinity "soft" }}
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                topologyKey: {{ .Values.wazuh.master.podAntiAffinityTopologyKey }}
-                labelSelector:
-                  matchExpressions:
-                    - {key: app.kubernetes.io/name, operator: In, values: [{{ include "wazuh.name" . }}]}
-        {{- end }}
+      {{- end }}
       volumes:
         - name: config
           configMap:

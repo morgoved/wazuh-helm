@@ -58,7 +58,7 @@ spec:
             - topologyKey: {{ .Values.wazuh.worker.podAntiAffinityTopologyKey }}
               labelSelector:
                 matchExpressions:
-                  - {key: app.kubernetes.io/name, operator: In, values: [{{ include "wazuh.fullname" . }}]}
+                  - {key: app, operator: In, values: [{{ include "wazuh.fullname" . }}-manager-worker]}
         {{- else if eq .Values.wazuh.worker.podAntiAffinity "soft" }}
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
