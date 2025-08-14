@@ -55,6 +55,6 @@ keywords:
   - elasticsearch
 dependencies:
   - name: cert-manager
-    version: 1.16.3
+    version: v1.18.1
     repository: https://quay.io/jetstack/charts/cert-manager
     condition: cert-manager.enabled
