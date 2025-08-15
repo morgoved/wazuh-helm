@@ -26,7 +26,8 @@ spec:
       annotations:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/indexer/configmap.yaml") . | sha256sum }}
-        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        checksum/admin-certificate: {{ include (print $.Template.BasePath "/certs/admin/certificate.yaml") . | sha256sum }}
+        checksum/node-certificate: {{ include (print $.Template.BasePath "/certs/node/certificate.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.indexer.annotations }}
             {{- toYaml . | nindent 8 }}

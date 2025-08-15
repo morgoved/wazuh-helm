@@ -22,7 +22,8 @@ spec:
       annotations:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/dashboard/configmap.yaml") . | sha256sum }}
-        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        checksum/dashboard-certificate: {{ include (print $.Template.BasePath "/certs/dashboard/certificate.yaml") . | sha256sum }}
+        checksum/admin-certificate: {{ include (print $.Template.BasePath "/certs/admin/certificate.yaml") . | sha256sum }}
         checksum/dashboard-secret: {{ include (print $.Template.BasePath "/dashboard/secret.yaml") . | sha256sum }}
         checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
         checksum/api-secret: {{ include (print $.Template.BasePath "/manager/secret-api-cred.yaml") . | sha256sum }}

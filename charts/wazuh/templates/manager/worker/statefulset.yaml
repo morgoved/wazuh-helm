@@ -28,7 +28,7 @@ spec:
       annotations:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/manager/configmap.yaml") . | sha256sum }}
-        checksum/certificate: {{ include (print $.Template.BasePath "/certs/certificate.yaml") . | sha256sum }}
+        checksum/filebeat-certificate: {{ include (print $.Template.BasePath "/certs/filebeat/certificate.yaml") . | sha256sum }}
         checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.wazuh.worker.annotations }}
@@ -185,7 +185,7 @@ spec:
             # Agent groups configuration
             {{- range .Values.wazuh.agentGroupConf }}
             - name: config
-              mountPath: /wazuh-config-mount/etc/shared/{{.name}}/agent.conf
+              mountPath: /wazuh-config-mount/etc/shared/{{ .name }}/agent.conf
               subPath: {{ .name }}-agent.conf
             {{- end }}
           ports:
