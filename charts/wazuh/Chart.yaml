@@ -21,11 +21,11 @@ annotations:
       url: https://github.com/wazuh/wazuh-kubernetes
   artifacthub.io/screenshots: |
     - title: Home Page
-      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/dashboard.png
+      url: https://morgoved.github.io/wazuh-helm/images/dashboard.png
     - title: Agent Deployment
-      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/agent-deploy.png
+      url: https://morgoved.github.io/wazuh-helm/agent-deploy.png
     - title: Threat Hunting
-      url: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/threat-hunting.png
+      url: https://morgoved.github.io/wazuh-helm/threat-hunting.png
 home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
@@ -43,7 +43,7 @@ maintainers:
     url: https://github.com/TrueDru
   - name: 71g3pf4c3
     url: https://github.com/71g3pf4c3
-icon: https://github.com/morgoved/wazuh-helm/blob/main/charts/wazuh/images/icon.png
+icon: https://morgoved.github.io/wazuh-helm/images/icon.png
 keywords:
   - security
   - information
