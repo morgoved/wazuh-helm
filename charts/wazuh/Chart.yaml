@@ -23,9 +23,9 @@ annotations:
     - title: Home Page
       url: https://morgoved.github.io/wazuh-helm/images/dashboard.png
     - title: Agent Deployment
-      url: https://morgoved.github.io/wazuh-helm/agent-deploy.png
+      url: https://morgoved.github.io/wazuh-helm/images/agent-deploy.png
     - title: Threat Hunting
-      url: https://morgoved.github.io/wazuh-helm/threat-hunting.png
+      url: https://morgoved.github.io/wazuh-helm/images/threat-hunting.png
 home: https://wazuh.com/
 sources:
   - https://github.com/morgoved/wazuh-helm
