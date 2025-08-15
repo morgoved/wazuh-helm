@@ -35,7 +35,7 @@ entries:
       and SIEM protection for endpoints and cloud workloads.
     digest: d1bdbd1689595f5d39817e571f889a140dbc92c8ab477ff4d1a011be3669c0b6
     home: https://wazuh.com/
-    icon:https://morgoved.github.io/wazuh-helm/images/icon.png
+    icon: https://morgoved.github.io/wazuh-helm/images/icon.png
     keywords:
     - security
     - information
