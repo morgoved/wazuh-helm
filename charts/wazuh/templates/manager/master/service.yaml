@@ -17,11 +17,11 @@ spec:
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
-      {{- if (and (eq .Values.wazuh.master.service.type "NodePort") (not (empty .nodePort))) }}
+      {{- if (and (eq $.Values.wazuh.master.service.type "NodePort") (not (empty .nodePort))) }}
       nodePort: {{ .nodePort }}
       {{- end }}
   {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: master
-  type: {{ .Values.wazuh.master.service.type }}
+

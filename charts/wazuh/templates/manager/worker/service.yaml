@@ -16,7 +16,7 @@ spec:
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
-      {{- if (and (eq .Values.wazuh.worker.service.type "NodePort") (not (empty .nodePort))) }}
+      {{- if (and (eq $.Values.wazuh.worker.service.type "NodePort") (not (empty .nodePort))) }}
       nodePort: {{ .nodePort }}
       {{- end }}
   {{- end }}
@@ -28,4 +28,4 @@ spec:
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
     node-type: worker
-  type: {{ .Values.wazuh.worker.service.type }}
+
