@@ -1410,7 +1410,7 @@ admin:
 kibanaserver:
   hash: "{{ .Values.dashboard.cred.passwordHash }}"
   reserved: true
-  description: "Demo kibanaserver user"
+  description: "Demo {{ .Values.dashboard.cred.username }} user"
 
 kibanaro:
   hash: "$2a$12$JJSXNfTowz7Uu5ttXfeYpeYE0arACvcwlPBStB1F.MI7f0U9Z4DGC"
@@ -1520,7 +1520,7 @@ kibana_server:
   {{- end }}
   hosts: []
   users:
-  - "kibanaserver"
+    - "{{ .Values.dashboard.cred.username }}"
   and_backend_roles: []
 
 kibana_user:
@@ -1543,7 +1543,7 @@ manage_wazuh_index:
   backend_roles: []
   hosts: []
   users:
-  - "kibanaserver"
+    - "{{ .Values.dashboard.cred.username }}"
   and_backend_roles: []
 
 
