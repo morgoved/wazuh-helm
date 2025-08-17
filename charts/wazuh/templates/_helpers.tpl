@@ -1407,7 +1407,7 @@ admin:
   - "admin"
   description: "Demo admin user"
 
-kibanaserver:
+{{ .Values.dashboard.cred.username }}:
   hash: "{{ .Values.dashboard.cred.passwordHash }}"
   reserved: true
   description: "Demo {{ .Values.dashboard.cred.username }} user"
