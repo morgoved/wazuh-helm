@@ -841,6 +841,7 @@ agent:
   service:
     port: 5000
     type: ClusterIP
+    annotations: {}
 
   ## @param wazuh.agent.labels Extra labels for the agent
   labels: {}
