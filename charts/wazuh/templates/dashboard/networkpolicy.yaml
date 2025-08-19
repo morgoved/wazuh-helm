@@ -35,6 +35,11 @@ spec:
         port: {{ .port }}
       {{ end }}
     {{ end }}
+      to:
+        - podSelector:
+            matchLabels:
+              app: {{ include "wazuh.fullname" . }}-manager
+              node-type: master
     # DNS
     - ports:
         - protocol: UDP
