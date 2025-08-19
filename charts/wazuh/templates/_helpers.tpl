@@ -2236,3 +2236,16 @@ if [ "$DESIRED" -gt "$CURRENT" ]; then
     sysctl -w {{ .key }}={{ .value }};
 fi;
 {{- end -}}
+
+{{/*
+Get port value from ports array by name
+*/}}
+{{- define "wazuh.getPortByName" -}}
+{{- $portName := .portName -}}
+{{- $ports := .ports -}}
+{{- range $ports -}}
+{{- if eq .name $portName -}}
+{{- .port -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

@@ -30,12 +30,11 @@ spec:
     # Wazuh Manager
     - ports:
       - protocol: TCP
-        port: {{ .Values.wazuh.master.service.ports.api.port }}
-      to:
-        - podSelector:
-            matchLabels:
-              app: {{ include "wazuh.fullname" . }}-manager
-              node-type: master
+    {{- range .Values.wazuh.master.service.ports }}
+      {{ if eq .name "api" }}
+        port: {{ .port }}
+      {{ end }}
+    {{ end }}
     # DNS
     - ports:
         - protocol: UDP
