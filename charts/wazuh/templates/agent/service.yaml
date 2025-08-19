@@ -8,7 +8,7 @@ metadata:
     app: {{ include "wazuh.fullname" . }}-agent
     node-type: agent
   annotations:
-    {{- toYaml .Values.wazuh.master.service.annotations | nindent 4 }}
+    {{- toYaml .Values.agent.service.annotations | nindent 4 }}
 spec:
   ports:
     - name: http
