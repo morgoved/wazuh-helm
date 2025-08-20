@@ -1105,7 +1105,7 @@ wazuh_clusterd.debug=0
     {{- if .Values.indexer.enabled }}
       <host>https://{{ include "wazuh.indexer.fullname" . }}-indexer:{{ .Values.indexer.service.httpPort }}</host>
     {{- end }}
-    {{- if not .Values.externalIndexer.enabled }}
+    {{- if .Values.externalIndexer.enabled }}
       <host>https://{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}</host>
     {{- end }}
     </hosts>
