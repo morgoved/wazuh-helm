@@ -461,6 +461,45 @@ dashboard:
         enableSSL: false
         pemtrustedcasFilePath: ""
 
+    saml:
+      ## @param dashboard.sso.saml.enabled Enable SAML authentication
+      ## ref: https://docs.opensearch.org/latest/security/authentication-backends/saml/
+      enabled: false
+      primary: false
+      ## @param dashboard.sso.saml.metadataUrl SAML IdP metadata URL
+      ## Remember to add additional extraEgresses to the NetworkPolicy on dashboard and indexer
+      metadataUrl: ""
+      ## @param dashboard.sso.saml.idpEntityId SAML IdP entity ID
+      idpEntityId: ""
+      ## @param dashboard.sso.saml.spEntityId SAML SP entity ID
+      spEntityId: "wazuh-saml"
+      ## @param dashboard.sso.saml.kibanaUrl Dashboard/Kibana URL for SAML SP configuration
+      ## default to dashboard.ingress.host
+      ## else Required
+      kibanaUrl: ""
+      order: 1
+      ## @param dashboard.sso.saml.exchangeKey SAML exchange key for signing JWT tokens (64 characters recommended)
+      ## Generate with: openssl rand -hex 32
+      exchangeKey: ""
+      config:
+        rolesKey: "Roles"
+      roleMappings:
+        allAccess:
+          backendRoles: []
+        kibanaServer:
+          backendRoles: []
+        kibanaUser:
+          backendRoles: []
+      extraRoleMappings: {}
+#        testingUser:
+#          reserved: false
+#          hidden: false
+#          backend_roles: []
+#          hosts: []
+#          users: []
+#          and_backend_roles: []
+#          description: "Allow full access to an index named like the username"
+
   ## Ingress parameters for the dashboard Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ## @param dashboard.ingress.enabled Enable ingress record generation for dashboard.
   ##
