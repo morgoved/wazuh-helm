@@ -58,6 +58,9 @@ uiSettings.overrides.defaultRoute: /app/wz-home
 {{- if .Values.dashboard.sso.oidc.enabled }}
 {{-   $authType = append $authType "openid" }}
 {{- end }}
+{{- if .Values.dashboard.sso.saml.enabled }}
+{{-   $authType = append $authType "saml" }}
+{{- end }}
 {{- if .Values.dashboard.basicAuth.enabled }}
 {{-   $authType = append $authType "basicauth" }}
 {{- end }}
@@ -80,6 +83,11 @@ opensearch_security.ui.openid.login.brandimage: {{ required "dashboard.sso.oidc.
 opensearch_security.ui.openid.login.showbrandimage: {{ .Values.dashboard.sso.oidc.customizeLoginButton.showImage }}
 {{- end }}
 {{- end }}
+{{- end }}
+
+{{- if .Values.dashboard.sso.saml.enabled }}
+server.xsrf.allowlist: ["/_plugins/_security/saml/acs", "/_plugins/_security/saml/logout", "/_opendistro/_security/saml/logout", "/_opendistro/_security/api/authtoken", "/_opendistro/_security/saml/acs", "/_opendistro/_security/saml/acs/idpinitiated", "/_plugins/_security/api/authtoken"]
+opensearch_security.session.keepalive: false
 {{- end }}
 
 {{- end }}
@@ -1467,6 +1475,9 @@ all_access:
   {{- if .Values.dashboard.sso.oidc.roleMappings.allAccess.backendRoles }}
     {{- toYaml .Values.dashboard.sso.oidc.roleMappings.allAccess.backendRoles | nindent 4 }}
   {{- end }}
+  {{- if .Values.dashboard.sso.saml.roleMappings.allAccess.backendRoles }}
+    {{- toYaml .Values.dashboard.sso.saml.roleMappings.allAccess.backendRoles | nindent 4 }}
+  {{- end }}
   hosts: []
   users: []
   and_backend_roles: []
@@ -1518,6 +1529,9 @@ kibana_server:
   {{- else }}
   backend_roles: []
   {{- end }}
+  {{- if .Values.dashboard.sso.saml.roleMappings.kibanaServer.backendRoles }}
+    {{- toYaml .Values.dashboard.sso.saml.roleMappings.kibanaServer.backendRoles | nindent 4 }}
+  {{- end }}
   hosts: []
   users:
     - "{{ .Values.dashboard.cred.username }}"
@@ -1530,6 +1544,9 @@ kibana_user:
     - "kibanauser"
   {{- if .Values.dashboard.sso.oidc.roleMappings.kibanaUser.backendRoles }}
     {{- toYaml .Values.dashboard.sso.oidc.roleMappings.kibanaUser.backendRoles | nindent 4 }}
+  {{- end }}
+  {{- if .Values.dashboard.sso.saml.roleMappings.kibanaUser.backendRoles }}
+    {{- toYaml .Values.dashboard.sso.saml.roleMappings.kibanaUser.backendRoles | nindent 4 }}
   {{- end }}
   hosts: []
   users: []
@@ -1548,6 +1565,10 @@ manage_wazuh_index:
 
 
 {{- with .Values.dashboard.sso.oidc.extraRoleMappings }}
+{{- toYaml . | nindent 0 }}
+{{- end }}
+
+{{- with .Values.dashboard.sso.saml.extraRoleMappings }}
 {{- toYaml . | nindent 0 }}
 {{- end }}
 {{- end }}
@@ -2057,6 +2078,26 @@ config:
             {{- end }}
             client_id: ${env.OPENSEARCH_OIDC_CLIENT_ID}
             client_secret: ${env.OPENSEARCH_OIDC_CLIENT_SECRET}
+        authentication_backend:
+          type: noop
+      {{- end }}
+      {{- if .Values.dashboard.sso.saml.enabled }}
+      saml_auth_domain:
+        http_enabled: true
+        transport_enabled: false
+        order: {{ .Values.dashboard.sso.saml.order }}
+        http_authenticator:
+          type: saml
+          challenge: {{ not .Values.dashboard.sso.saml.primary }}
+          config:
+            idp:
+              metadata_url: {{ required "dashboard.sso.saml.metadataUrl is required" .Values.dashboard.sso.saml.metadataUrl }}
+              entity_id: {{ required "dashboard.sso.saml.idpEntityId is required" .Values.dashboard.sso.saml.idpEntityId }}
+            sp:
+              entity_id: {{ .Values.dashboard.sso.saml.spEntityId }}
+            kibana_url: {{ .Values.dashboard.sso.saml.kibanaUrl | default (printf "https://%s" .Values.dashboard.ingress.host) | required "dashboard.sso.saml.kibanaUrl or dashboard.ingress.host is required" }}
+            roles_key: {{ .Values.dashboard.sso.saml.config.rolesKey }}
+            exchange_key: {{ required "dashboard.sso.saml.exchangeKey is required" .Values.dashboard.sso.saml.exchangeKey }}
         authentication_backend:
           type: noop
       {{- end }}
