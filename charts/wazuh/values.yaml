@@ -183,6 +183,26 @@ indexer:
 
   affinity: {}
   
+  ## @param indexer.dnsPolicy DNS policy for the pod
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+  ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
+  ##
+  dnsPolicy: ""
+  
+  ## @param indexer.dnsConfig DNS configuration for the pod
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## Example:
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 1.2.3.4
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  dnsConfig: {}
+  
   ## @param indexer.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
@@ -373,6 +393,26 @@ dashboard:
   tolerations: []
   
   affinity: {}
+  
+  ## @param dashboard.dnsPolicy DNS policy for the pod
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+  ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
+  ##
+  dnsPolicy: ""
+  
+  ## @param dashboard.dnsConfig DNS configuration for the pod
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## Example:
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 1.2.3.4
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  dnsConfig: {}
   
   ## @param dashboard.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
@@ -668,6 +708,26 @@ wazuh:
 
     affinity: {}
 
+    ## @param wazuh.master.dnsPolicy DNS policy for the pod
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
+    ##
+    dnsPolicy: ""
+    
+    ## @param wazuh.master.dnsConfig DNS configuration for the pod
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    ## Example:
+    ## dnsConfig:
+    ##   nameservers:
+    ##     - 1.2.3.4
+    ##   searches:
+    ##     - ns1.svc.cluster-domain.example
+    ##     - my.dns.search.suffix
+    ##   options:
+    ##     - name: ndots
+    ##       value: "2"
+    dnsConfig: {}
+
     ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
     ## @param wazuh.master.service.type Type of the created service.
     ## @param wazuh.master.service.annotations Annotations of the created service.
@@ -776,6 +836,26 @@ wazuh:
     tolerations: []
 
     affinity: {}
+
+    ## @param wazuh.worker.dnsPolicy DNS policy for the pod
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+    ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
+    ##
+    dnsPolicy: ""
+    
+    ## @param wazuh.worker.dnsConfig DNS configuration for the pod
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+    ## Example:
+    ## dnsConfig:
+    ##   nameservers:
+    ##     - 1.2.3.4
+    ##   searches:
+    ##     - ns1.svc.cluster-domain.example
+    ##     - my.dns.search.suffix
+    ##   options:
+    ##     - name: ndots
+    ##       value: "2"
+    dnsConfig: {}
 
     ## Pod anti-affinity can prevent the scheduler from placing Alertmanager replicas on the same node.
     ## The default value "soft" means that the scheduler should *prefer* to not schedule two replica pods onto the same node but no guarantee is provided.
@@ -944,6 +1024,26 @@ agent:
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
   ## @param wazuh.agent.tolerations
   tolerations: []
+
+  ## @param agent.dnsPolicy DNS policy for the pod
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+  ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
+  ##
+  dnsPolicy: ""
+  
+  ## @param agent.dnsConfig DNS configuration for the pod
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## Example:
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 1.2.3.4
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  dnsConfig: {}
 
   ## Parameters to configure the join manager.
   ## @param wazuh.agent.joinManager.scheme Join manager scheme
