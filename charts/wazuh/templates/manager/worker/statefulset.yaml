@@ -69,6 +69,13 @@ spec:
                   matchExpressions:
                     - {key: app, operator: In, values: [{{ include "wazuh.fullname" . }}-manager-worker]}
         {{- end }}
+      {{- with .Values.wazuh.worker.dnsPolicy }}
+      dnsPolicy: {{ . }}
+      {{- end }}
+      {{- with .Values.wazuh.worker.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
         - name: config
           configMap:
