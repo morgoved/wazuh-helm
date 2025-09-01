@@ -2095,7 +2095,7 @@ config:
               entity_id: {{ required "dashboard.sso.saml.idpEntityId is required" .Values.dashboard.sso.saml.idpEntityId }}
             sp:
               entity_id: {{ .Values.dashboard.sso.saml.spEntityId }}
-            kibana_url: {{ .Values.dashboard.sso.saml.kibanaUrl | default .Values.dashboard.ingress.host | required "dashboard.sso.saml.kibanaUrl or dashboard.ingress.host is required" }}
+            kibana_url: {{ .Values.dashboard.sso.saml.kibanaUrl | default (printf "https://%s" .Values.dashboard.ingress.host) | required "dashboard.sso.saml.kibanaUrl or dashboard.ingress.host is required" }}
             roles_key: {{ .Values.dashboard.sso.saml.config.rolesKey }}
             exchange_key: {{ required "dashboard.sso.saml.exchangeKey is required" .Values.dashboard.sso.saml.exchangeKey }}
         authentication_backend:
