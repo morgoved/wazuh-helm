@@ -1,0 +1,36 @@
+{{- if .Values.wazuh.loadBalancer.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wazuh.fullname" . }}-manager-lb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+  annotations:
+    {{- with .Values.wazuh.loadBalancer.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: LoadBalancer
+  ports:
+  {{- range .Values.wazuh.master.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+  {{- end }}
+  {{- range .Values.wazuh.worker.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+  {{- end }}
+  {{- if .Values.wazuh.syslog_enable }}
+    - name: syslog
+      port: 514
+      targetPort: 514
+      protocol: UDP
+  {{- end }}
+  selector:
+    app: {{ include "wazuh.fullname" . }}-manager
+{{- end -}}
