@@ -9,6 +9,7 @@ metadata:
   annotations:
     {{- toYaml .Values.wazuh.master.annotations | nindent 4 }}
 spec:
+  serviceAccountName: {{ include "wazuh.manager.serviceAccountName" . }}
   {{- with .Values.wazuh.master.extraSpec.statefulSet }}
   {{- toYaml . | nindent 2 }}
   {{- end }}
