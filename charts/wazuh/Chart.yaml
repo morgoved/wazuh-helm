@@ -8,12 +8,16 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
+    - kind: changed
+      description: "Update all components to Wazuh 4.12.0"
+    - kind: changed
+      description: "Update agent image to 4.12.0"
+    - kind: added
+      description: "Add ARM architecture support via nodeSelector"
     - kind: added
       description: "Add support for cert-manager"
     - kind: changed
       description: "Refactor whole chart"
-    - kind: changed
-      description: "Bump wazuh-manager to 4.10.1"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh
