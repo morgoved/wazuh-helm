@@ -1,3 +1,4 @@
+{{- if .Values.agent.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -18,3 +19,4 @@ spec:
     app: {{ include "wazuh.fullname" . }}-agent
     node-type: agent
   type: {{ .Values.agent.service.type }}
+{{- end }}
