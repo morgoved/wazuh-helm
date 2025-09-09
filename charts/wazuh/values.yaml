@@ -551,7 +551,7 @@ wazuh:
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service (e.g., AWS NLB annotations)
   ##
   loadBalancer:
-    enabled: true
+    enabled: false
     annotations: {}
       ## Example AWS NLB annotations:
       # service.beta.kubernetes.io/aws-load-balancer-type: "external"
