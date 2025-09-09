@@ -52,12 +52,12 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.indexer.dnsPolicy }}
-      dnsPolicy: {{ . }}
+      {{- if .Values.indexer.dnsPolicy }}
+      dnsPolicy: {{ .Values.indexer.dnsPolicy }}
       {{- end }}
-      {{- with .Values.indexer.dnsConfig }}
+      {{- if .Values.indexer.dnsConfig }}
       dnsConfig:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.indexer.dnsConfig | nindent 8 }}
       {{- end }}
       {{- if and .Values.indexer.sysctlImage.enabled }}
       initContainers:

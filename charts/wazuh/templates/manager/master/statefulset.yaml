@@ -53,12 +53,12 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.wazuh.master.dnsPolicy }}
-      dnsPolicy: {{ . }}
+      {{- if .Values.wazuh.master.dnsPolicy }}
+      dnsPolicy: {{ .Values.wazuh.master.dnsPolicy }}
       {{- end }}
-      {{- with .Values.wazuh.master.dnsConfig }}
+      {{- if .Values.wazuh.master.dnsConfig }}
       dnsConfig:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.wazuh.master.dnsConfig | nindent 8 }}
       {{- end }}
       volumes:
         - name: config

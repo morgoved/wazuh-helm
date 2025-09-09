@@ -48,12 +48,12 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.dashboard.dnsPolicy }}
-      dnsPolicy: {{ . }}
+      {{- if .Values.dashboard.dnsPolicy }}
+      dnsPolicy: {{ .Values.dashboard.dnsPolicy }}
       {{- end }}
-      {{- with .Values.dashboard.dnsConfig }}
+      {{- if .Values.dashboard.dnsConfig }}
       dnsConfig:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml .Values.dashboard.dnsConfig | nindent 8 }}
       {{- end }}
       volumes:
         - configMap:
