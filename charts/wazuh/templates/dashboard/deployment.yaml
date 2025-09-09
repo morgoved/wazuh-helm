@@ -49,6 +49,13 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.dashboard.dnsPolicy }}
+      dnsPolicy: {{ .Values.dashboard.dnsPolicy }}
+      {{- end }}
+      {{- if .Values.dashboard.dnsConfig }}
+      dnsConfig:
+        {{- toYaml .Values.dashboard.dnsConfig | nindent 8 }}
+      {{- end }}
       volumes:
         - configMap:
             name: {{ include "wazuh.fullname" . }}-dashboard-config

@@ -53,6 +53,13 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.indexer.dnsPolicy }}
+      dnsPolicy: {{ .Values.indexer.dnsPolicy }}
+      {{- end }}
+      {{- if .Values.indexer.dnsConfig }}
+      dnsConfig:
+        {{- toYaml .Values.indexer.dnsConfig | nindent 8 }}
+      {{- end }}
       {{- if and .Values.indexer.sysctlImage.enabled }}
       initContainers:
         ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)

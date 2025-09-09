@@ -50,6 +50,13 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.agent.dnsPolicy }}
+      dnsPolicy: {{ .Values.agent.dnsPolicy }}
+      {{- end }}
+      {{- if .Values.agent.dnsConfig }}
+      dnsConfig:
+        {{- toYaml .Values.agent.dnsConfig | nindent 8 }}
+      {{- end }}
       containers:
         - name: wazuh-agent
           {{- with .Values.agent.extraSpec.container }}

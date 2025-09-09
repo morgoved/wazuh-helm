@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 0.2.7](https://img.shields.io/badge/Version-0.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
+![Version: 0.2.8](https://img.shields.io/badge/Version-0.2.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -123,6 +123,8 @@ Same applies when changing `dashboard.cred.password`
 | `indexer.cred.existingSecret`                | Name of the existingSecret which holds the key "INDEXER_PASSWORD".             | `""`                                                           |
 | `indexer.cred.password`                      | Value of the password for the admin user.                                      | `WazuhSecretPassword`                                          |
 | `indexer.cred.passwordHash`                  | Hash of the password for the admin user. To create this, follow the README.    | `$2a$12$zGWIT7wkPKT/zww3bmMyp.KuWXH4RzgxiB91Q8NGFcqpyPy.R2Rcq` |
+| `indexer.dnsPolicy`                          | DNS policy for the pod.                                                        | `""`                                                           |
+| `indexer.dnsConfig`                          | DNS configuration for the pod.                                                 | `{}`                                                           |
 
 ### indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 
@@ -168,6 +170,8 @@ Same applies when changing `dashboard.cred.password`
 | `dashboard.ingress.tls`                        | Allows to use specific tls certificate.                                            | `[]`                                                           |
 | `dashboard.ingress.annotations`                | Used for detailed configuration.                                                   | `{}`                                                           |
 | `dashboard.ingress.host`                       | Defines the hostname and URL under which the dashboard gets                        | `wazuh.example.com`                                            |
+| `dashboard.dnsPolicy`                          | DNS policy for the pod.                                                            | `""`                                                           |
+| `dashboard.dnsConfig`                          | DNS configuration for the pod.                                                     | `{}`                                                           |
 
 ### wazuh configuration of the wazuh core component.
 
@@ -220,6 +224,8 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.master.storageClass`                        | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
 | `wazuh.master.conf`                                | Config for the wazuh master, do not change!                  | `{{ include "wazuh.master.conf" . }}`  |
 | `wazuh.master.extraConf`                           | Gets appended to the wazuh.master.conf.                      | `""`                                   |
+| `wazuh.master.dnsPolicy`                           | DNS policy for the pod.                                      | `""`                                   |
+| `wazuh.master.dnsConfig`                           | DNS configuration for the pod.                               | `{}`                                   |
 
 ### wazuh.worker configuration of the wazuh worker component.
 
@@ -246,3 +252,17 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.worker.storageClass`                       | Defines the storageClass of the pvc used by the statefulset. | `nil`                                  |
 | `wazuh.worker.conf`                               | Config for the wazuh worker, do not change!                  | `{{ include "wazuh.worker.conf" . }}`  |
 | `wazuh.worker.extraConf`                          | Gets appended to the wazuh.worker.conf.                      | `""`                                   |
+| `wazuh.worker.dnsPolicy`                          | DNS policy for the pod.                                      | `""`                                   |
+| `wazuh.worker.dnsConfig`                          | DNS configuration for the pod.                               | `{}`                                   |
+
+### agent configuration of the wazuh agent component.
+
+| Name                                              | Description                                                  | Value                                  |
+| ------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| `agent.enabled`                                   | Enable the agent.                                            | `false`                                |
+| `agent.service.port`                              | Port for the service.                                        | `5000`                                 |
+| `agent.service.type`                              | Type of the created service.                                 | `ClusterIP`                            |
+| `agent.service.annotations`                       | Annotations of the created service.                          | `{}`                                   |
+| `agent.labels`                                    | Extra labels for the agent.                                  | `{}`                                   |
+| `agent.dnsPolicy`                                 | DNS policy for the pod.                                      | `""`                                   |
+| `agent.dnsConfig`                                 | DNS configuration for the pod.                               | `{}`                                   |
