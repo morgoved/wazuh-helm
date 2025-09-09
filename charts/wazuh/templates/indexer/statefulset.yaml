@@ -9,7 +9,6 @@ metadata:
   annotations:
     {{- toYaml .Values.indexer.annotations | nindent 4 }}
 spec:
-  serviceAccountName: {{ include "wazuh.indexer.serviceAccountName" . }}
   {{- with .Values.indexer.extraSpec.statefulSet }}
   {{- toYaml . | nindent 2 }}
   {{- end }}
@@ -34,6 +33,7 @@ spec:
             {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccountName: {{ include "wazuh.indexer.serviceAccountName" . }}
       {{- with .Values.indexer.extraSpec.pod }}
       {{- toYaml . | nindent 6 }}
       {{- end }}

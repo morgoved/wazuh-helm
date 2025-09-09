@@ -13,7 +13,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  serviceAccountName: {{ include "wazuh.agent.serviceAccountName" . }}
   {{- with .Values.agent.extraSpec.daemonSet }}
   {{- toYaml . | nindent 2 }}
   {{- end }}
@@ -31,6 +30,7 @@ spec:
         app: {{ include "wazuh.indexer.fullname" . }}-agent
         node-type: agent
     spec:
+      serviceAccountName: {{ include "wazuh.agent.serviceAccountName" . }}
       {{- with .Values.agent.extraSpec.pod }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
