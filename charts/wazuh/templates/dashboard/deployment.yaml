@@ -8,6 +8,7 @@ metadata:
   annotations:
     {{- toYaml .Values.dashboard.annotations | nindent 4 }}
 spec:
+  serviceAccountName: {{ include "wazuh.dashboard.serviceAccountName" . }}
   {{- with .Values.dashboard.extraSpec.deployment }}
   {{- toYaml . | nindent 2 }}
   {{- end }}

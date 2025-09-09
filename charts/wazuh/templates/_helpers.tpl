@@ -2290,3 +2290,30 @@ Get port value from ports array by name
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Define serviceaccount names
+*/}}
+{{- define "wazuh.indexer.serviceAccountName" -}}
+{{- if .Values.indexer.serviceAccount.create -}}
+    {{ default (printf "%s-indexer" (include "wazuh.indexer.fullname" .)) .Values.indexer.serviceAccount.name }}
+{{- else -}}
+    {{ "default" }}
+{{- end -}}
+{{- end -}}
+
+{{- define "wazuh.dashboard.serviceAccountName" -}}
+{{- if .Values.dashboard.serviceAccount.create -}}
+    {{ default (printf "%s-dashboard" (include "wazuh.fullname" .)) .Values.dashboard.serviceAccount.name }}
+{{- else -}}
+    {{ "default" }}
+{{- end -}}
+{{- end -}}
+
+{{- define "wazuh.manager.serviceAccountName" -}}
+{{- if .Values.wazuh.serviceAccount.create -}}
+    {{ default (printf "%s-manager" (include "wazuh.fullname" .)) .Values.wazuh.serviceAccount.name }}
+{{- else -}}
+    {{ "default" }}
+{{- end -}}
+{{- end -}}

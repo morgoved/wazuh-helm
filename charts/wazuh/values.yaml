@@ -63,6 +63,12 @@ externalIndexer:
 indexer:
   ## @param indexer.enabled defines if we deploy indexer or not 
   enabled: true
+
+  ## @param indexer.serviceAccount defines wazuh indexer serviceAccount
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: "wazuh-indexer"
   ## @param indexer.replicas number of replicas used in statefulset.
   ##
   replicas: 3
@@ -262,6 +268,11 @@ indexer:
 ## pre-installed
 ##
 dashboard:
+  ## @param dashboard.serviceAccount defines wazuh dashboard serviceAccount
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: "wazuh-dashboard"
   ## @param dashboard.replicas number of replicas used in deployment.
   ##
   replicas: 1
@@ -538,6 +549,11 @@ dashboard:
 ## @section wazuh configuration of the wazuh core component.
 ##
 wazuh:
+  ## @param wazuh.serviceAccount defines wazuh manager serviceAccount
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: "wazuh-manager"
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   ##
   syslog_enable: true
@@ -876,6 +892,12 @@ wazuh:
 agent:
   ## @param wazuh.agent.enabled Enable the agent
   enabled: false
+
+  ## @param agent.serviceAccount defines wazuh agent serviceAccount
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: "wazuh-agent"
 
   service:
     port: 5000
