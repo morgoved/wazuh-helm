@@ -2317,3 +2317,11 @@ Define serviceaccount names
     {{ "default" }}
 {{- end -}}
 {{- end -}}
+
+{{- define "wazuh.agent.serviceAccountName" -}}
+{{- if .Values.agent.serviceAccount.create -}}
+    {{ default (printf "%s-agent" (include "wazuh.fullname" .)) .Values.agent.serviceAccount.name }}
+{{- else -}}
+    {{ "default" }}
+{{- end -}}
+{{- end -}}
