@@ -90,6 +90,9 @@ spec:
       - configMap:
           name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
         name: indexer-conf
+      {{- with .Values.indexer.additionalVolumes }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       containers:
         - name: wazuh-indexer
           {{- with .Values.indexer.extraSpec.container }}
@@ -192,6 +195,9 @@ spec:
               mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
               subPath: config.yml
               readOnly: true
+            {{- with .Values.indexer.additionalVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           ports:
             - containerPort: {{ .Values.indexer.service.httpPort }}
               name: indexer-rest

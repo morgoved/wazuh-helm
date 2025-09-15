@@ -213,6 +213,14 @@ indexer:
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
   additionalEnv: []
+  ## @param indexer.additionalVolumes Possibility to define additional volumes in the pod.
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ##
+  additionalVolumes: []
+  ## @param indexer.additionalVolumeMounts Possibility to define additional volumeMounts in the pod.
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  ##
+  additionalVolumeMounts: []
   ## Configuration of the indexer parameters, this should not be changed.
   ## @param indexer.config.opensearch Configuration of opensearch.yml.
   ## @param indexer.config.internalUsers Configuration of internalUsers of the indexer.
@@ -231,6 +239,8 @@ indexer:
       {{ include "wazuh.indexer.rolesMapping" . }}
     roles: |-
       {{ include "wazuh.indexer.roles" . }}
+  ## Additional configurations to add to the configmap
+  additionalConfigs: {}
   ## Parameters for the sysctlImage initContainer.
   ##
   sysctlImage:
