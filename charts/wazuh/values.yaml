@@ -676,6 +676,13 @@ wazuh:
       limits:
         cpu: 1000m
         memory: 1Gi
+
+  ## Define command to be executed at startup by grafana container
+  # command: []
+
+  ## Optionally define args if command is used
+  # args: []
+
   ## @param wazuh.localDecoder Configuration of the local decoder.
   ##
   localDecoder: |

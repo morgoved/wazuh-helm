@@ -121,6 +121,18 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if .Values.wazuh.command }}
+          command:
+          {{- range .Values.wazuh.command }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.wazuh.args }}
+          args:
+          {{- range .Values.wazuh.args }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- end }}
           volumeMounts:
             # Wazuh Config
             - mountPath: /wazuh-config-mount/etc/
