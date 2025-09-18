@@ -676,6 +676,10 @@ wazuh:
       limits:
         cpu: 1000m
         memory: 1Gi
+
+  ## Parameters for the additional initContainers.
+  extraInitContainers: []
+  
   ## @param wazuh.localDecoder Configuration of the local decoder.
   ##
   localDecoder: |
