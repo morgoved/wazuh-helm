@@ -31,10 +31,10 @@ spec:
     - ports:
       - protocol: TCP
     {{- range .Values.wazuh.master.service.ports }}
-      {{ if eq .name "api" }}
+      {{- if eq .name "api" }}
         port: {{ .port }}
-      {{ end }}
-    {{ end }}
+      {{- end }}
+    {{- end }}
       to:
         - podSelector:
             matchLabels:

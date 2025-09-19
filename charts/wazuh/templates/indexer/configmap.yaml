@@ -19,4 +19,8 @@ data:
     {{- tpl .Values.indexer.config.roles . | nindent 4 }}
   config.yml: |
     {{- tpl .Values.indexer.config.securityConfig . | nindent 4 }}
+{{- range $configName, $configYaml := .Values.indexer.additionalConfigs }}
+  {{ $configName }}: |
+    {{-   tpl $configYaml . | nindent 4 }}
+{{- end -}}
 {{- end }}
