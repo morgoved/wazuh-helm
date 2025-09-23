@@ -124,6 +124,20 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - |
+                  {{- range .Values.wazuh.agentGroupConf }}
+                  if [ -d "/var/ossec/etc/shared/{{ .name }}" ]; then
+                    chown -R wazuh:wazuh /var/ossec/etc/shared/{{ .name }}
+                    chmod 770 /var/ossec/etc/shared/{{ .name }}
+                    chmod 660 /var/ossec/etc/shared/{{ .name }}/* 2>/dev/null || true
+                  fi
+                  {{- end }}
           volumeMounts:
             # Wazuh Config
             - mountPath: /wazuh-config-mount/etc/
