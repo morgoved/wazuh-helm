@@ -2074,7 +2074,13 @@ config:
             {{- if .Values.dashboard.sso.oidc.idp.enableSSL }}
             openid_connect_idp:
               enable_ssl: {{ .Values.dashboard.sso.oidc.idp.enableSSL }}
+              {{- if and (.Values.dashboard.sso.oidc.idp.pemtrustedcasFilePath) (not .Values.dashboard.sso.oidc.idp.pemtrustedcasContent) }}
               pemtrustedcas_filepath: {{ .Values.dashboard.sso.oidc.idp.pemtrustedcasFilePath }}
+              {{- end }}
+              {{- if and (.Values.dashboard.sso.oidc.idp.pemtrustedcasContent) (not .Values.dashboard.sso.oidc.idp.pemtrustedcasFilePath) }}
+              pemtrustedcas_content: |- 
+                {{- .Values.dashboard.sso.oidc.idp.pemtrustedcasContent | nindent 16 }}
+              {{- end }}
             {{- end }}
             client_id: ${env.OPENSEARCH_OIDC_CLIENT_ID}
             client_secret: ${env.OPENSEARCH_OIDC_CLIENT_SECRET}
@@ -2091,6 +2097,16 @@ config:
           challenge: {{ not .Values.dashboard.sso.saml.primary }}
           config:
             idp:
+              {{- if .Values.dashboard.sso.saml.enableSSL }}
+              enable_ssl: {{ .Values.dashboard.sso.saml.enableSSL }}
+              {{- if and (.Values.dashboard.sso.saml.pemtrustedcasFilePath) (not .Values.dashboard.sso.saml.pemtrustedcasContent) }}
+              pemtrustedcas_filepath: {{ .Values.dashboard.sso.saml.pemtrustedcasFilePath }}
+              {{- end }}
+              {{- if and (.Values.dashboard.sso.saml.pemtrustedcasContent) (not .Values.dashboard.sso.saml.pemtrustedcasFilePath) }}
+              pemtrustedcas_content: |- 
+                {{- .Values.dashboard.sso.saml.pemtrustedcasContent | nindent 16 }}
+              {{- end }}
+              {{- end }}
               metadata_url: {{ required "dashboard.sso.saml.metadataUrl is required" .Values.dashboard.sso.saml.metadataUrl }}
               entity_id: {{ required "dashboard.sso.saml.idpEntityId is required" .Values.dashboard.sso.saml.idpEntityId }}
             sp:
