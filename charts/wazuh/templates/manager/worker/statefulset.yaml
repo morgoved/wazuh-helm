@@ -242,7 +242,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: key
-                  name: "wazuh-cluster-key"
+                  name: {{ .Values.wazuh.keyExistingSecret | default "wazuh-cluster-key" }}
             # Certs
             - name: SSL_CERTIFICATE_AUTHORITIES
               value: /etc/ssl/root-ca.pem

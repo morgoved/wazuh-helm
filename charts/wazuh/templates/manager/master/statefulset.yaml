@@ -252,7 +252,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: key
-                  name: "wazuh-cluster-key"
+                  name: {{ .Values.wazuh.keyExistingSecret | default "wazuh-cluster-key" }}
           {{- with .Values.wazuh.master.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
