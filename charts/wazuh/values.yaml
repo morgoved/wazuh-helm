@@ -541,7 +541,7 @@ dashboard:
       ## @param dashboard.sso.saml.idpEntityId SAML IdP entity ID
       idpEntityId: ""
       ## @param dashboard.sso.saml.enableSSL Enable SSL for idp metadata URL, when is false JDK settings are used
-      enableSSL: true
+      enableSSL: false
       ## @param dashboard.sso.saml.pemtrustedcasFilePath define the file path of the root CA, if enableSSL is false it's not used
       ## Configure the root CA used for validating the IdP TLS certificate by setting one of the following configuration options (pemtrustedcasFilePath or pemtrustedcasContent)
       pemtrustedcasFilePath: ""
