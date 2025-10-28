@@ -519,8 +519,16 @@ dashboard:
         imageUrl: ""
         showImage: false
       idp:
+        ## @param dashboard.sso.oidc.idp.enableSSL Enable SSL for idp metadata URL, when is false JDK settings are used
         enableSSL: false
+        ## @param dashboard.sso.oidc.idp.pemtrustedcasFilePath define the file path of the root CA, if enableSSL is false it's not used
+        ## Configure the root CA used for validating the IdP TLS certificate by setting one of the following configuration options (pemtrustedcasFilePath or pemtrustedcasContent)
         pemtrustedcasFilePath: ""
+        ## @param dashboard.sso.oidc.idp.pemtrustedcasContent define the content of the root CA, if enableSSL is false it's not used. 
+        ## The root CA content of your IdP server. Cannot be used when pemtrustedcas_filepath is set.
+        pemtrustedcasContent: |-
+          -----BEGIN CERTIFICATE-----
+          -----END CERTIFICATE-----
 
     saml:
       ## @param dashboard.sso.saml.enabled Enable SAML authentication
@@ -532,6 +540,16 @@ dashboard:
       metadataUrl: ""
       ## @param dashboard.sso.saml.idpEntityId SAML IdP entity ID
       idpEntityId: ""
+      ## @param dashboard.sso.saml.enableSSL Enable SSL for idp metadata URL, when is false JDK settings are used
+      enableSSL: false
+      ## @param dashboard.sso.saml.pemtrustedcasFilePath define the file path of the root CA, if enableSSL is false it's not used
+      ## Configure the root CA used for validating the IdP TLS certificate by setting one of the following configuration options (pemtrustedcasFilePath or pemtrustedcasContent)
+      pemtrustedcasFilePath: ""
+      ## @param dashboard.sso.saml.pemtrustedcasContent define the content of the root CA, if enableSSL is false it's not used. 
+      ## The root CA content of your IdP server. Cannot be used when pemtrustedcas_filepath is set.
+      pemtrustedcasContent: |-
+        -----BEGIN CERTIFICATE-----
+        -----END CERTIFICATE-----
       ## @param dashboard.sso.saml.spEntityId SAML SP entity ID
       spEntityId: "wazuh-saml"
       ## @param dashboard.sso.saml.kibanaUrl Dashboard/Kibana URL for SAML SP configuration
