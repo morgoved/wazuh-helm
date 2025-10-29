@@ -961,7 +961,7 @@ wazuh_clusterd.debug=0
     <name>wazuh</name>
     <node_name>{{ include "wazuh.fullname" . }}-manager-master-0</node_name>
     <node_type>master</node_type>
-    <key>{{ .Values.wazuh.key }}</key>
+    <key>${WAZUH_CLUSTER_KEY}</key>
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
@@ -1320,7 +1320,7 @@ wazuh_clusterd.debug=0
     <name>wazuh</name>
     <node_name>{{ include "wazuh.fullname" . }}-manager-worker-___INDEX___</node_name>
     <node_type>worker</node_type>
-    <key>{{ .Values.wazuh.key }}</key>
+    <key>${WAZUH_CLUSTER_KEY}</key>
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
