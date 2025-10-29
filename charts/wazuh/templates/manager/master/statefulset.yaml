@@ -72,32 +72,10 @@ spec:
         - name: wazuh-authd-pass
           secret:
             secretName: wazuh-authd-pass
-        - emptyDir: {}
-          name: result-config
       {{- with .Values.wazuh.master.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
-        - name: update-index
-          image: alpine
-          imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}
-          command: 
-            - 'sh'
-            - '-c'
-            - '/script.sh'
-          resources:
-            {{- toYaml .Values.wazuh.initContainer.resources | nindent 12 }}
-          volumeMounts:
-            - mountPath: /ossec.conf
-              name: config
-              readOnly: true
-              subPath: master.conf
-            - mountPath: /wazuh-config-mount/etc/
-              name: result-config
-            - mountPath: /script.sh
-              name: config
-              readOnly: true
-              subPath: script.sh
         {{- with .Values.wazuh.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -140,8 +118,10 @@ spec:
                   {{- end }}
           volumeMounts:
             # Wazuh Config
-            - mountPath: /wazuh-config-mount/etc/
-              name: result-config
+            - mountPath: /wazuh-config-mount/etc/ossec.conf
+              name: config
+              readOnly: true
+              subPath: master.conf
             - mountPath: /wazuh-config-mount/etc/internal_options.conf
               name: config
               readOnly: true
