@@ -1026,7 +1026,7 @@ wazuh:
 
 agent:
   ## @param wazuh.agent.enabled Enable the agent
-  enabled: false
+  enabled: true
 
   ## @param agent.serviceAccount defines wazuh agent serviceAccount
   serviceAccount:
@@ -1134,10 +1134,10 @@ agent:
       group: default
 
   ## Configuration of the api credentials. If username and password are left empty, they will be generated automatically.
-  ## @param wazuh.apiCred.existingSecret name of the existingSecret in the namespace. Expected keys are 'API_USERNAME' and
+  ## @param wazuh.agent.apiCred.existingSecret name of the existingSecret in the namespace. Expected keys are 'API_USERNAME' and
   ## 'API_PASSWORD'
-  ## @param wazuh.apiCred.username name of the username.
-  ## @param wazuh.apiCred.password password of the user. Note that the password must have a length
+  ## @param wazuh.agent.apiCred.username name of the username.
+  ## @param wazuh.agent.apiCred.password password of the user. Note that the password must have a length
   ## between 8 and 64 characters and contain at least one upper and lower case letter, a number
   ## and a symbol(.*+?-).
   ## use it when you need to deploy wazuh agent only
