@@ -1,3 +1,4 @@
+{{- if .Values.dashboard.enabled }}
 {{- if .Values.dashboard.ingress.enabled -}}
 apiVersion:  networking.k8s.io/v1
 kind: Ingress
@@ -36,4 +37,4 @@ spec:
             path: /
             pathType: Prefix
 {{- end -}}
-
+{{- end }}
