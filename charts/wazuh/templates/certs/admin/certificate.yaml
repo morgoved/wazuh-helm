@@ -1,3 +1,4 @@
+{{- if and .Values.certificates.enabled .Values.indexer.enabled }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -24,3 +25,4 @@ spec:
   issuerRef:
     # Admin Issuer have to use the CA Issuer so that the certificate can be validated with node-tls secret
     name: {{ include "wazuh.fullname" . }}-ca-issuer
+{{- end }}

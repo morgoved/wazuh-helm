@@ -1,3 +1,4 @@
+{{- if .Values.dashboard.enabled }}
 {{- if .Values.dashboard.pdb.enabled }}
 kind: PodDisruptionBudget
 apiVersion: policy/v1
@@ -11,4 +12,5 @@ spec:
   {{- with .Values.dashboard.pdb.maxUnavailable }}
   maxUnavailable: {{ . }}
   {{- end }}
+{{- end }}
 {{- end }}
