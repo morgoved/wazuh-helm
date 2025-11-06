@@ -1,3 +1,4 @@
+{{- if .Values.wazuh.master.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -269,3 +270,4 @@ spec:
         storageClassName: {{ $storageClass }}
         {{- end }}
         {{- end }}
+{{- end }}

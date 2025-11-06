@@ -74,11 +74,11 @@ spec:
           {{- end }}
           env:
             - name: JOIN_MANAGER
-              value: {{ printf "wazuh.%s.svc.cluster.local" .Release.Namespace }}
+              value: {{ or .Values.agent.joinManager.managerHost (printf "wazuh.%s.svc.cluster.local" .Release.Namespace) }}
             - name: JOIN_MANAGER_MASTER_HOST
-              value: {{ printf "wazuh.%s.svc.cluster.local" .Release.Namespace }}
+              value: {{ or .Values.agent.joinManager.managerHost (printf "wazuh.%s.svc.cluster.local" .Release.Namespace) }}
             - name: JOIN_MANAGER_WORKER_HOST
-              value: {{ printf "%s-manager-worker.wazuh.svc.cluster.local" (include "wazuh.fullname" .) }}
+              value: {{ or .Values.agent.joinManager.workerHost (printf "%s-manager-worker.wazuh.svc.cluster.local" (include "wazuh.fullname" .)) }}
             - name: JOIN_MANAGER_PROTOCOL
               value: {{ .Values.agent.joinManager.scheme }}
             - name: NODE_NAME
@@ -88,24 +88,31 @@ spec:
             - name: JOIN_MANAGER_USER
               valueFrom:
                 secretKeyRef:
-                  name: wazuh-api-cred
+                  name: {{ .Values.agent.apiCred.existingSecret | default "wazuh-api-cred" }}
                   key: API_USERNAME
             - name: JOIN_MANAGER_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: wazuh-api-cred
+                  name: {{ .Values.agent.apiCred.existingSecret | default "wazuh-api-cred" }}
                   key: API_PASSWORD
             - name: JOIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: wazuh-api-cred
+                  name: {{ .Values.agent.apiCred.existingSecret | default "wazuh-api-cred" }}
                   key: API_PASSWORD
             - name: WAZUH_GROUPS
               value: {{ .Values.agent.joinManager.wazuh.group | quote }}
+              {{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled }}
             - name: JOIN_MANAGER_API_PORT
               value: {{ include "wazuh.getPortByName" (dict "portName" "api" "ports" .Values.wazuh.master.service.ports) | quote }}
             - name: JOIN_MANAGER_PORT
               value: {{ include "wazuh.getPortByName" (dict "portName" "agents-events" "ports" .Values.wazuh.worker.service.ports) | quote }}
+              {{ else }}
+            - name: JOIN_MANAGER_API_PORT
+              value: {{ .Values.agent.joinManager.apiPort }}
+            - name: JOIN_MANAGER_PORT
+              value: {{ .Values.agent.joinManager.agentsEvents }}
+              {{- end }}
             - name: HEALTH_CHECK_PROCESSES
               value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd,ossec-authd"
           {{- with .Values.agent.livenessProbe }}

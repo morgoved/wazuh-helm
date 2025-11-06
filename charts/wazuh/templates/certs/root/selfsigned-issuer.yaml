@@ -1,4 +1,5 @@
 # https://cert-manager.io/docs/configuration/selfsigned/
+{{- if .Values.certificates.enabled }}
 {{- if not .Values.certificates.issuer.name }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -8,3 +9,4 @@ metadata:
 spec:
   selfSigned: {}
 {{- end -}}
+{{- end }}
