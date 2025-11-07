@@ -38,7 +38,7 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.agent.securityContext }}
+      {{- with .Values.agent.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -68,7 +68,7 @@ spec:
             - name: agent-http
               containerPort: {{ .Values.agent.service.port }}
               protocol: TCP
-          {{- with .Values.agent.podSecurityContext }}
+          {{- with .Values.agent.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -109,9 +109,9 @@ spec:
               value: {{ include "wazuh.getPortByName" (dict "portName" "agents-events" "ports" .Values.wazuh.worker.service.ports) | quote }}
               {{ else }}
             - name: JOIN_MANAGER_API_PORT
-              value: {{ .Values.agent.joinManager.apiPort }}
+              value: {{ .Values.agent.joinManager.apiPort | quote }}
             - name: JOIN_MANAGER_PORT
-              value: {{ .Values.agent.joinManager.agentsEvents }}
+              value: {{ .Values.agent.joinManager.agentsEvents | quote }}
               {{- end }}
             - name: HEALTH_CHECK_PROCESSES
               value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd,ossec-authd"

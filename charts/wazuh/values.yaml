@@ -1060,16 +1060,15 @@ agent:
     tag: "4.12.0"
     pullPolicy: IfNotPresent
 
-  ## Parameters to configure securityContext of the daemonSet
-  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  ## @param wazuh.agent.securityContext Additional capabilities.
-  securityContext:
-    privileged: true
-
   ## Parameters to configure securityContext of the pod.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   ## @param wazuh.agent.podSecurityContext Additional capabilities.
-  podSecurityContext:
+  podSecurityContext: {}
+
+  ## Parameters to configure securityContext of the container
+  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  ## @param wazuh.agent.securityContext Additional capabilities.
+  securityContext:
     privileged: true
 
   ## Parameters to configure the resources allocated to the agent.
