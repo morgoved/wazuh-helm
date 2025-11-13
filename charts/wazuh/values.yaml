@@ -73,7 +73,7 @@ indexer:
     name: "wazuh-indexer"
   ## @param indexer.replicas number of replicas used in statefulset.
   ##
-  replicas: 3
+  replicas: 1
   ## @param indexer.annotations additional annotations set on statefulset.
   ##
   annotations: {}
@@ -90,7 +90,7 @@ indexer:
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.12.0"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
     ## Parameter to set the imagePullSecret TODO
     ## @skip indexer.images.imagePullSecrets.enabled 
@@ -241,6 +241,12 @@ indexer:
       {{ include "wazuh.indexer.rolesMapping" . }}
     roles: |-
       {{ include "wazuh.indexer.roles" . }}
+    tenants: |-
+      {{ include "wazuh.indexer.tenants" . }}
+    nodesDn: |-
+      {{ include "wazuh.indexer.nodes_dn" . }}
+    whitelist: |-
+      {{ include "wazuh.indexer.whitelist" . }}
   ## Additional configurations to add to the configmap
   additionalConfigs: {}
   ## Parameters for the sysctlImage initContainer.
@@ -324,7 +330,7 @@ dashboard:
     ## @param dashboard.images.pullPolicy pullPolicy of the image.
     ## @param dashboard.images.updateStrategy updateStrategy of the image.
     ##
-    tag: "4.12.0"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## Parameters to configure the resources allocated to the dashboard.
@@ -657,7 +663,7 @@ wazuh:
     ## @param wazuh.images.tag Tag of the image.
     ## @param wazuh.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.12.0"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
     ## @skip wazuh.images.pullSecret TODO
     ##
@@ -848,6 +854,8 @@ wazuh:
     ## @param wazuh.master.securityContext.capabilities.add Additional capabilities.
     ##
     securityContext:
+      runAsUser: 0
+      runAsGroup: 0
       capabilities:
         add: ["SYS_CHROOT"]
     ## Network Policies for restricting the traffic in the cluster.
@@ -885,7 +893,7 @@ wazuh:
     enabled: true
     ## @param wazuh.worker.replicas number of replicas used in statefulset.
     ##
-    replicas: 2
+    replicas: 0
     ## @param wazuh.worker.annotations additional annotations set on deployment.
     ##
     annotations: {}
@@ -1084,7 +1092,7 @@ agent:
       memory: 128Mi
     limits:
       cpu: 100m
-      memory: 64Mi
+      memory: 128Mi
 
   ## Parameters to configure the nodeSelector.
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/

@@ -19,6 +19,12 @@ data:
     {{- tpl .Values.indexer.config.roles . | nindent 4 }}
   config.yml: |
     {{- tpl .Values.indexer.config.securityConfig . | nindent 4 }}
+  tenants.yml: |
+    {{- tpl .Values.indexer.config.tenants . | nindent 4 }}
+  nodes_dn.yml: |
+    {{- tpl .Values.indexer.config.nodesDn . | nindent 4 }}
+  whitelist.yml: |
+    {{- tpl .Values.indexer.config.whitelist . | nindent 4 }}
 {{- range $configName, $configYaml := .Values.indexer.additionalConfigs }}
   {{ $configName }}: |
     {{-   tpl $configYaml . | nindent 4 }}
