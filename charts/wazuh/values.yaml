@@ -1079,10 +1079,10 @@ agent:
   ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
   ##
   resources:
-    requests:
+    limits:
       cpu: 50m
       memory: 128Mi
-    limits:
+    requests:
       cpu: 100m
       memory: 64Mi
 
