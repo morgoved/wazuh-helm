@@ -1081,10 +1081,10 @@ agent:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 64Mi
     limits:
       cpu: 100m
-      memory: 64Mi
+      memory: 128Mi
 
   ## Parameters to configure the nodeSelector.
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
