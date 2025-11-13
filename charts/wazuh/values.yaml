@@ -1079,12 +1079,12 @@ agent:
   ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
   ##
   resources:
-    limits:
-      cpu: 50m
-      memory: 128Mi
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
   ## Parameters to configure the nodeSelector.
   ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
