@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 0.3.8](https://img.shields.io/badge/Version-0.3.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.12.0](https://img.shields.io/badge/AppVersion-4.12.0-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.1](https://img.shields.io/badge/AppVersion-4.14.1-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -84,7 +84,7 @@ Same applies when changing `dashboard.cred.password`
 | `indexer.annotations`                        | additional annotations set on statefulset.                                     | `{}`                                                           |
 | `indexer.updateStrategy`                     | updateStrategy for the statefulset.                                            | `RollingUpdate`                                                |
 | `indexer.images.repository`                  | name of the image used. If you use your own image registry                     | `wazuh/wazuh-indexer`                                          |
-| `indexer.images.tag`                         | Tag of the image.                                                              | `4.12.0`                                                       |
+| `indexer.images.tag`                         | Tag of the image.                                                              | `4.14.1`                                                       |
 | `indexer.images.pullPolicy`                  | pullPolicy of the image.                                                       | `IfNotPresent`                                                 |
 | `indexer.resources.requests.cpu`             | Minimum CPU assigned to the pod.                                               | `500m`                                                         |
 | `indexer.resources.requests.memory`          | Minimum memory assigned to the pod.                                            | `1Gi`                                                          |
@@ -133,7 +133,7 @@ Same applies when changing `dashboard.cred.password`
 | `dashboard.replicas`                           | number of replicas used in deployment.                                             | `1`                                                            |
 | `dashboard.annotations`                        | additional annotations set on deployment.                                          | `{}`                                                           |
 | `dashboard.images.repository`                  | name of the image used. If you use your own image registry                         | `wazuh/wazuh-dashboard`                                        |
-| `dashboard.images.tag`                         | Tag of the image.                                                                  | `4.12.0`                                                       |
+| `dashboard.images.tag`                         | Tag of the image.                                                                  | `4.14.1`                                                       |
 | `dashboard.images.pullPolicy`                  | pullPolicy of the image.                                                           | `IfNotPresent`                                                 |
 | `dashboard.images.updateStrategy`              | updateStrategy of the image.                                                       | `OnDelete`                                                     |
 | `dashboard.resources.requests.cpu`             | Minimum CPU assigned to the pod.                                                   | `500m`                                                         |
@@ -180,7 +180,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.syslog_enable`                           | Enables the syslog of the wazuh instance.                                         | `true`                                     |
 | `wazuh.key`                                     | Defines the key of the wazuh cluster.                                             | `c98b62a9b6169ac5f67dae55ae4a9088`         |
 | `wazuh.images.repository`                       | name of the image used. If you use your own image registry                        | `wazuh/wazuh-manager`                      |
-| `wazuh.images.tag`                              | Tag of the image.                                                                 | `4.12.0`                                   |
+| `wazuh.images.tag`                              | Tag of the image.                                                                 | `4.14.1`                                   |
 | `wazuh.images.pullPolicy`                       | pullPolicy of the image.                                                          | `IfNotPresent`                             |
 | `wazuh.service.annotations`                     | Annotations of the created service.                                               | `{}`                                       |
 | `wazuh.service.port`                            | Port for the http endpoint.                                                       | `1516`                                     |
