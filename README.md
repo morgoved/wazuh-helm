@@ -24,7 +24,7 @@ Any changes made to the indexer configuration or secrets will be automatically a
 
 ### Compatibility
 
-This Helm chart has been tested with Wazuh version 4.12.0. Please note:
+This Helm chart has been tested with Wazuh version 4.14.1. Please note:
 
 Wazuh supports only a single master node and multiple worker nodes. Although the configuration is prepared for a multi-master setup, Wazuh does not currently support this feature.
 All XML configuration files are automatically updated through init containers.
