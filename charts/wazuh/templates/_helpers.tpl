@@ -379,6 +379,12 @@ remoted.send_buffer_size=131072
 # Sleep time to retry delivery to a client in TCP (seconds) [1..60]
 remoted.send_timeout_to_retry=1
 
+# Control message queue size for remoted (number of bytes or messages depending on version).
+# Newer Wazuh versions expect this key to be present: add a sane default to avoid "Definition not
+# found" errors during startup.
+remoted.control_msg_queue_size=65536
+
+remoted.router_forwarding_disabled=0
 # Deallocate network buffers after usage.
 # 0. Do not deallocate memory.
 # 1. Shrink memory to the reception chunk.
@@ -498,6 +504,9 @@ wazuh_modules.max_eps=100
 # 0: Kill immediately
 wazuh_modules.kill_timeout=10
 
+# Wazuh modules - maximum number of open file descriptors
+wazuh_modules.rlimit_nofile = 65536
+
 # Wazuh database module settings
 
 # Synchronize agent database with client.keys
@@ -584,6 +593,9 @@ vulnerability-detection.remediation_lru_size=2048
 # 0. Enabled
 # 1. Disabled
 vulnerability-detection.disable_scan_manager=1
+
+# Vulnerability detector - report queue size
+vulnerability-detection.report_queue_size=16384
 
 # Debug options.
 # Debug 0 -> no debug
@@ -1373,12 +1385,12 @@ cluster.initial_master_nodes:
 node.max_local_storage_nodes: "3"
 path.data: /var/lib/wazuh-indexer
 path.logs: /var/log/wazuh-indexer
-plugins.security.ssl.http.pemcert_filepath: /usr/share/wazuh-indexer/certs/node.pem
-plugins.security.ssl.http.pemkey_filepath: /usr/share/wazuh-indexer/certs/node-key.pem
-plugins.security.ssl.http.pemtrustedcas_filepath: /usr/share/wazuh-indexer/certs/root-ca.pem
-plugins.security.ssl.transport.pemcert_filepath: /usr/share/wazuh-indexer/certs/node.pem
-plugins.security.ssl.transport.pemkey_filepath: /usr/share/wazuh-indexer/certs/node-key.pem
-plugins.security.ssl.transport.pemtrustedcas_filepath: /usr/share/wazuh-indexer/certs/root-ca.pem
+plugins.security.ssl.http.pemcert_filepath: /usr/share/wazuh-indexer/config/certs/node.pem
+plugins.security.ssl.http.pemkey_filepath: /usr/share/wazuh-indexer/config/certs/node-key.pem
+plugins.security.ssl.http.pemtrustedcas_filepath: /usr/share/wazuh-indexer/config/certs/root-ca.pem
+plugins.security.ssl.transport.pemcert_filepath: /usr/share/wazuh-indexer/config/certs/node.pem
+plugins.security.ssl.transport.pemkey_filepath: /usr/share/wazuh-indexer/config/certs/node-key.pem
+plugins.security.ssl.transport.pemtrustedcas_filepath: /usr/share/wazuh-indexer/config/certs/root-ca.pem
 plugins.security.ssl.http.enabled: true
 plugins.security.ssl.transport.enforce_hostname_verification: false
 plugins.security.ssl.transport.resolve_hostname: false
@@ -1572,6 +1584,25 @@ manage_wazuh_index:
 {{- toYaml . | nindent 0 }}
 {{- end }}
 {{- end }}
+
+{{- define "wazuh.indexer.tenants"}}
+_meta:
+  type: "tenants"
+  config_version: 2
+  
+{{end}}
+
+{{- define "wazuh.indexer.nodes_dn"}}
+_meta:
+  type: "nodes_dn"
+  config_version: 2
+{{end}}
+
+{{- define "wazuh.indexer.whitelist"}}
+_meta:
+  type: "whitelist"
+  config_version: 2
+{{end}}
 
 {{- define "wazuh.indexer.roles"}}
 _meta:

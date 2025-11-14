@@ -90,7 +90,7 @@ indexer:
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.12.0"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
     ## Parameter to set the imagePullSecret TODO
     ## @skip indexer.images.imagePullSecrets.enabled 
@@ -241,6 +241,12 @@ indexer:
       {{ include "wazuh.indexer.rolesMapping" . }}
     roles: |-
       {{ include "wazuh.indexer.roles" . }}
+    tenants: |-
+      {{ include "wazuh.indexer.tenants" . }}
+    nodesDn: |-
+      {{ include "wazuh.indexer.nodes_dn" . }}
+    whitelist: |-
+      {{ include "wazuh.indexer.whitelist" . }}
   ## Additional configurations to add to the configmap
   additionalConfigs: {}
   ## Parameters for the sysctlImage initContainer.
@@ -324,7 +330,7 @@ dashboard:
     ## @param dashboard.images.pullPolicy pullPolicy of the image.
     ## @param dashboard.images.updateStrategy updateStrategy of the image.
     ##
-    tag: "4.12.0"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## Parameters to configure the resources allocated to the dashboard.
@@ -657,7 +663,7 @@ wazuh:
     ## @param wazuh.images.tag Tag of the image.
     ## @param wazuh.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.12.0"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
     ## @skip wazuh.images.pullSecret TODO
     ##
