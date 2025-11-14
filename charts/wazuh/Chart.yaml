@@ -3,7 +3,7 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.1
-version: 0.3.8
+version: 1.0.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
@@ -47,6 +47,8 @@ maintainers:
     url: https://github.com/TrueDru
   - name: 71g3pf4c3
     url: https://github.com/71g3pf4c3
+  - name: ShorMario
+    url: https://github.com/ShorMario
 icon: https://morgoved.github.io/wazuh-helm/images/icon.png
 keywords:
   - security
