@@ -14,6 +14,7 @@ Wazuh is a free and open source security platform that unifies XDR and SIEM prot
 | --------- | -------------------------------- | ------------------------------ |
 | Morgoved  | <morgyes@gmail.com>              | <https://github.com/morgoved>  |
 | Kaslie    | <jinyi_lie@yahoo.com>            | <https://github.com/Kaslie>    |
+| ShorMario |                                  | <https://github.com/ShorMario> |
 | Dani      | <andre.gomes@promptlyhealth.com> | <https://github.com/Ca-moes>   |
 | TrueDru   |                                  | <https://github.com/TrueDru>   |
 | 71g3pf4c3 |                                  | <https://github.com/71g3pf4c3> |
