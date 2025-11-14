@@ -1063,7 +1063,7 @@ agent:
   ##
   images:
     repository: opennix/wazuh-agent
-    tag: "4.11.1"
+    tag: "4.14.1"
     pullPolicy: IfNotPresent
 
   ## Parameters to configure securityContext of the pod.
