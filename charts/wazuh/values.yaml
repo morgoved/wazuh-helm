@@ -256,7 +256,7 @@ indexer:
       ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-indexer
       ## @param indexer.sysctlImage.images.tag Tag of the image.
       ##
-      repository: bitnami/os-shell
+      repository: bitnamilegacy/os-shell
       tag: 12-debian-12-r43
   ## Configuration of the indexer env vars, this should be only changed if needed.
   ## @skip indexer.env.OPENSEARCH_JAVA_OPTS
