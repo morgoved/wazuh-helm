@@ -34,6 +34,9 @@ spec:
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.fullname" . }}-manager
+    {{- with .Values.wazuh.worker.networkPolicy.extraIngresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   egress:
     # Wazuh CTI (Cyber Threat Intelligence)
     - ports:
@@ -54,6 +57,8 @@ spec:
             matchLabels:
               app: {{ include "wazuh.fullname" . }}-manager
               node-type: master
+    # DNS
+    {{- range $dnsServerLabelsList := list "kube-dns" "coredns" }}
     - ports:
         - protocol: UDP
           port: 53
@@ -63,6 +68,10 @@ spec:
               kubernetes.io/metadata.name: kube-system
           podSelector:
             matchLabels:
-              k8s-app: kube-dns
+              k8s-app: {{ $dnsServerLabelsList }}
+    {{- end }}
+    {{- with .Values.wazuh.worker.networkPolicy.extraEgresses }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end -}}
 {{- end }}
