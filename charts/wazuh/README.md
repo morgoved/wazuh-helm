@@ -117,7 +117,7 @@ Same applies when changing `dashboard.cred.password`
 | `indexer.config.rolesMapping`                | Configuration of rolesMapping of the indexer.                                  | `{{ include "wazuh.indexer.rolesMapping" . }}`                 |
 | `indexer.config.roles`                       | Configuration of roles of the indexer.                                         | `{{ include "wazuh.indexer.roles" . }}`                        |
 | `indexer.sysctlImage.enabled`                | Enable kernel settings modifier image                                          | `false`                                                        |
-| `indexer.sysctlImage.images.repository`      | name of the image used. If you use your own image registry                     | `bitnami/os-shell`                                             |
+| `indexer.sysctlImage.images.repository`      | name of the image used. If you use your own image registry                     | `bitnamilegacy/os-shell`                                             |
 | `indexer.sysctlImage.images.tag`             | Tag of the image.                                                              | `12-debian-12-r43`                                             |
 | `indexer.storageSize`                        | Defines the size of the pvc used by the statefulset.                           | `50Gi`                                                         |
 | `indexer.storageClass`                       | Defines the storageClass of the pvc used by the statefulset.                   | `nil`                                                          |
