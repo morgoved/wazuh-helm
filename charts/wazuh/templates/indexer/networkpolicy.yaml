@@ -57,6 +57,19 @@ spec:
           podSelector:
             matchLabels:
               k8s-app: kube-dns
+    # DNS
+    {{- range $dnsServerLabelsList := list "kube-dns" "coredns" }}
+    - ports:
+        - protocol: UDP
+          port: 53
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: {{ $dnsServerLabelsList }}
+    {{- end }}
     {{- with .Values.indexer.networkPolicy.extraEgresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
