@@ -31,6 +31,32 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- end -}}
 {{- end -}}
 
+{{- define "wazuh.dashboard.username" -}}
+{{- if .Values.dashboard.cred.existingSecret -}}
+  {{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.dashboard.cred.existingSecret -}}
+  {{- if and $secret (index $secret.data "DASHBOARD_USERNAME") -}}
+    {{- index $secret.data "DASHBOARD_USERNAME" | b64dec -}}
+  {{- else -}}
+    {{- .Values.dashboard.cred.username -}}
+  {{- end -}}
+{{- else -}}
+  {{- .Values.dashboard.cred.username -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "wazuh.dashboard.passwordHash" -}}
+{{- if .Values.dashboard.cred.existingSecret -}}
+  {{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.dashboard.cred.existingSecret -}}
+  {{- if and $secret (index $secret.data "DASHBOARD_PASSWORD_HASH") -}}
+    {{- index $secret.data "DASHBOARD_PASSWORD_HASH" | b64dec -}}
+  {{- else -}}
+    {{- .Values.dashboard.cred.passwordHash -}}
+  {{- end -}}
+{{- else -}}
+  {{- .Values.dashboard.cred.passwordHash -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
@@ -1427,10 +1453,10 @@ admin:
   - "admin"
   description: "Demo admin user"
 
-{{ .Values.dashboard.cred.username }}:
-  hash: "{{ .Values.dashboard.cred.passwordHash }}"
+{{ include "wazuh.dashboard.username" . }}:
+  hash: "{{ include "wazuh.dashboard.passwordHash" . }}"
   reserved: true
-  description: "Demo {{ .Values.dashboard.cred.username }} user"
+  description: "Demo {{ include "wazuh.dashboard.username" . }} user"
 
 kibanaro:
   hash: "$2a$12$JJSXNfTowz7Uu5ttXfeYpeYE0arACvcwlPBStB1F.MI7f0U9Z4DGC"
@@ -1546,7 +1572,7 @@ kibana_server:
   {{- end }}
   hosts: []
   users:
-    - "{{ .Values.dashboard.cred.username }}"
+    - "{{ include "wazuh.dashboard.username" . }}"
   and_backend_roles: []
 
 kibana_user:
@@ -1572,7 +1598,7 @@ manage_wazuh_index:
   backend_roles: []
   hosts: []
   users:
-    - "{{ .Values.dashboard.cred.username }}"
+    - "{{ include "wazuh.dashboard.username" . }}"
   and_backend_roles: []
 
 
@@ -1589,7 +1615,7 @@ manage_wazuh_index:
 _meta:
   type: "tenants"
   config_version: 2
-  
+
 {{end}}
 
 {{- define "wazuh.indexer.nodes_dn"}}
