@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ include "wazuh.indexer.fullname" . }}-agent
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.indexer.fullname" . }}-agent
     {{- with .Values.agent.labels }}
@@ -128,13 +129,26 @@ spec:
           {{- with .Values.agent.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
+            - name: local-internal-options
+              mountPath: /tmp/local_internal_options.conf
+              subPath: local_internal_options.conf
+              readOnly: true
           {{- end }}
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5; cat /tmp/local_internal_options.conf >> /var/ossec/etc/local_internal_options.conf"]
           {{- with .Values.agent.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- $indexerFullname := include "wazuh.indexer.fullname" . }}
       {{- with .Values.agent.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
+        - name: local-internal-options
+          configMap:
+            name: {{ $indexerFullname }}-agent-local-internal-options
+            defaultMode: 0644
       {{- end }}
 {{- end }}
