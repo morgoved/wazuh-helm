@@ -464,7 +464,7 @@ dashboard:
     {{ include "wazuh.dashboard.config" . }}
 
   ## Configuration of the credentials for the dashboard.
-  ## @param dashboard.cred.existingSecret Name of the existingSecret which holds the key "DASHBOARD_PASSWORD".
+  ## @param dashboard.cred.existingSecret Name of the existingSecret which holds the keys "DASHBOARD_USERNAME", "DASHBOARD_PASSWORD" and "DASHBOARD_PASSWORD_HASH".
   ## @param dashboard.cred.password Value of the password for the kibanaserver user.
   ## @param dashboard.cred.passwordHash Hash of the password for the kibanaserver user. To create this, follow the README.
   ## TODO this is only needed, as the corresponding helm feature to create bcrypt hashes with 12 rounds is
