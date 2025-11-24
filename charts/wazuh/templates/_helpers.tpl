@@ -57,6 +57,19 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 {{- end -}}
 
+{{- define "wazuh.indexer.PasswordHash" -}}
+{{- if .Values.indexer.cred.existingSecret -}}
+  {{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.indexer.cred.existingSecret -}}
+  {{- if and $secret (index $secret.data "INDEXER_PASSWORD_HASH") -}}
+    {{- index $secret.data "INDEXER_PASSWORD_HASH" | b64dec -}}
+  {{- else -}}
+    {{- .Values.indexer.cred.passwordHash -}}
+  {{- end -}}
+{{- else -}}
+  {{- .Values.indexer.cred.passwordHash -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.config"}}
 server.host: 0.0.0.0
 server.port: {{ .Values.dashboard.service.httpPort }}
@@ -1447,7 +1460,7 @@ _meta:
 
 ## Demo users
 admin:
-  hash: "{{ .Values.indexer.cred.passwordHash }}"
+  hash: "{{ include "wazuh.indexer.passwordHash" . }}"
   reserved: true
   backend_roles:
   - "admin"
