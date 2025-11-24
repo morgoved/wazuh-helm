@@ -266,7 +266,7 @@ indexer:
       ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-indexer
       ## @param indexer.sysctlImage.images.tag Tag of the image.
       ##
-      repository: bitnamilegacy/os-shell
+      repository: bitnami/os-shell
       tag: 12-debian-12-r43
   ## Configuration of the indexer env vars, this should be only changed if needed.
   ## @skip indexer.env.OPENSEARCH_JAVA_OPTS
@@ -426,15 +426,15 @@ dashboard:
   nodeSelector: {}
 
   tolerations: []
-  
+
   affinity: {}
-  
+
   ## @param dashboard.dnsPolicy DNS policy for the pod
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
   ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
   ##
   dnsPolicy: ""
-  
+
   ## @param dashboard.dnsConfig DNS configuration for the pod
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
   ## Example:
@@ -448,7 +448,7 @@ dashboard:
   ##     - name: ndots
   ##       value: "2"
   dnsConfig: {}
-  
+
   ## @param dashboard.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
@@ -464,7 +464,7 @@ dashboard:
     {{ include "wazuh.dashboard.config" . }}
 
   ## Configuration of the credentials for the dashboard.
-  ## @param dashboard.cred.existingSecret Name of the existingSecret which holds the key "DASHBOARD_PASSWORD".
+  ## @param dashboard.cred.existingSecret Name of the existingSecret which holds the keys "DASHBOARD_USERNAME", "DASHBOARD_PASSWORD" and "DASHBOARD_PASSWORD_HASH".
   ## @param dashboard.cred.password Value of the password for the kibanaserver user.
   ## @param dashboard.cred.passwordHash Hash of the password for the kibanaserver user. To create this, follow the README.
   ## TODO this is only needed, as the corresponding helm feature to create bcrypt hashes with 12 rounds is
@@ -646,7 +646,16 @@ wazuh:
   ##
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
   ## Parameters for the image of the manager.
+  ## @param wazuh.images.repository name of the image used. If you use your own image registry just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-manager
+  ## @param wazuh.images.tag Tag of the image.
+  ## @param wazuh.images.pullPolicy pullPolicy of the image.
+  ## @skip wazuh.images.pullSecret TODO
   ##
+  images:
+    repository: wazuh/wazuh-manager
+    tag: "4.14.1"
+    pullPolicy: IfNotPresent
+    pullSecret: regcred
   ## LoadBalancer service for external agent, api access via NLB
   ## @param wazuh.loadBalancer.enabled Enable LoadBalancer service for external agent connections
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service (e.g., AWS NLB annotations)
@@ -659,19 +668,6 @@ wazuh:
       # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
       # service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       # service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-xxx,subnet-yyy"
-  images:
-    ## @param wazuh.images.repository name of the image used. If you use your own image registry
-    ## just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-manager
-    ##
-    repository: wazuh/wazuh-manager
-    ## @param wazuh.images.tag Tag of the image.
-    ## @param wazuh.images.pullPolicy pullPolicy of the image.
-    ##
-    tag: "4.14.1"
-    pullPolicy: IfNotPresent
-    ## @skip wazuh.images.pullSecret TODO
-    ##
-    pullSecret: regcred
   ## Parameters for svc resource. Ref: https://kubernetes.io/de/docs/concepts/services-networking/service/
   ## @param wazuh.service.annotations Annotations of the created service.
   ## @param wazuh.service.port Port for the http endpoint.
@@ -833,6 +829,7 @@ wazuh:
           port: 55000
           targetPort: 55000
           # nodePort: 31550
+
     ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
@@ -1043,27 +1040,38 @@ wazuh:
       container: {}
 
 agent:
-  ## @param wazuh.agent.enabled Enable the agent
+  ## @param wazuh.agent.enabled Enable the agent.
   enabled: true
 
-  ## @param agent.serviceAccount defines wazuh agent serviceAccount
+  ## @param agent.serviceAccount defines wazuh agent serviceAccount.
   serviceAccount:
     create: false
     annotations: {}
     name: "wazuh-agent"
+
+  ## @param wazuh.agent.debug Enable debug mode for the agent.
+  ## @param wazuh.agent.debug.level Run the agent processes in debug mode.
+  ## Options: 1 (standard debug output), 2 (verbose debug output).
+  ## @param wazuh.agent.debug.modules List of agent processes for which debugging is enabled.
+  debug:
+    enabled: false
+    level: 1
+    modules:
+      - agent
+      - wazuh_modules
 
   service:
     port: 5000
     type: ClusterIP
     annotations: {}
 
-  ## @param wazuh.agent.labels Extra labels for the agent
+  ## @param wazuh.agent.labels Extra labels for the agent.
   labels: {}
 
-  ## @param wazuh.agent.annotations Extra annotations for the agent
+  ## @param wazuh.agent.annotations Extra annotations for the agent.
   annotations: {}
 
-  ## @param wazuh.agent.podAnnotations Extra annotations for the agent
+  ## @param wazuh.agent.podAnnotations Extra annotations for the agent.
   podAnnotations: {}
 
   ## Parameters to configure the resources allocated to the agent.
@@ -1074,8 +1082,8 @@ agent:
   ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
   ##
   images:
-    repository: wazuh/wazuh-agent
-    tag: "4.14.1"
+    repository: opennix/wazuh-agent
+    tag: "4.11.1"
     pullPolicy: IfNotPresent
 
   ## Parameters to configure securityContext of the pod.
@@ -1083,7 +1091,7 @@ agent:
   ## @param wazuh.agent.podSecurityContext Additional capabilities.
   podSecurityContext: {}
 
-  ## Parameters to configure securityContext of the container
+  ## Parameters to configure securityContext of the container.
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   ## @param wazuh.agent.securityContext Additional capabilities.
   securityContext:
@@ -1119,13 +1127,13 @@ agent:
   ## @param wazuh.agent.tolerations
   tolerations: []
 
-  ## @param agent.dnsPolicy DNS policy for the pod
+  ## @param agent.dnsPolicy DNS policy for the pod.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
   ## Options: Default, ClusterFirst, ClusterFirstWithHostNet, None
   ##
   dnsPolicy: ""
-  
-  ## @param agent.dnsConfig DNS configuration for the pod
+
+  ## @param agent.dnsConfig DNS configuration for the pod.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
   ## Example:
   ## dnsConfig:
@@ -1140,7 +1148,7 @@ agent:
   dnsConfig: {}
 
   ## Parameters to configure the join manager.
-  ## @param wazuh.agent.joinManager.scheme Join manager scheme
+  ## @param wazuh.agent.joinManager.scheme Join manager scheme.
   joinManager:
     managerHost: ""
     apiPort: "55000"

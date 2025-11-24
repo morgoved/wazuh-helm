@@ -72,7 +72,7 @@ spec:
             secretName: filebeat-tls
         - name: wazuh-authd-pass
           secret:
-            secretName: wazuh-authd-pass
+            secretName: {{ .Values.wazuh.authd.existingSecret | default "wazuh-authd-pass" }}
         - emptyDir: {}
           name: result-config
       {{- with .Values.wazuh.master.additionalVolumes }}
