@@ -57,7 +57,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 {{- end -}}
 
-{{- define "wazuh.indexer.PasswordHash" -}}
+{{- define "wazuh.indexer.passwordHash" -}}
 {{- if .Values.indexer.cred.existingSecret -}}
   {{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.indexer.cred.existingSecret -}}
   {{- if and $secret (index $secret.data "INDEXER_PASSWORD_HASH") -}}
