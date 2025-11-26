@@ -738,13 +738,6 @@ wazuh:
   ## @skip wazuh.agentGroupConf[0].agent
   ##
   agentGroupConf:
-    - name: default
-      agent: |
-        <agent_config>
-          <syscheck>
-            <directories check_all="yes" realtime="yes" report_changes="yes">/integrity/check.txt</directories>
-          </syscheck>
-        </agent_config>
     - name: example
       agent: |
         <agent_config>
