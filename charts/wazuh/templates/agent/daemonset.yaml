@@ -129,9 +129,6 @@ spec:
           {{- with .Values.agent.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
-            {{- with $.Values.agent.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
             - name: local-internal-options
               mountPath: /tmp/local_internal_options.conf
               subPath: local_internal_options.conf
@@ -149,9 +146,6 @@ spec:
       {{- with .Values.agent.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
-        {{- with $.Values.agent.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
         - name: local-internal-options
           configMap:
             name: {{ $indexerFullname }}-agent-local-internal-options
