@@ -738,6 +738,13 @@ wazuh:
   ## @skip wazuh.agentGroupConf[0].agent
   ##
   agentGroupConf:
+    - name: default
+      agent: |
+        <agent_config>
+          <syscheck>
+            <directories check_all="yes" realtime="yes" report_changes="yes">/integrity/check.txt</directories>
+          </syscheck>
+        </agent_config>
     - name: example
       agent: |
         <agent_config>
@@ -1266,3 +1273,12 @@ agent:
     daemonSet: {}
     pod: {}
     container: {}
+
+  ## Extra containers configuration for the agent
+  ## @param agent.extraContainers Sidecar containers to add to the agent pod.
+  ## Example:
+  ## extraContainers:
+  ##  - name: sidecar
+  ##    image: alpine
+  ##    command: ["/bin/sh", "-c", "sleep 3600"]
+  extraContainers: []

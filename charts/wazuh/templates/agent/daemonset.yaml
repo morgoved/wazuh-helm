@@ -142,6 +142,9 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- with .Values.agent.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- $indexerFullname := include "wazuh.indexer.fullname" . }}
       {{- with .Values.agent.volumes }}
       volumes:
