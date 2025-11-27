@@ -38,7 +38,7 @@ spec:
           args:
             - /usr/share/wazuh-indexer/plugins/opensearch-security/tools/securityadmin.sh
             - -cd
-            - /usr/share/wazuh-indexer/opensearch-security/
+            - /usr/share/wazuh-indexer/config/opensearch-security/
             - -nhnv
             - -cacert
             - /usr/share/wazuh-indexer/config/certs/root-ca.pem
