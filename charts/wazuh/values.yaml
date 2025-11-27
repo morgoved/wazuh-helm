@@ -1266,3 +1266,12 @@ agent:
     daemonSet: {}
     pod: {}
     container: {}
+
+  ## Extra containers configuration for the agent
+  ## @param agent.extraContainers Sidecar containers to add to the agent pod.
+  ## Example:
+  ## extraContainers:
+  ##  - name: sidecar
+  ##    image: alpine
+  ##    command: ["/bin/sh", "-c", "sleep 3600"]
+  extraContainers: []
