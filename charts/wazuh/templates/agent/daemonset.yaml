@@ -94,7 +94,6 @@ spec:
               value: {{ .Values.agent.joinManager.apiPort | quote }}
             - name: JOIN_MANAGER_PORT
               value: {{ .Values.agent.joinManager.agentsEvents | quote }}
-              {{- end }}
             - name: K8S_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -103,9 +102,10 @@ spec:
               value: "{{ .Values.agent.namePrefix }}$(K8S_NODE_NAME)"
             - name: WAZUH_GROUPS
               value: {{ .Values.agent.joinManager.wazuh.group | quote }}
-              {{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled }}
+            {{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled }}
             - name: HEALTH_CHECK_PROCESSES
               value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd,ossec-authd"
+            {{- end }}
           {{- with .Values.agent.livenessProbe }}
           livenessProbe:
             httpGet:
@@ -133,7 +133,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- with .Values.agent.extraContainers }}
-        {{- toYaml . | nindent 8 }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- $indexerFullname := include "wazuh.indexer.fullname" . }}
       volumes:
