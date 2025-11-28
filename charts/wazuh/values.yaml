@@ -1043,6 +1043,10 @@ agent:
   ## @param wazuh.agent.enabled Enable the agent.
   enabled: true
 
+  ## @param wazuh.agent.namePrefix Prefix for the agent name.
+  ## If set, the agent name will be {{ namePrefix }}{{ nodeName }}.
+  namePrefix: ""
+
   ## @param agent.serviceAccount defines wazuh agent serviceAccount.
   serviceAccount:
     create: false
