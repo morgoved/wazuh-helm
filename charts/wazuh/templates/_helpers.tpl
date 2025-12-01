@@ -1871,6 +1871,9 @@ index_management_full_access:
     - "cluster:admin/opensearch/controlcenter/lron/*"
     - "cluster:admin/opensearch/notifications/channels/get"
     - "cluster:admin/opensearch/notifications/feature/publish"
+    - "cluster:admin/opensearch/templates/*"
+    - "cluster:admin/opensearch/index_template/*"
+ 
   index_permissions:
     - index_patterns:
         - '*'
@@ -2126,6 +2129,16 @@ config:
         ###### and here https://tools.ietf.org/html/rfc7239
         ###### and https://tomcat.apache.org/tomcat-8.0-doc/config/valve.html#Remote_IP_Valve
     authc:
+      basic_internal_auth_domain:
+        description: "Authenticate via HTTP Basic against internal users database"
+        http_enabled: true
+        transport_enabled: true
+        order: {{ .Values.dashboard.basicAuth.order }}
+        http_authenticator:
+          type: basic
+          challenge: {{ .Values.dashboard.basicAuth.challenge }}
+        authentication_backend:
+          type: intern    
       {{- if .Values.dashboard.sso.oidc.enabled }}
       openid_auth_domain:
         http_enabled: true
@@ -2187,30 +2200,6 @@ config:
         authentication_backend:
           type: noop
       {{- end }}
-      kerberos_auth_domain:
-        http_enabled: false
-        transport_enabled: false
-        order: 6
-        http_authenticator:
-          type: kerberos
-          challenge: true
-          config:
-            # If true a lot of kerberos/security related debugging output will be logged to standard out
-            krb_debug: false
-            # If true then the realm will be stripped from the user name
-            strip_realm_from_principal: true
-        authentication_backend:
-          type: noop
-      basic_internal_auth_domain:
-        description: "Authenticate via HTTP Basic against internal users database"
-        http_enabled: true
-        transport_enabled: true
-        order: {{ .Values.dashboard.basicAuth.order }}
-        http_authenticator:
-          type: basic
-          challenge: {{ .Values.dashboard.basicAuth.challenge }}
-        authentication_backend:
-          type: intern
       proxy_auth_domain:
         description: "Authenticate via proxy"
         http_enabled: false
@@ -2228,7 +2217,7 @@ config:
         description: "Authenticate via Json Web Token"
         http_enabled: false
         transport_enabled: false
-        order: 0
+        order: 4
         http_authenticator:
           type: jwt
           challenge: false
@@ -2245,12 +2234,26 @@ config:
         description: "Authenticate via SSL client certificates"
         http_enabled: false
         transport_enabled: false
-        order: 2
+        order: 5
         http_authenticator:
           type: clientcert
           config:
             username_attribute: cn #optional, if omitted DN becomes username
           challenge: false
+        authentication_backend:
+          type: noop                          
+      kerberos_auth_domain:
+        http_enabled: false
+        transport_enabled: false
+        order: 6
+        http_authenticator:
+          type: kerberos
+          challenge: true
+          config:
+            # If true a lot of kerberos/security related debugging output will be logged to standard out
+            krb_debug: false
+            # If true then the realm will be stripped from the user name
+            strip_realm_from_principal: true
         authentication_backend:
           type: noop
       ldap:
