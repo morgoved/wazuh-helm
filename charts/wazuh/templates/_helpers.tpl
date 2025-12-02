@@ -2260,7 +2260,7 @@ config:
         description: "Authenticate via LDAP or Active Directory"
         http_enabled: false
         transport_enabled: false
-        order: 5
+        order: 7
         http_authenticator:
           type: basic
           challenge: false
