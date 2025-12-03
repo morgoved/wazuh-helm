@@ -191,27 +191,27 @@ spec:
               subPath: internal_users.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles.yml
               subPath: roles.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles_mapping.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles_mapping.yml
               subPath: roles_mapping.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/config.yml
               subPath: config.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/tenants.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/tenants.yml
               subPath: tenants.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/nodes_dn.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/nodes_dn.yml
               subPath: nodes_dn.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/whitelist.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/whitelist.yml
               subPath: whitelist.yml
               readOnly: true
             {{- with .Values.indexer.additionalVolumeMounts }}
