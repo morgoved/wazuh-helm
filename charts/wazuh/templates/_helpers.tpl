@@ -1871,6 +1871,8 @@ index_management_full_access:
     - "cluster:admin/opensearch/controlcenter/lron/*"
     - "cluster:admin/opensearch/notifications/channels/get"
     - "cluster:admin/opensearch/notifications/feature/publish"
+    - "cluster:admin/opensearch/templates/*"
+    - "cluster:admin/opensearch/index_template/*"    
   index_permissions:
     - index_patterns:
         - '*'
