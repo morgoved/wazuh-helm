@@ -77,6 +77,9 @@ indexer:
   ## @param indexer.annotations additional annotations set on statefulset.
   ##
   annotations: {}
+  ## @param indexer.extraPodLabels Extra labels to add to the indexer pods.
+  ##
+  extraPodLabels: {}
   ## @param indexer.updateStrategy updateStrategy for the statefulset.
   ##
   updateStrategy: RollingUpdate
@@ -323,6 +326,9 @@ dashboard:
   ## @param dashboard.annotations additional annotations set on deployment.
   ##
   annotations: {}
+  ## @param dashboard.extraPodLabels Extra labels to add to the dashboard pods.
+  ##
+  extraPodLabels: {}
   ## Parameters for the image of the dashboard.
   ##
   images:
@@ -764,6 +770,9 @@ wazuh:
     ## @param wazuh.master.annotations additional annotations set on statefulset.
     ##
     annotations: {}
+    ## @param wazuh.master.extraPodLabels Extra labels to add to the master pods.
+    ##
+    extraPodLabels: {}
     ## Parameters to configure the resources allocated to the master.
     ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
     ## @param wazuh.master.resources.requests.cpu Minimum CPU assigned to the pod.
@@ -900,6 +909,9 @@ wazuh:
     ## @param wazuh.worker.annotations additional annotations set on deployment.
     ##
     annotations: {}
+    ## @param wazuh.worker.extraPodLabels Extra labels to add to the worker pods.
+    ##
+    extraPodLabels: {}
     ## Parameters to configure the resources allocated to the worker.
     ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
     ## @param wazuh.worker.resources.requests.cpu Minimum CPU assigned to the pod.
@@ -1077,6 +1089,9 @@ agent:
 
   ## @param wazuh.agent.podAnnotations Extra annotations for the agent.
   podAnnotations: {}
+
+  ## @param wazuh.agent.extraPodLabels Extra labels to add to the agent pods.
+  extraPodLabels: {}
 
   ## Parameters to configure the resources allocated to the agent.
   ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/

@@ -30,6 +30,9 @@ spec:
       labels:
         app: {{ include "wazuh.indexer.fullname" . }}-agent
         node-type: agent
+        {{- with .Values.agent.extraPodLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "wazuh.agent.serviceAccountName" . }}
       {{- with .Values.agent.extraSpec.pod }}

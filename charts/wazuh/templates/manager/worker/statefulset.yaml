@@ -25,6 +25,9 @@ spec:
       labels:
         app: {{ include "wazuh.fullname" . }}-manager
         node-type: worker
+        {{- with .Values.wazuh.worker.extraPodLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       name: wazuh-manager-worker
       annotations:
         {{- if .Values.autoreload.enabled }}
