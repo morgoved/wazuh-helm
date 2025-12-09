@@ -493,7 +493,7 @@ dashboard:
   ## @param dashboard.server.basePath Set the base path for Wazuh Dashboard
   ## This can be left as "" or set to your required path E.g. "/_dashboards"
   server:
-    basePath: ""
+    extraConf: {}
     
   sso:
     oidc:
