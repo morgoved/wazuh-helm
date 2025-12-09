@@ -129,8 +129,8 @@ server.xsrf.allowlist: ["/_plugins/_security/saml/acs", "/_plugins/_security/sam
 opensearch_security.session.keepalive: false
 {{- end }}
 
-{{- if .Values.dashboard.server.basePath }}
-server.basePath: {{ .Values.dashboard.server.basePath }}
+{{- if .Values.dashboard.server.extraConf }}
+{{ .Values.dashboard.server.extraConf }}
 {{- end }}
 
 {{- end }}
