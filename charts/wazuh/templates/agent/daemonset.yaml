@@ -80,9 +80,9 @@ spec:
             - name: JOIN_MANAGER_PROTOCOL
               value: {{ .Values.agent.joinManager.scheme }}
             - name: JOIN_MANAGER_MASTER_HOST
-              value: {{ or .Values.agent.joinManager.managerHost (printf "wazuh.%s.svc.cluster.local" .Release.Namespace) }}
+              value: {{ or .Values.agent.joinManager.managerHost (printf "%s.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
             - name: JOIN_MANAGER_WORKER_HOST
-              value: {{ or .Values.agent.joinManager.workerHost (printf "%s-manager-worker.wazuh.svc.cluster.local" (include "wazuh.fullname" .)) }}
+              value: {{ or .Values.agent.joinManager.workerHost (printf "%s-manager-worker.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
             - name: JOIN_MANAGER_USER
               valueFrom:
                 secretKeyRef:
