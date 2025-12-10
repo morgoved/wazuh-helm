@@ -61,9 +61,9 @@ spec:
       dnsConfig:
         {{- toYaml .Values.agent.dnsConfig | nindent 8 }}
       {{- end }}
-      {{- if .Values.indexer.images.imagePullSecrets.enabled }}
+      {{- if .Values.wazuh.images.imagePullSecrets.enabled }}
       imagePullSecrets:
-      {{- range .Values.indexer.images.imagePullSecrets.secret }}
+      {{- range .Values.wazuh.images.imagePullSecrets.secret }}
         - name: {{ . }}
       {{- end }}
       {{- end }}
