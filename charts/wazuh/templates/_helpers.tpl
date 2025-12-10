@@ -2208,6 +2208,7 @@ config:
         http_enabled: true
         transport_enabled: true
         order: {{ .Values.dashboard.basicAuth.order }}
+        http_authenticator:
           type: basic
           challenge: {{ .Values.dashboard.basicAuth.challenge }}
         authentication_backend:
