@@ -105,6 +105,12 @@ spec:
         {{- with .Values.wazuh.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- if .Values.wazuh.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.wazuh.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: wazuh-manager
           {{- with .Values.wazuh.master.extraSpec.container }}

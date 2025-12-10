@@ -32,6 +32,12 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.indexer.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.indexer.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - command:
             - sh

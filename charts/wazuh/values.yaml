@@ -661,7 +661,9 @@ wazuh:
     repository: wazuh/wazuh-manager
     tag: "4.14.1"
     pullPolicy: IfNotPresent
-    pullSecret: regcred
+    imagePullSecrets:
+      enabled: false
+      secret: {}
   ## LoadBalancer service for external agent, api access via NLB
   ## @param wazuh.loadBalancer.enabled Enable LoadBalancer service for external agent connections
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service (e.g., AWS NLB annotations)
@@ -898,6 +900,7 @@ wazuh:
       statefulSet: {}
       pod: {}
       container: {}
+
   ## @section wazuh.worker configuration of the wazuh worker component.
   ##
   worker:
