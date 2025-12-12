@@ -491,6 +491,11 @@ dashboard:
     order: 4
     challenge: true
 
+  ## @param dashboard.server.basePath Set the base path for Wazuh Dashboard
+  ## This can be left as "" or set to your required path E.g. "/_dashboards"
+  server:
+    extraConf: {}
+    
   sso:
     oidc:
       ## @param dashboard.sso.oidc.enabled Enable OpenID Connect
