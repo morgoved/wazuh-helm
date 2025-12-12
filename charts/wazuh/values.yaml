@@ -95,9 +95,10 @@ indexer:
     ##
     tag: "4.14.1"
     pullPolicy: IfNotPresent
-    ## Parameter to set the imagePullSecret TODO
-    ## @skip indexer.images.imagePullSecrets.enabled 
-    ## @skip indexer.images.imagePullSecrets.secret
+    ## Parameter to set the imagePullSecret
+    ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## @param indexer.images.imagePullSecrets.enabled Enable pulling image using secret.
+    ## @param indexer.images.imagePullSecrets.secret Map of secret names to authenticate with a container registry to pull a private image.
     ##
     imagePullSecrets:
       enabled: false
@@ -655,13 +656,16 @@ wazuh:
   ## @param wazuh.images.repository name of the image used. If you use your own image registry just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-manager
   ## @param wazuh.images.tag Tag of the image.
   ## @param wazuh.images.pullPolicy pullPolicy of the image.
-  ## @skip wazuh.images.pullSecret TODO
+  ## @param wazuh.images.imagePullSecrets.enabled Enable pulling image using secret.
+  ## @param wazuh.images.imagePullSecrets.secret Map of secret names to authenticate with a container registry to pull a private image.
   ##
   images:
     repository: wazuh/wazuh-manager
     tag: "4.14.1"
     pullPolicy: IfNotPresent
-    pullSecret: regcred
+    imagePullSecrets:
+      enabled: false
+      secret: {}
   ## LoadBalancer service for external agent, api access via NLB
   ## @param wazuh.loadBalancer.enabled Enable LoadBalancer service for external agent connections
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service (e.g., AWS NLB annotations)
@@ -898,6 +902,7 @@ wazuh:
       statefulSet: {}
       pod: {}
       container: {}
+
   ## @section wazuh.worker configuration of the wazuh worker component.
   ##
   worker:

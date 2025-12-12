@@ -67,6 +67,12 @@ spec:
         - name: dashboard-certs
           secret:
             secretName: dashboard-tls
+      {{- if .Values.wazuh.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.wazuh.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: wazuh-dashboard
           imagePullPolicy: {{ .Values.dashboard.images.pullPolicy }}

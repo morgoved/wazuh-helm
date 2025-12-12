@@ -103,6 +103,12 @@ spec:
       {{- with .Values.indexer.additionalVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
+      {{- if .Values.indexer.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.indexer.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: wazuh-indexer
           {{- with .Values.indexer.extraSpec.container }}

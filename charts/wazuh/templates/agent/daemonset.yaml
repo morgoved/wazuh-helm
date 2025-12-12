@@ -61,6 +61,12 @@ spec:
       dnsConfig:
         {{- toYaml .Values.agent.dnsConfig | nindent 8 }}
       {{- end }}
+      {{- if .Values.wazuh.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.wazuh.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: wazuh-agent
           {{- with .Values.agent.extraSpec.container }}
