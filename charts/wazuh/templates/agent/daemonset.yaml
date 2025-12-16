@@ -83,6 +83,15 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           env:
+            - name: WAZUH_MANAGER_SERVER
+              value: {{ or .Values.agent.joinManager.workerHost (printf "%s-manager-worker.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
+            - name: WAZUH_REGISTRATION_SERVER
+              value: {{ or .Values.agent.joinManager.managerHost (printf "%s.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
+            - name: WAZUH_REGISTRATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.wazuh.authd.existingSecret | default "wazuh-authd-pass" }}
+                  key: authd.pass
             - name: JOIN_MANAGER_PROTOCOL
               value: {{ .Values.agent.joinManager.scheme }}
             - name: JOIN_MANAGER_MASTER_HOST
