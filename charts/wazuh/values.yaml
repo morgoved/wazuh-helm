@@ -712,10 +712,12 @@ wazuh:
     username: "wazuh-wui"
     password: "MyS3cr37P450r.*-"
   ## Parameters to the authd service.
+  ## @param wazuh.authd.enabled enable password-based agent registration (required if not using API-based enrollment).
   ## @param wazuh.authd.existingSecret name of the existingSecret in the namespace.
   ## @param wazuh.authd.pass password of the authd.
   ##
   authd:
+    enabled: true
     existingSecret: ""
     pass: "password"
   ## Parameters for the resources of the initContainer.
