@@ -3,8 +3,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
+    {{- if .Values.indexer.job.annotations }}
+    {{- toYaml .Values.indexer.job.annotations | nindent 4 }}
+    {{- else }}
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    {{- end }}
   name: {{ include "wazuh.indexer.fullname" . }}-indexer
   namespace: {{ .Release.Namespace }}
 spec:

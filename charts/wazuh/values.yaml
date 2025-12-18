@@ -310,6 +310,16 @@ indexer:
     pod: {}
     container: {}
 
+  ## Override the indexer job annotations from the default Helm hooks
+  ## @param indexer.job.annotations Annotations to add to the indexer job.
+  ## Example:
+  ## job:
+  ##   annotations:
+  ##     argocd.argoproj.io/hook: PostSync
+  ##     argocd.argoproj.io/hook-delete-policy: HookSucceeded,BeforeHookCreation
+  job:
+    annotations: {}
+
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed
 ##
