@@ -130,7 +130,7 @@ opensearch_security.session.keepalive: false
 {{- end }}
 
 {{- if .Values.dashboard.server.extraConf }}
-{{ .Values.dashboard.server.extraConf }}
+{{ toYaml .Values.dashboard.server.extraConf }}
 {{- end }}
 
 {{- end }}
