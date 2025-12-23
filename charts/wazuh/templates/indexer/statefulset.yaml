@@ -234,6 +234,12 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: wazuh-indexer
+        {{- if .Values.indexer.pvc.extraLabels }}
+        labels:
+          {{- with .Values.indexer.pvc.extraLabels }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
       spec:
         accessModes:
           - ReadWriteOnce

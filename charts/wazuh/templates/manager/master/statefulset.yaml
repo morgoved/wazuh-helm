@@ -265,6 +265,12 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: {{ include "wazuh.fullname" . }}-manager-master
+        {{- if .Values.wazuh.master.pvc.extraLabels }}
+        labels:
+          {{- with .Values.wazuh.master.pvc.extraLabels }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
       spec:
         accessModes:
           - ReadWriteOnce
