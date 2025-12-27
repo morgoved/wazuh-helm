@@ -283,6 +283,9 @@ indexer:
     CLUSTER_NAME: "wazuh"
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
+  ## @param indexer.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+  pvc:
+    extraLabels: {}
   ## @param indexer.storageSize Defines the size of the pvc used by the statefulset.
   ## @param indexer.storageClass Defines the storageClass of the pvc used by the statefulset.
   ##
@@ -897,6 +900,9 @@ wazuh:
       extraIngresses: []
       ## @param wazuh.master.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
       extraEgresses: []
+    ## @param wazuh.master.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+    pvc:
+      extraLabels: {}
     ## @param wazuh.master.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the statefulset.
     ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
@@ -1049,6 +1055,9 @@ wazuh:
       extraIngresses: []
       ## @param wazuh.worker.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
       extraEgresses: []
+    ## @param wazuh.worker.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+    pvc:
+      extraLabels: {}
     ## @param wazuh.worker.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.worker.storageClass Defines the storageClass of the pvc used by the statefulset.
     ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
