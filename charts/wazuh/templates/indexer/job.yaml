@@ -3,8 +3,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
+    {{- if .Values.indexer.job.annotations }}
+    {{- toYaml .Values.indexer.job.annotations | nindent 4 }}
+    {{- else }}
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    {{- end }}
   name: {{ include "wazuh.indexer.fullname" . }}-indexer
   namespace: {{ .Release.Namespace }}
 spec:
@@ -32,13 +36,19 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.indexer.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.indexer.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - command:
             - sh
           args:
             - /usr/share/wazuh-indexer/plugins/opensearch-security/tools/securityadmin.sh
             - -cd
-            - /usr/share/wazuh-indexer/opensearch-security/
+            - /usr/share/wazuh-indexer/config/opensearch-security/
             - -nhnv
             - -cacert
             - /usr/share/wazuh-indexer/config/certs/root-ca.pem
@@ -91,27 +101,27 @@ spec:
               subPath: internal_users.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles.yml
               subPath: roles.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/roles_mapping.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles_mapping.yml
               subPath: roles_mapping.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/config.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/config.yml
               subPath: config.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/tenants.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/tenants.yml
               subPath: tenants.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/nodes_dn.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/nodes_dn.yml
               subPath: nodes_dn.yml
               readOnly: true
             - name: indexer-conf
-              mountPath: /usr/share/wazuh-indexer/opensearch-security/whitelist.yml
+              mountPath: /usr/share/wazuh-indexer/config/opensearch-security/whitelist.yml
               subPath: whitelist.yml
               readOnly: true
       terminationGracePeriodSeconds: 30

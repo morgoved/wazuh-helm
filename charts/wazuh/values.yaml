@@ -77,6 +77,9 @@ indexer:
   ## @param indexer.annotations additional annotations set on statefulset.
   ##
   annotations: {}
+  ## @param indexer.extraPodLabels Extra labels to add to the indexer pods.
+  ##
+  extraPodLabels: {}
   ## @param indexer.updateStrategy updateStrategy for the statefulset.
   ##
   updateStrategy: RollingUpdate
@@ -92,9 +95,10 @@ indexer:
     ##
     tag: "4.14.1"
     pullPolicy: IfNotPresent
-    ## Parameter to set the imagePullSecret TODO
-    ## @skip indexer.images.imagePullSecrets.enabled 
-    ## @skip indexer.images.imagePullSecrets.secret
+    ## Parameter to set the imagePullSecret
+    ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## @param indexer.images.imagePullSecrets.enabled Enable pulling image using secret.
+    ## @param indexer.images.imagePullSecrets.secret Map of secret names to authenticate with a container registry to pull a private image.
     ##
     imagePullSecrets:
       enabled: false
@@ -279,6 +283,9 @@ indexer:
     CLUSTER_NAME: "wazuh"
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
+  ## @param indexer.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+  pvc:
+    extraLabels: {}
   ## @param indexer.storageSize Defines the size of the pvc used by the statefulset.
   ## @param indexer.storageClass Defines the storageClass of the pvc used by the statefulset.
   ##
@@ -306,6 +313,16 @@ indexer:
     pod: {}
     container: {}
 
+  ## Override the indexer job annotations from the default Helm hooks
+  ## @param indexer.job.annotations Annotations to add to the indexer job.
+  ## Example:
+  ## job:
+  ##   annotations:
+  ##     argocd.argoproj.io/hook: PostSync
+  ##     argocd.argoproj.io/hook-delete-policy: HookSucceeded,BeforeHookCreation
+  job:
+    annotations: {}
+
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed
 ##
@@ -323,6 +340,9 @@ dashboard:
   ## @param dashboard.annotations additional annotations set on deployment.
   ##
   annotations: {}
+  ## @param dashboard.extraPodLabels Extra labels to add to the dashboard pods.
+  ##
+  extraPodLabels: {}
   ## Parameters for the image of the dashboard.
   ##
   images:
@@ -484,6 +504,11 @@ dashboard:
     order: 4
     challenge: true
 
+  ## @param dashboard.server.basePath Set the base path for Wazuh Dashboard
+  ## This can be left as "" or set to your required path E.g. "/_dashboards"
+  server:
+    extraConf: {}
+    
   sso:
     oidc:
       ## @param dashboard.sso.oidc.enabled Enable OpenID Connect
@@ -649,13 +674,16 @@ wazuh:
   ## @param wazuh.images.repository name of the image used. If you use your own image registry just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-manager
   ## @param wazuh.images.tag Tag of the image.
   ## @param wazuh.images.pullPolicy pullPolicy of the image.
-  ## @skip wazuh.images.pullSecret TODO
+  ## @param wazuh.images.imagePullSecrets.enabled Enable pulling image using secret.
+  ## @param wazuh.images.imagePullSecrets.secret Map of secret names to authenticate with a container registry to pull a private image.
   ##
   images:
     repository: wazuh/wazuh-manager
     tag: "4.14.1"
     pullPolicy: IfNotPresent
-    pullSecret: regcred
+    imagePullSecrets:
+      enabled: false
+      secret: {}
   ## LoadBalancer service for external agent, api access via NLB
   ## @param wazuh.loadBalancer.enabled Enable LoadBalancer service for external agent connections
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service (e.g., AWS NLB annotations)
@@ -697,10 +725,12 @@ wazuh:
     username: "wazuh-wui"
     password: "MyS3cr37P450r.*-"
   ## Parameters to the authd service.
+  ## @param wazuh.authd.enabled enable password-based agent registration (required if not using API-based enrollment).
   ## @param wazuh.authd.existingSecret name of the existingSecret in the namespace.
   ## @param wazuh.authd.pass password of the authd.
   ##
   authd:
+    enabled: true
     existingSecret: ""
     pass: "password"
   ## Parameters for the resources of the initContainer.
@@ -764,6 +794,9 @@ wazuh:
     ## @param wazuh.master.annotations additional annotations set on statefulset.
     ##
     annotations: {}
+    ## @param wazuh.master.extraPodLabels Extra labels to add to the master pods.
+    ##
+    extraPodLabels: {}
     ## Parameters to configure the resources allocated to the master.
     ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
     ## @param wazuh.master.resources.requests.cpu Minimum CPU assigned to the pod.
@@ -867,6 +900,9 @@ wazuh:
       extraIngresses: []
       ## @param wazuh.master.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
       extraEgresses: []
+    ## @param wazuh.master.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+    pvc:
+      extraLabels: {}
     ## @param wazuh.master.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the statefulset.
     ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
@@ -889,6 +925,7 @@ wazuh:
       statefulSet: {}
       pod: {}
       container: {}
+
   ## @section wazuh.worker configuration of the wazuh worker component.
   ##
   worker:
@@ -900,6 +937,9 @@ wazuh:
     ## @param wazuh.worker.annotations additional annotations set on deployment.
     ##
     annotations: {}
+    ## @param wazuh.worker.extraPodLabels Extra labels to add to the worker pods.
+    ##
+    extraPodLabels: {}
     ## Parameters to configure the resources allocated to the worker.
     ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
     ## @param wazuh.worker.resources.requests.cpu Minimum CPU assigned to the pod.
@@ -1015,6 +1055,9 @@ wazuh:
       extraIngresses: []
       ## @param wazuh.worker.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
       extraEgresses: []
+    ## @param wazuh.worker.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+    pvc:
+      extraLabels: {}
     ## @param wazuh.worker.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.worker.storageClass Defines the storageClass of the pvc used by the statefulset.
     ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner.
@@ -1042,6 +1085,10 @@ wazuh:
 agent:
   ## @param wazuh.agent.enabled Enable the agent.
   enabled: true
+
+  ## @param wazuh.agent.namePrefix Prefix for the agent name.
+  ## If set, the agent name will be {{ namePrefix }}{{ nodeName }}.
+  namePrefix: ""
 
   ## @param agent.serviceAccount defines wazuh agent serviceAccount.
   serviceAccount:
@@ -1073,6 +1120,9 @@ agent:
 
   ## @param wazuh.agent.podAnnotations Extra annotations for the agent.
   podAnnotations: {}
+
+  ## @param wazuh.agent.extraPodLabels Extra labels to add to the agent pods.
+  extraPodLabels: {}
 
   ## Parameters to configure the resources allocated to the agent.
   ## Ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
@@ -1266,3 +1316,12 @@ agent:
     daemonSet: {}
     pod: {}
     container: {}
+
+  ## Extra containers configuration for the agent
+  ## @param agent.extraContainers Sidecar containers to add to the agent pod.
+  ## Example:
+  ## extraContainers:
+  ##  - name: sidecar
+  ##    image: alpine
+  ##    command: ["/bin/sh", "-c", "sleep 3600"]
+  extraContainers: []

@@ -129,6 +129,10 @@ server.xsrf.allowlist: ["/_plugins/_security/saml/acs", "/_plugins/_security/sam
 opensearch_security.session.keepalive: false
 {{- end }}
 
+{{- if .Values.dashboard.server.extraConf }}
+{{ toYaml .Values.dashboard.server.extraConf }}
+{{- end }}
+
 {{- end }}
 
 
@@ -1871,6 +1875,8 @@ index_management_full_access:
     - "cluster:admin/opensearch/controlcenter/lron/*"
     - "cluster:admin/opensearch/notifications/channels/get"
     - "cluster:admin/opensearch/notifications/feature/publish"
+    - "cluster:admin/opensearch/templates/*"
+    - "cluster:admin/opensearch/index_template/*"    
   index_permissions:
     - index_patterns:
         - '*'
@@ -2228,7 +2234,7 @@ config:
         description: "Authenticate via Json Web Token"
         http_enabled: false
         transport_enabled: false
-        order: 0
+        order: 4
         http_authenticator:
           type: jwt
           challenge: false

@@ -27,6 +27,9 @@ spec:
       labels:
         app: {{ include "wazuh.fullname" . }}-manager
         node-type: master
+        {{- with .Values.wazuh.master.extraPodLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       name: wazuh-manager-master
       annotations:
         {{- if .Values.autoreload.enabled }}
@@ -102,6 +105,12 @@ spec:
         {{- with .Values.wazuh.extraInitContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- if .Values.wazuh.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.wazuh.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
       containers:
         - name: wazuh-manager
           {{- with .Values.wazuh.master.extraSpec.container }}
@@ -256,6 +265,12 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: {{ include "wazuh.fullname" . }}-manager-master
+        {{- if .Values.wazuh.master.pvc.extraLabels }}
+        labels:
+          {{- with .Values.wazuh.master.pvc.extraLabels }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
       spec:
         accessModes:
           - ReadWriteOnce
