@@ -262,9 +262,9 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: {{ include "wazuh.fullname" . }}-manager-worker
-        {{- if .Values.wazuh.worker.pvc.extralabels }}
+        {{- if .Values.wazuh.worker.pvc.extraLabels }}
         labels:
-          {{- with .Values.wazuh.worker.pvc.extralabels }}
+          {{- with .Values.wazuh.worker.pvc.extraLabels }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- end }}
