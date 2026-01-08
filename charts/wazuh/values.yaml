@@ -735,11 +735,13 @@ wazuh:
     pass: "password"
   ## Parameters for the resources of the initContainer.
   ## @param wazuh.initContainer.resources.requests.cpu Minimum CPU assigned to the pod.
+  ## @param wazuh.initContainer.image Image used by the update-index container
   ## @param wazuh.initContainer.resources.requests.memory Minimum memory assigned to the pod.
   ## @param wazuh.initContainer.resources.limits.cpu Maximum CPU used by the pod.
   ## @param wazuh.initContainer.resources.limits.memory Maximum memory used by the pod.
   ##
   initContainer:
+    image: alpine
     resources:
       requests:
         cpu: 250m

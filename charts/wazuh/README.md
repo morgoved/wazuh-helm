@@ -191,6 +191,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.apiCred.password`                        | password of the user. Note that the password must have a length                   | `MyS3cr37P450r.*-`                         |
 | `wazuh.authd.existingSecret`                    | name of the existingSecret in the namespace.                                      | `""`                                       |
 | `wazuh.authd.pass`                              | password of the authd.                                                            | `password`                                 |
+| `wazuh.initContainer.image`                     | Image used by the update-index container                                          | `alpine`                                   |
 | `wazuh.initContainer.resources.requests.cpu`    | Minimum CPU assigned to the pod.                                                  | `250m`                                     |
 | `wazuh.initContainer.resources.requests.memory` | Minimum memory assigned to the pod.                                               | `512Mi`                                    |
 | `wazuh.initContainer.resources.limits.cpu`      | Maximum CPU used by the pod.                                                      | `1000m`                                    |
