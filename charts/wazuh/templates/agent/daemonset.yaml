@@ -84,9 +84,9 @@ spec:
           {{- end }}
           env:
             - name: WAZUH_MANAGER_SERVER
-              value: {{ or .Values.agent.joinManager.workerHost (printf "%s-manager-worker.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
+              value: {{ printf "%s-manager-worker.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace }}
             - name: WAZUH_REGISTRATION_SERVER
-              value: {{ or .Values.agent.joinManager.managerHost (printf "%s.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
+              value: {{ printf "%s.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace }}
             {{- if .Values.wazuh.authd.enabled }}
             - name: WAZUH_REGISTRATION_PASSWORD
               valueFrom:
@@ -94,37 +94,8 @@ spec:
                   name: {{ .Values.wazuh.authd.existingSecret | default "wazuh-authd-pass" }}
                   key: authd.pass
             {{- end }}
-            - name: JOIN_MANAGER_PROTOCOL
-              value: {{ .Values.agent.joinManager.scheme }}
-            - name: JOIN_MANAGER_MASTER_HOST
-              value: {{ or .Values.agent.joinManager.managerHost (printf "%s.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
-            - name: JOIN_MANAGER_WORKER_HOST
-              value: {{ or .Values.agent.joinManager.workerHost (printf "%s-manager-worker.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
-            - name: JOIN_MANAGER_USER
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.agent.apiCred.existingSecret | default "wazuh-api-cred" }}
-                  key: API_USERNAME
-            - name: JOIN_MANAGER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.agent.apiCred.existingSecret | default "wazuh-api-cred" }}
-                  key: API_PASSWORD
-            - name: JOIN_MANAGER_API_PORT
-              value: {{ .Values.agent.joinManager.apiPort | quote }}
-            - name: JOIN_MANAGER_PORT
-              value: {{ .Values.agent.joinManager.agentsEvents | quote }}
-            - name: K8S_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: NODE_NAME
-              value: "{{ .Values.agent.namePrefix }}$(K8S_NODE_NAME)"
-            - name: WAZUH_GROUPS
-              value: {{ .Values.agent.joinManager.wazuh.group | quote }}
-            {{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled }}
-            - name: HEALTH_CHECK_PROCESSES
-              value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd,ossec-authd"
+            {{- with .Values.agent.extraEnv }}
+              {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- with .Values.agent.livenessProbe }}
           livenessProbe:
