@@ -1199,7 +1199,7 @@ agent:
   ##       value: "2"
   dnsConfig: {}
 
-  ## Environment variables to add to the aget pods
+  ## Environment variables to add to the agent pods
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ## Full list of supported environment variables by agent is in official Wazuh docs:
   ## https://documentation.wazuh.com/current/user-manual/agent/agent-enrollment/deployment-variables/deployment-variables-linux.html
