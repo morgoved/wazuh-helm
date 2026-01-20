@@ -1203,7 +1203,7 @@ agent:
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ## Full list of supported environment variables by agent is in official Wazuh docs:
   ## https://documentation.wazuh.com/current/user-manual/agent/agent-enrollment/deployment-variables/deployment-variables-linux.html
-  ## Also it will be useful to see what init scripts do with env variables during container start:
+  ## Also it will be useful to see what init scripts actually do with env variables during container start:
   ## https://github.com/wazuh/wazuh-docker/blob/main/build-docker-images/wazuh-agent/config/etc/cont-init.d/0-wazuh-init
   ## Example:
   ## extraEnv:
