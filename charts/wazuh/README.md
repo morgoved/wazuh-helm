@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 1.0.14](https://img.shields.io/badge/Version-1.0.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.1](https://img.shields.io/badge/AppVersion-4.14.1-informational?style=flat-square)
+![Version: 1.0.15](https://img.shields.io/badge/Version-1.0.15-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.1](https://img.shields.io/badge/AppVersion-4.14.1-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -191,6 +191,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.apiCred.password`                        | password of the user. Note that the password must have a length                   | `MyS3cr37P450r.*-`                         |
 | `wazuh.authd.existingSecret`                    | name of the existingSecret in the namespace.                                      | `""`                                       |
 | `wazuh.authd.pass`                              | password of the authd.                                                            | `password`                                 |
+| `wazuh.initContainer.image`                     | Image used by the update-index container                                          | `alpine`                                   |
 | `wazuh.initContainer.resources.requests.cpu`    | Minimum CPU assigned to the pod.                                                  | `250m`                                     |
 | `wazuh.initContainer.resources.requests.memory` | Minimum memory assigned to the pod.                                               | `512Mi`                                    |
 | `wazuh.initContainer.resources.limits.cpu`      | Maximum CPU used by the pod.                                                      | `1000m`                                    |

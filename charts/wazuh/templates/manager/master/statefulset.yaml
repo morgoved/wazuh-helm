@@ -83,7 +83,7 @@ spec:
       {{- end }}
       initContainers:
         - name: update-index
-          image: alpine
+          image: {{ .Values.wazuh.initContainer.image }}
           imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}
           command: 
             - 'sh'
