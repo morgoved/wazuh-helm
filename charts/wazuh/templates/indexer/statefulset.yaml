@@ -63,8 +63,9 @@ spec:
       dnsConfig:
         {{- toYaml .Values.indexer.dnsConfig | nindent 8 }}
       {{- end }}
-      {{- if and .Values.indexer.sysctlImage.enabled }}
+      {{- if or .Values.indexer.sysctlImage.enabled (gt (len .Values.indexer.initContainers) 0) }}
       initContainers:
+      {{- if .Values.indexer.sysctlImage.enabled }}
         ## Image that performs the sysctl operation to modify Kernel settings (needed sometimes to avoid boot errors)
         - name: sysctl
           image: "{{ .Values.indexer.sysctlImage.images.repository }}:{{ .Values.indexer.sysctlImage.images.tag }}"
@@ -82,6 +83,40 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+      {{- end }}
+      {{- range .Values.indexer.initContainers }}
+        - name: {{ .name }}
+        {{- with .image }}
+          image: {{ . }}
+        {{- end }}
+        {{- with .imagePullPolicy }}
+          imagePullPolicy: {{ . }}
+        {{- end }}
+        {{- with .command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+      {{- end }}
       {{- end }}
       volumes:
       - name: indexer-certs
