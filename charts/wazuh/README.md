@@ -119,6 +119,7 @@ Same applies when changing `dashboard.cred.password`
 | `indexer.sysctlImage.enabled`                | Enable kernel settings modifier image                                          | `false`                                                        |
 | `indexer.sysctlImage.images.repository`      | name of the image used. If you use your own image registry                     | `bitnamilegacy/os-shell`                                             |
 | `indexer.sysctlImage.images.tag`             | Tag of the image.                                                              | `12-debian-12-r43`                                             |
+| `indexer.initContainers`                     | List of custom initContainers for indexer statefulset.                         | `[]`                                             |
 | `indexer.storageSize`                        | Defines the size of the pvc used by the statefulset.                           | `50Gi`                                                         |
 | `indexer.storageClass`                       | Defines the storageClass of the pvc used by the statefulset.                   | `nil`                                                          |
 | `indexer.cred.existingSecret`                | Name of the existingSecret which holds the key "INDEXER_PASSWORD".             | `""`                                                           |
