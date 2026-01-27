@@ -11,6 +11,16 @@ metadata:
   annotations:
     {{- toYaml .Values.agent.service.annotations | nindent 4 }}
 spec:
+  type: {{ .Values.agent.service.type }}
+  {{- if .Values.global.dualStack.enabled }}
+  {{- if .Values.global.dualStack.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.global.dualStack.ipFamilyPolicy }}
+  {{- end }}
+  {{- if .Values.global.dualStack.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.global.dualStack.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- end }}
   ports:
     - name: http
       port: {{ .Values.agent.service.port }}
@@ -18,5 +28,4 @@ spec:
   selector:
     app: {{ include "wazuh.fullname" . }}-agent
     node-type: agent
-  type: {{ .Values.agent.service.type }}
 {{- end }}

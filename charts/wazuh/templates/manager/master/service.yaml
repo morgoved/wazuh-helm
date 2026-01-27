@@ -12,6 +12,15 @@ metadata:
     {{- toYaml .Values.wazuh.master.service.annotations | nindent 4 }}
 spec:
   type: {{ .Values.wazuh.master.service.type }}
+  {{- if .Values.global.dualStack.enabled }}
+  {{- if .Values.global.dualStack.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.global.dualStack.ipFamilyPolicy }}
+  {{- end }}
+  {{- if .Values.global.dualStack.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.global.dualStack.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- end }}
   ports:
   {{- range .Values.wazuh.master.service.ports }}
     - name: {{ .name }}

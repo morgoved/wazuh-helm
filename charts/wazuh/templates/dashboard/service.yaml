@@ -10,11 +10,20 @@ metadata:
   annotations:
     {{- toYaml .Values.dashboard.service.annotations | nindent 4 }}
 spec:
+  type: {{ .Values.dashboard.service.type }}
+  {{- if .Values.global.dualStack.enabled }}
+  {{- if .Values.global.dualStack.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ .Values.global.dualStack.ipFamilyPolicy }}
+  {{- end }}
+  {{- if .Values.global.dualStack.ipFamilies }}
+  ipFamilies:
+    {{- toYaml .Values.global.dualStack.ipFamilies | nindent 4 }}
+  {{- end }}
+  {{- end }}
   ports:
     - name: dashboard
       port: {{ .Values.dashboard.service.httpPort }}
       targetPort: {{ .Values.dashboard.service.httpPort }}
   selector:
     app: {{ include "wazuh.fullname" . }}-dashboard
-  type: {{ .Values.dashboard.service.type }}
 {{- end }}

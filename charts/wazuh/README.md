@@ -54,6 +54,14 @@ Same applies when changing `dashboard.cred.password`
 
 ## Parameters
 
+### global These parameters control the global networking behavior across all services (e.g., Wazuh Agent, Manager, Indexer, etc.).
+
+| Name                              | Description                                              | Value   |
+| --------------------------------- | -------------------------------------------------------- | ------- |
+| `global.dualStack.enabled`        | Enables dual-stack networking logic globally.            | `false` |
+| `global.dualStack.ipFamilyPolicy` | Sets the IP family policy for Kubernetes Services.       | `""`    |
+| `global.dualStack.ipFamilies`     | A list defining the order of IP families.                | `[]`    |
+
 ### cert-manager This are the parameters for the official sub-chart for cert-manager, here you
 
 | Name                   | Description                                              | Value   |
