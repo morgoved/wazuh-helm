@@ -9,8 +9,14 @@ fullnameOverride: null
 autoreload:
   enabled: false
 
+global:
+  dualStack:
+    enabled: false
+    ipFamilyPolicy: ""
+    ipFamilies: []
+
 ## @section cert-manager This are the parameters for the official sub-chart for cert-manager, here you
-## can set all available values of the official Chart. 
+## can set all available values of the official Chart.
 ## Ref: https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
 ##
 cert-manager:
@@ -63,7 +69,7 @@ externalIndexer:
 ## @section indexer configuration of the wazuh indexer.
 ##
 indexer:
-  ## @param indexer.enabled defines if we deploy indexer or not 
+  ## @param indexer.enabled defines if we deploy indexer or not
   enabled: true
 
   ## @param indexer.serviceAccount defines wazuh indexer serviceAccount
@@ -218,7 +224,7 @@ indexer:
   ##     - name: ndots
   ##       value: "2"
   dnsConfig: {}
-  
+
   ## @param indexer.additionalEnv Possibility to define additional env vars in the pod.
   ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   ##
@@ -327,7 +333,7 @@ indexer:
 ## pre-installed
 ##
 dashboard:
-  ## @param dashboard.enabled defines if we deploy dashboard or not 
+  ## @param dashboard.enabled defines if we deploy dashboard or not
   enabled: true
   ## @param dashboard.serviceAccount defines wazuh dashboard serviceAccount
   serviceAccount:
@@ -508,7 +514,7 @@ dashboard:
   ## This can be left as "" or set to your required path E.g. "/_dashboards"
   server:
     extraConf: {}
-    
+
   sso:
     oidc:
       ## @param dashboard.sso.oidc.enabled Enable OpenID Connect
@@ -563,7 +569,7 @@ dashboard:
         ## @param dashboard.sso.oidc.idp.pemtrustedcasFilePath define the file path of the root CA, if enableSSL is false it's not used
         ## Configure the root CA used for validating the IdP TLS certificate by setting one of the following configuration options (pemtrustedcasFilePath or pemtrustedcasContent)
         pemtrustedcasFilePath: ""
-        ## @param dashboard.sso.oidc.idp.pemtrustedcasContent define the content of the root CA, if enableSSL is false it's not used. 
+        ## @param dashboard.sso.oidc.idp.pemtrustedcasContent define the content of the root CA, if enableSSL is false it's not used.
         ## The root CA content of your IdP server. Cannot be used when pemtrustedcas_filepath is set.
         pemtrustedcasContent: |-
           -----BEGIN CERTIFICATE-----
@@ -584,7 +590,7 @@ dashboard:
       ## @param dashboard.sso.saml.pemtrustedcasFilePath define the file path of the root CA, if enableSSL is false it's not used
       ## Configure the root CA used for validating the IdP TLS certificate by setting one of the following configuration options (pemtrustedcasFilePath or pemtrustedcasContent)
       pemtrustedcasFilePath: ""
-      ## @param dashboard.sso.saml.pemtrustedcasContent define the content of the root CA, if enableSSL is false it's not used. 
+      ## @param dashboard.sso.saml.pemtrustedcasContent define the content of the root CA, if enableSSL is false it's not used.
       ## The root CA content of your IdP server. Cannot be used when pemtrustedcas_filepath is set.
       pemtrustedcasContent: |-
         -----BEGIN CERTIFICATE-----
@@ -657,7 +663,7 @@ dashboard:
 ##
 wazuh:
   ## @param wazuh.enabled enable the deployment of wazuh core component
-  ## needed if manager must be deployed 
+  ## needed if manager must be deployed
   enabled: true
   ## @param wazuh.serviceAccount defines wazuh manager serviceAccount
   serviceAccount:
