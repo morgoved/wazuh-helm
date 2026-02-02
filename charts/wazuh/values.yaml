@@ -1209,16 +1209,22 @@ agent:
   ##       value: "2"
   dnsConfig: {}
 
-  ## Parameters to configure the join manager.
-  ## @param wazuh.agent.joinManager.scheme Join manager scheme.
-  joinManager:
-    managerHost: ""
-    apiPort: "55000"
-    agentsEvents: "1514"
-    workerHost: ""
-    scheme: https
-    wazuh:
-      group: default
+  ## Environment variables to add to the agent pods
+  ## Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+  ## Full list of supported environment variables by agent is in official Wazuh docs:
+  ## https://documentation.wazuh.com/current/user-manual/agent/agent-enrollment/deployment-variables/deployment-variables-linux.html
+  ## Also it will be useful to see what init scripts actually do with env variables during container start:
+  ## https://github.com/wazuh/wazuh-docker/blob/main/build-docker-images/wazuh-agent/config/etc/cont-init.d/0-wazuh-init
+  ## Example:
+  ## extraEnv:
+  ##   - name: K8S_NODE_NAME
+  ##     valueFrom:
+  ##       fieldRef:
+  ##         apiVersion: v1
+  ##         fieldPath: spec.nodeName
+  ##   - name: WAZUH_AGENT_NAME
+  ##     value: my-k8s-cluster_$(K8S_NODE_NAME)
+  extraEnv: []
 
   ## Configuration of the api credentials. If username and password are left empty, they will be generated automatically.
   ## @param wazuh.agent.apiCred.existingSecret name of the existingSecret in the namespace. Expected keys are 'API_USERNAME' and
