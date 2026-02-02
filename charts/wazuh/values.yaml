@@ -278,6 +278,10 @@ indexer:
       ##
       repository: bitnamilegacy/os-shell
       tag: 12-debian-12-r43
+
+  ## @param indexer.initContainers Possibility to define additional init containers in the pod.
+  initContainers: []
+
   ## Configuration of the indexer env vars, this should be only changed if needed.
   ## @skip indexer.env.OPENSEARCH_JAVA_OPTS
   ## @skip indexer.env.CLUSTER_NAME
