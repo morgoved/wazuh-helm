@@ -1144,7 +1144,7 @@ agent:
   ## @param wazuh.agent.resources.limits.memory Maximum memory used by the pod.
   ##
   images:
-    repository: wazuh/wazuh-agent
+    repository: kinseii/wazuh-agent
     tag: "4.14.1"
     pullPolicy: IfNotPresent
 
