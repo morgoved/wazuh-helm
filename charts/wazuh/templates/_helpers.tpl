@@ -729,6 +729,8 @@ wazuh_clusterd.debug=0
       <connection>secure</connection>
       <port>{{ .port }}</port>
       <protocol>tcp</protocol>
+      <local_ip>::</local_ip>
+      <ipv6>yes</ipv6>
       <queue_size>131072</queue_size>
     </remote>
   {{- end }}
@@ -1088,6 +1090,8 @@ wazuh_clusterd.debug=0
       <connection>secure</connection>
       <port>{{ .port }}</port>
       <protocol>tcp</protocol>
+      <local_ip>::</local_ip>
+      <ipv6>yes</ipv6>
       <queue_size>131072</queue_size>
     </remote>
   {{- end }}
@@ -1876,7 +1880,7 @@ index_management_full_access:
     - "cluster:admin/opensearch/notifications/channels/get"
     - "cluster:admin/opensearch/notifications/feature/publish"
     - "cluster:admin/opensearch/templates/*"
-    - "cluster:admin/opensearch/index_template/*"    
+    - "cluster:admin/opensearch/index_template/*"
   index_permissions:
     - index_patterns:
         - '*'
