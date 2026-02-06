@@ -1016,9 +1016,9 @@ wazuh_clusterd.debug=0
 
   <cluster>
     <name>wazuh</name>
-    <node_name>{{ include "wazuh.fullname" . }}-manager-master-0</node_name>
+    <node_name>to_be_replaced_by_hostname</node_name>
     <node_type>master</node_type>
-    <key>{{ .Values.wazuh.key }}</key>
+    <key>to_be_replaced_by_cluster_key</key>
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>
@@ -1377,9 +1377,9 @@ wazuh_clusterd.debug=0
 
   <cluster>
     <name>wazuh</name>
-    <node_name>{{ include "wazuh.fullname" . }}-manager-worker-___INDEX___</node_name>
+    <node_name>to_be_replaced_by_hostname</node_name>
     <node_type>worker</node_type>
-    <key>{{ .Values.wazuh.key }}</key>
+    <key>to_be_replaced_by_cluster_key</key>
     <port>{{ .Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>

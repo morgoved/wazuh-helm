@@ -678,8 +678,11 @@ wazuh:
   ##
   syslog_enable: true
   ## @param wazuh.key Defines the key of the wazuh cluster.
+  ## @param wazuh.keyExistingSecret Name of existing secret containing the cluster key. Expected key is 'key'.
+  ## If set, wazuh.key is ignored and the secret is used instead.
   ##
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
+  keyExistingSecret: ""
   ## Parameters for the image of the manager.
   ## @param wazuh.images.repository name of the image used. If you use your own image registry just enter the url for the image. E.g.: my.registry.de/registry/wazuh/wazuh-manager
   ## @param wazuh.images.tag Tag of the image.
