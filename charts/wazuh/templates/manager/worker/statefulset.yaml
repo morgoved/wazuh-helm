@@ -85,7 +85,7 @@ spec:
         - name: config
           configMap:
             name: {{ include "wazuh.fullname" . }}-manager-config
-            defaultMode: 0777
+            defaultMode: 0755
         - name: filebeat-certs
           secret:
             secretName: filebeat-tls
@@ -167,6 +167,10 @@ spec:
             # Wazuh config
             - mountPath: /wazuh-config-mount/etc/
               name: result-config
+            - mountPath: /wazuh-config-mount/etc/internal_options.conf
+              name: config
+              readOnly: true
+              subPath: internal_options.conf
             # Certs
             - mountPath: /etc/ssl/root-ca.pem
               name: filebeat-certs

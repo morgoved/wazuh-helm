@@ -26,10 +26,10 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              app: {{ include "wazuh.indexer.fullname" . }}-dashboard
+              app: {{ include "wazuh.fullname" . }}-dashboard
         - podSelector:
             matchLabels:
-              app: {{ include "wazuh.indexer.fullname" . }}-manager
+              app: {{ include "wazuh.fullname" . }}-manager
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.indexer.fullname" . }}-indexer
@@ -47,16 +47,6 @@ spec:
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.indexer.fullname" . }}-indexer
-    - ports:
-        - protocol: UDP
-          port: 53
-      to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-          podSelector:
-            matchLabels:
-              k8s-app: kube-dns
     # DNS
     {{- range $dnsServerLabelsList := list "kube-dns" "coredns" }}
     - ports:

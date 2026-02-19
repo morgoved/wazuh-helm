@@ -263,6 +263,71 @@ indexer:
       {{ include "wazuh.indexer.whitelist" . }}
   ## Additional configurations to add to the configmap
   additionalConfigs: {}
+  ## LDAP / Active Directory authentication for the indexer (OpenSearch Security)
+  ## @param indexer.ldap.enabled Enable LDAP authentication domain
+  ## @param indexer.ldap.order Auth domain order (lower = higher priority)
+  ## @param indexer.ldap.hosts List of LDAP hosts (host:port)
+  ## @param indexer.ldap.bindDn Distinguished name for LDAP bind user
+  ## @param indexer.ldap.existingSecret Kubernetes Secret containing the LDAP bind password
+  ## @param indexer.ldap.bindPasswordKey Key in the secret containing the bind password
+  ## @param indexer.ldap.userbase LDAP search base for users
+  ## @param indexer.ldap.usersearch LDAP user search filter ({0} is replaced with the username)
+  ## @param indexer.ldap.usernameAttribute LDAP attribute used as username (null = use DN)
+  ## @param indexer.ldap.authz.enabled Enable LDAP authorization (role loading)
+  ldap:
+    enabled: false
+    order: 5
+    enableSSL: false
+    enableStartTLS: false
+    enableSSLClientAuth: false
+    verifyHostnames: true
+    hosts:
+      - localhost:389
+    bindDn: null
+    existingSecret: ""
+    bindPasswordKey: "password"
+    userbase: "ou=people,dc=example,dc=com"
+    usersearch: "(sAMAccountName={0})"
+    usernameAttribute: null
+    ## Authorization domain – loads roles from LDAP after authentication
+    authz:
+      enabled: false
+      ## Override hosts for authz; defaults to indexer.ldap.hosts if empty
+      hosts: []
+      bindDn: null
+      ## Leave empty to reuse indexer.ldap.existingSecret
+      existingSecret: ""
+      bindPasswordKey: "password"
+      rolebase: "ou=groups,dc=example,dc=com"
+      rolesearch: "(member={0})"
+      userroleattribute: null
+      userrolename: disabled
+      rolename: cn
+      resolveNestedRoles: true
+      userbase: "ou=people,dc=example,dc=com"
+      usersearch: "(uid={0})"
+    ## Mapping of LDAP groups to default OpenSearch roles
+    roleMappings:
+      allAccess:
+        backendRoles: []
+      readall:
+        backendRoles: []
+      manageSnapshots:
+        backendRoles: []
+      kibanaServer:
+        backendRoles: []
+      kibanaUser:
+        backendRoles: []
+      manageWazuhIndex:
+        backendRoles: []
+    ## Additional custom role mappings (for roles that are not part of the OpenSearch default)
+    extraRoleMappings: {}
+      # Example for a custom role:
+      # wazuh_admin:
+      #   reserved: false
+      #   backend_roles:
+      #     - "group"
+
   ## Parameters for the sysctlImage initContainer.
   ##
   sysctlImage:

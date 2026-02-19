@@ -69,7 +69,7 @@ spec:
         - name: config
           configMap:
             name: {{ template "wazuh.fullname" . }}-manager-config
-            defaultMode: 0777
+            defaultMode: 0755
         - name: filebeat-certs
           secret:
             secretName: filebeat-tls
@@ -81,6 +81,8 @@ spec:
       {{- with .Values.wazuh.master.additionalVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        fsGroup: 101
       initContainers:
         - name: update-index
           image: {{ .Values.wazuh.initContainer.image }}

@@ -9,22 +9,50 @@ metadata:
   annotations:
     {{- toYaml .Values.indexer.annotations | nindent 4 }}
 data:
-  internal_users.yml: |
-    {{- tpl .Values.indexer.config.internalUsers . | nindent 4 }}
   opensearch.yml: |
-    {{- tpl .Values.indexer.config.opensearch . | nindent 4 }}
-  roles_mapping.yml: |
-    {{- tpl .Values.indexer.config.rolesMapping . | nindent 4 }}
-  roles.yml: |
-    {{- tpl .Values.indexer.config.roles . | nindent 4 }}
-  config.yml: |
-    {{- tpl .Values.indexer.config.securityConfig . | nindent 4 }}
-  tenants.yml: |
-    {{- tpl .Values.indexer.config.tenants . | nindent 4 }}
-  nodes_dn.yml: |
-    {{- tpl .Values.indexer.config.nodesDn . | nindent 4 }}
-  whitelist.yml: |
-    {{- tpl .Values.indexer.config.whitelist . | nindent 4 }}
+    cluster.name: ${CLUSTER_NAME}
+    node.name: ${NODE_NAME}
+    network.host: ${NETWORK_HOST}
+    discovery.seed_hosts: {{ include "wazuh.indexer.fullname" . }}-indexer-nodes
+    cluster.initial_master_nodes:
+      - {{ include "wazuh.indexer.fullname" . }}-indexer-0
+
+    node.max_local_storage_nodes: "3"
+    path.data: /var/lib/wazuh-indexer
+    path.logs: /var/log/wazuh-indexer
+    plugins.security.ssl.http.pemcert_filepath: /usr/share/wazuh-indexer/config/certs/node.pem
+    plugins.security.ssl.http.pemkey_filepath: /usr/share/wazuh-indexer/config/certs/node-key.pem
+    plugins.security.ssl.http.pemtrustedcas_filepath: /usr/share/wazuh-indexer/config/certs/root-ca.pem
+    plugins.security.ssl.transport.pemcert_filepath: /usr/share/wazuh-indexer/config/certs/node.pem
+    plugins.security.ssl.transport.pemkey_filepath: /usr/share/wazuh-indexer/config/certs/node-key.pem
+    plugins.security.ssl.transport.pemtrustedcas_filepath: /usr/share/wazuh-indexer/config/certs/root-ca.pem
+    plugins.security.ssl.http.enabled: true
+    plugins.security.ssl.transport.enforce_hostname_verification: false
+    plugins.security.ssl.transport.resolve_hostname: false
+    plugins.security.authcz.admin_dn:
+      - CN=admin,O={{ .Values.certificates.subject.organization }},L={{ .Values.certificates.subject.locality }},C={{ .Values.certificates.subject.country }}
+    plugins.security.check_snapshot_restore_write_privileges: true
+    plugins.security.enable_snapshot_restore_privilege: true
+    plugins.security.nodes_dn:
+      - CN={{ include "wazuh.indexer.fullname" . }}-indexer,O={{ .Values.certificates.subject.organization }},L={{ .Values.certificates.subject.locality }},C={{ .Values.certificates.subject.country }}
+    plugins.security.restapi.roles_enabled:
+    - "all_access"
+    - "security_rest_api_access"
+    plugins.security.allow_default_init_securityindex: true
+    cluster.routing.allocation.disk.threshold_enabled: false
+    compatibility.override_main_response_version: true
+  tenants.yml: |-
+    _meta:
+      type: "tenants"
+      config_version: 2
+  nodes_dn.yml: |-
+    _meta:
+      type: "nodes_dn"
+      config_version: 2
+  whitelist.yml: |-
+    _meta:
+      type: "whitelist"
+      config_version: 2
 {{- range $configName, $configYaml := .Values.indexer.additionalConfigs }}
   {{ $configName }}: |
     {{-   tpl $configYaml . | nindent 4 }}

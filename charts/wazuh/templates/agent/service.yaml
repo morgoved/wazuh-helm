@@ -25,6 +25,9 @@ spec:
     - name: http
       port: {{ .Values.agent.service.port }}
       targetPort: {{ .Values.agent.service.port }}
+      {{- if and (eq (.Values.agent.service.type | default "ClusterIP") "NodePort") .Values.agent.service.nodePort }}
+      nodePort: {{ .Values.agent.service.nodePort }}
+      {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-agent
     node-type: agent

@@ -135,6 +135,10 @@ spec:
         configMap:
           name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
           defaultMode: 0600
+      - name: indexer-security
+        secret:
+          secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
+          defaultMode: 0600
       {{- with .Values.indexer.additionalVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -185,6 +189,20 @@ spec:
                   name: {{ required "dashboard.sso.oidc.existingSecret is required" .Values.dashboard.sso.oidc.existingSecret }}
                   key: {{ .Values.dashboard.sso.oidc.clientSecretKey }}
             {{- end }}
+            {{- if and .Values.indexer.ldap.enabled .Values.indexer.ldap.existingSecret }}
+            - name: OPENSEARCH_LDAP_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.indexer.ldap.existingSecret }}
+                  key: {{ .Values.indexer.ldap.bindPasswordKey }}
+            {{- end }}
+            {{- if and .Values.indexer.ldap.authz.enabled .Values.indexer.ldap.authz.existingSecret }}
+            - name: OPENSEARCH_LDAP_AUTHZ_BIND_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.indexer.ldap.authz.existingSecret }}
+                  key: {{ .Values.indexer.ldap.authz.bindPasswordKey }}
+            {{- end }}
           {{- with .Values.indexer.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -230,19 +248,19 @@ spec:
               mountPath: /usr/share/wazuh-indexer/config/opensearch.yml
               subPath: opensearch.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
               subPath: internal_users.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles.yml
               subPath: roles.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles_mapping.yml
               subPath: roles_mapping.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/config.yml
               subPath: config.yml
               readOnly: true

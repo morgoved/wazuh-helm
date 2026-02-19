@@ -5,24 +5,16 @@ metadata:
   name: {{ include "wazuh.fullname" . }}-manager-config
   namespace: {{ .Release.Namespace }}
 data:
-  script.sh: |-
-    #/bin/sh
-    # Updates each workers config to fix hostname
-    cp /ossec.conf /wazuh-config-mount/etc/ossec.conf
-    node_index=${HOSTNAME##*-}
-    sed -i "s/___INDEX___/$node_index/g" /wazuh-config-mount/etc/ossec.conf
-  master.conf: |
-    {{- tpl .Values.wazuh.master.conf . | nindent 4 }}
-  worker.conf: |
-    {{- tpl .Values.wazuh.worker.conf . | nindent 4 }}
-  local_decoder.xml: | 
-    {{- tpl .Values.wazuh.localDecoder . | nindent 4 }}
-  local_rules.xml: | 
-    {{- tpl .Values.wazuh.localRules . | nindent 4 }}
-  internal_options.conf: | 
-    {{- tpl .Values.wazuh.internalOptions . | nindent 4 }}
+  script.sh: {{ .Files.Get "files/script.sh" | default "# fallback" | quote }}
+  master.conf: {{ include "wazuh.ossec_config" (dict "root" . "type" "master") | quote }}
+  worker.conf: {{ include "wazuh.ossec_config" (dict "root" . "type" "worker") | quote }}
+  local_decoder.xml: {{ .Files.Get "files/local_decoder.xml" | default "<decoder></decoder>" | quote }}
+  local_rules.xml: {{ .Files.Get "files/local_rules.xml" | default "<group></group>" | quote }}
+  internal_options.conf: {{ .Files.Get "files/internal_options.conf" | default "# fallback" | quote }}
+
+{{- if .Values.wazuh.agentGroupConf }}
 {{- range .Values.wazuh.agentGroupConf }}
-  {{ .name }}-agent.conf: | 
-    {{- .agent | nindent 4 }} 
+  {{ printf "%s-agent.conf" .name | quote }}: {{ .agent | default "" | quote }}
+{{- end }}
 {{- end }}
 {{- end }}

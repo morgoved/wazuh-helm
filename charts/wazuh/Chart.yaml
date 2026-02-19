@@ -2,8 +2,8 @@ apiVersion: v2
 name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
-appVersion: 4.14.1
-version: 1.0.18
+appVersion: 4.14.3
+version: 2.0.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
@@ -61,6 +61,6 @@ keywords:
   - elasticsearch
 dependencies:
   - name: cert-manager
-    version: 1.18.1
+    version: 1.19.3
     repository: https://charts.jetstack.io
     condition: cert-manager.enabled

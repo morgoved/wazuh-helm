@@ -24,6 +24,9 @@ spec:
     - name: dashboard
       port: {{ .Values.dashboard.service.httpPort }}
       targetPort: {{ .Values.dashboard.service.httpPort }}
+      {{- if and (eq (.Values.dashboard.service.type | default "ClusterIP") "NodePort") .Values.dashboard.service.nodePort }}
+      nodePort: {{ .Values.dashboard.service.nodePort }}
+      {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-dashboard
 {{- end }}

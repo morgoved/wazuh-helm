@@ -96,19 +96,19 @@ spec:
               mountPath: /usr/share/wazuh-indexer/config/opensearch.yml
               subPath: opensearch.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
               subPath: internal_users.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles.yml
               subPath: roles.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/roles_mapping.yml
               subPath: roles_mapping.yml
               readOnly: true
-            - name: indexer-conf
+            - name: indexer-security
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/config.yml
               subPath: config.yml
               readOnly: true
@@ -124,6 +124,8 @@ spec:
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/whitelist.yml
               subPath: whitelist.yml
               readOnly: true
+      securityContext:
+        fsGroup: 1000
       terminationGracePeriodSeconds: 30
       volumes:
         - name: admin-certs
@@ -132,7 +134,11 @@ spec:
         - name: node-certs
           secret:
             secretName: node-tls
-        - configMap:
+        - name: indexer-conf
+          configMap:
             name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
-          name: indexer-conf
+        - name: indexer-security
+          secret:
+            secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
+            defaultMode: 0600
 {{- end }}
