@@ -729,7 +729,7 @@ wazuh_clusterd.debug=0
       <connection>secure</connection>
       <port>{{ .port }}</port>
       <protocol>tcp</protocol>
-      {{- if .Values.global.dualStack.enabled }}
+      {{- if and $.Values.global $.Values.global.dualStack $.Values.global.dualStack.enabled }}
       <local_ip>::</local_ip>
       <ipv6>yes</ipv6>
       {{- else }}
@@ -1097,7 +1097,7 @@ wazuh_clusterd.debug=0
       <connection>secure</connection>
       <port>{{ .port }}</port>
       <protocol>tcp</protocol>
-      {{- if .Values.global.dualStack.enabled }}
+      {{- if and $.Values.global $.Values.global.dualStack $.Values.global.dualStack.enabled }}
       <local_ip>::</local_ip>
       <ipv6>yes</ipv6>
       {{- else }}
