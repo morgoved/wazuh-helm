@@ -260,7 +260,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: {{ include "wazuh.fullname" . }}-manager-worker
         {{- if .Values.wazuh.worker.pvc.extraLabels }}
         labels:

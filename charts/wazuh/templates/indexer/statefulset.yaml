@@ -267,7 +267,9 @@ spec:
             - containerPort: {{ .Values.indexer.service.nodes }}
               name: indexer-nodes
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: wazuh-indexer
         {{- if .Values.indexer.pvc.extraLabels }}
         labels:
