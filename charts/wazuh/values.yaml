@@ -332,6 +332,13 @@ indexer:
   ##     argocd.argoproj.io/hook-delete-policy: HookSucceeded,BeforeHookCreation
   job:
     annotations: {}
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
 ## @section indexer configuration of the wazuh dashboard. Kibana for elasticsearch with Wazuh plugins
 ## pre-installed
