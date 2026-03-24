@@ -1473,6 +1473,9 @@ plugins.security.restapi.roles_enabled:
 plugins.security.allow_default_init_securityindex: true
 cluster.routing.allocation.disk.threshold_enabled: false
 compatibility.override_main_response_version: true
+{{- if .Values.indexer.snapshot.enabled }}
+path.repo: ["{{ .Values.indexer.snapshot.fs.path }}"]
+{{- end }}
 {{- end }}
 
 {{- define "wazuh.indexer.internalUsers"}}
