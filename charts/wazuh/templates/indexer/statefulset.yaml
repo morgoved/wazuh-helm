@@ -135,6 +135,11 @@ spec:
         configMap:
           name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
           defaultMode: 0600
+      {{- if .Values.indexer.snapshot.enabled }}
+      - name: snapshot-repo
+        persistentVolumeClaim:
+          claimName: {{ .Values.indexer.snapshot.fs.existingClaim | default (printf "%s-indexer-snapshots" (include "wazuh.indexer.fullname" .)) }}
+      {{- end }}
       {{- with .Values.indexer.additionalVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -260,6 +265,10 @@ spec:
               readOnly: true
             {{- with .Values.indexer.additionalVolumeMounts }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.indexer.snapshot.enabled }}
+            - mountPath: {{ .Values.indexer.snapshot.fs.path }}
+              name: snapshot-repo
             {{- end }}
           ports:
             - containerPort: {{ .Values.indexer.service.httpPort }}

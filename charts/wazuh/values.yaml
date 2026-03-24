@@ -323,6 +323,35 @@ indexer:
     pod: {}
     container: {}
 
+  ## @section indexer.snapshot Configuration for OpenSearch snapshot repositories.
+  ## Ref: https://docs.opensearch.org/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/
+  ##
+  snapshot:
+    ## @param indexer.snapshot.enabled Enable snapshot repository configuration on the indexer.
+    ##
+    enabled: false
+    ## @param indexer.snapshot.fs.path Path inside the container where snapshots are stored.
+    ## This path is set as path.repo in opensearch.yml and must be accessible by all indexer nodes.
+    ##
+    fs:
+      path: /mnt/snapshots
+      ## @param indexer.snapshot.fs.storageSize Size of the PVC used for the snapshot volume.
+      ##
+      storageSize: 50Gi
+      ## @param indexer.snapshot.fs.storageClass StorageClass for the snapshot PVC.
+      ## Must support ReadWriteMany access mode (e.g. azurefile, azurefile-csi, efs-sc, nfs-client).
+      ## Standard block storage (managed-csi, gp3, etc.) will NOT work.
+      ##
+      storageClass: ""
+      ## @param indexer.snapshot.fs.accessModes Access modes for the snapshot PVC.
+      ##
+      accessModes:
+        - ReadWriteMany
+      ## @param indexer.snapshot.fs.existingClaim Name of an existing PVC to use instead of creating one.
+      ## If set, storageSize, storageClass, and accessModes are ignored.
+      ##
+      existingClaim: ""
+
   ## Override the indexer job annotations from the default Helm hooks
   ## @param indexer.job.annotations Annotations to add to the indexer job.
   ## Example:
