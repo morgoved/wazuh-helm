@@ -19,9 +19,14 @@
 .project
 .idea/
 *.tmproj
-# img folder
-img/
+# images folder
+images/
 # Changelog
 CHANGELOG.md
-
+# README
+README.md
+# License
+LICENSE
+# example folder
+example/
 wazuh-*.tgz
