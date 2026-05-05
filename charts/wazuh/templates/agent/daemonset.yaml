@@ -124,7 +124,7 @@ spec:
               value: {{ .Values.agent.joinManager.wazuh.group | quote }}
             {{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled }}
             - name: HEALTH_CHECK_PROCESSES
-              value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd,ossec-authd"
+              value: "ossec-execd,ossec-syscheckd,ossec-logcollector,wazuh-modulesd"
             {{- end }}
           {{- with .Values.agent.livenessProbe }}
           livenessProbe:

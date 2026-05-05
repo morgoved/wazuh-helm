@@ -755,11 +755,11 @@ wazuh_clusterd.debug=0
     <!-- Frequency that rootcheck is executed - every 12 hours -->
     <frequency>43200</frequency>
 
-    <rootkit_files>/var/ossec/etc/rootcheck/rootkit_files.txt</rootkit_files>
-    <rootkit_trojans>/var/ossec/etc/rootcheck/rootkit_trojans.txt</rootkit_trojans>
+    <rootkit_files>/var/wazuh-manager/etc/rootcheck/rootkit_files.txt</rootkit_files>
+    <rootkit_trojans>/var/wazuh-manager/etc/rootcheck/rootkit_trojans.txt</rootkit_trojans>
 
-    <system_audit>/var/ossec/etc/rootcheck/system_audit_rcl.txt</system_audit>
-    <system_audit>/var/ossec/etc/rootcheck/system_audit_ssh.txt</system_audit>
+    <system_audit>/var/wazuh-manager/etc/rootcheck/system_audit_rcl.txt</system_audit>
+    <system_audit>/var/wazuh-manager/etc/rootcheck/system_audit_ssh.txt</system_audit>
 
     <skip_nfs>yes</skip_nfs>
   </rootcheck>
@@ -823,8 +823,8 @@ wazuh_clusterd.debug=0
       <certificate_authorities>
         <ca>/etc/ssl/root-ca.pem</ca>
       </certificate_authorities>
-      <certificate>/etc/ssl/filebeat.pem</certificate>
-      <key>/etc/ssl/filebeat.key</key>
+      <certificate>/etc/ssl/indexer-connector.pem</certificate>
+      <key>/etc/ssl/indexer-connector.key</key>
     </ssl>
   </indexer>
 
@@ -990,36 +990,10 @@ wazuh_clusterd.debug=0
       <session_timeout>15m</session_timeout>
   </rule_test>
 
-  <!-- Configuration for ossec-authd
-    To enable this service, run:
-    wazuh-control enable auth
+  <!-- Agent enrollment via API (wazuh-authd / ossec-authd removed in Wazuh 5.0).
+       Use the Wazuh API to enroll agents. The <auth> block below is kept for
+       reference but the ossec-authd daemon no longer exists in v5.
   -->
-  <auth>
-    <disabled>no</disabled>
-{{- range .Values.wazuh.master.service.ports }}
-  {{- if eq .name "registration" }}
-    <port>{{ .port }}</port>
-  {{- end }}
-{{- end }}
-    <use_source_ip>no</use_source_ip>
-    {{- if .Values.global.dualStack.enabled }}
-    <ipv6>yes</ipv6>
-    {{- end }}
-    <force>
-      <enabled>yes</enabled>
-      <key_mismatch>yes</key_mismatch>
-      <disconnected_time enabled="yes">1h</disconnected_time>
-      <after_registration_time>1h</after_registration_time>
-    </force>
-    <purge>no</purge>
-    <use_password>yes</use_password>
-    <ciphers>HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH</ciphers>
-    <!-- <ssl_agent_ca></ssl_agent_ca> -->
-    <ssl_verify_host>no</ssl_verify_host>
-    <ssl_manager_cert>/var/ossec/etc/sslmanager.cert</ssl_manager_cert>
-    <ssl_manager_key>/var/ossec/etc/sslmanager.key</ssl_manager_key>
-    <ssl_auto_negotiate>no</ssl_auto_negotiate>
-  </auth>
 
   <cluster>
     <name>wazuh</name>
@@ -1037,7 +1011,7 @@ wazuh_clusterd.debug=0
 
   <localfile>
     <log_format>syslog</log_format>
-    <location>/var/ossec/logs/active-responses.log</location>
+    <location>/var/wazuh-manager/logs/active-responses.log</location>
   </localfile>
   <localfile>
     <log_format>syslog</log_format>
@@ -1123,11 +1097,11 @@ wazuh_clusterd.debug=0
     <!-- Frequency that rootcheck is executed - every 12 hours -->
     <frequency>43200</frequency>
 
-    <rootkit_files>/var/ossec/etc/rootcheck/rootkit_files.txt</rootkit_files>
-    <rootkit_trojans>/var/ossec/etc/rootcheck/rootkit_trojans.txt</rootkit_trojans>
+    <rootkit_files>/var/wazuh-manager/etc/rootcheck/rootkit_files.txt</rootkit_files>
+    <rootkit_trojans>/var/wazuh-manager/etc/rootcheck/rootkit_trojans.txt</rootkit_trojans>
 
-    <system_audit>/var/ossec/etc/rootcheck/system_audit_rcl.txt</system_audit>
-    <system_audit>/var/ossec/etc/rootcheck/system_audit_ssh.txt</system_audit>
+    <system_audit>/var/wazuh-manager/etc/rootcheck/system_audit_rcl.txt</system_audit>
+    <system_audit>/var/wazuh-manager/etc/rootcheck/system_audit_ssh.txt</system_audit>
 
     <skip_nfs>yes</skip_nfs>
   </rootcheck>
@@ -1191,8 +1165,8 @@ wazuh_clusterd.debug=0
       <certificate_authorities>
         <ca>/etc/ssl/root-ca.pem</ca>
       </certificate_authorities>
-      <certificate>/etc/ssl/filebeat.pem</certificate>
-      <key>/etc/ssl/filebeat.key</key>
+      <certificate>/etc/ssl/indexer-connector.pem</certificate>
+      <key>/etc/ssl/indexer-connector.key</key>
     </ssl>
   </indexer>
 
@@ -1358,36 +1332,10 @@ wazuh_clusterd.debug=0
     <session_timeout>15m</session_timeout>
   </rule_test>
 
-  <!-- Configuration for ossec-authd
-    To enable this service, run:
-    wazuh-control enable auth
+  <!-- Agent enrollment via API (wazuh-authd / ossec-authd removed in Wazuh 5.0).
+       Use the Wazuh API to enroll agents. The <auth> block is no longer supported
+       on worker nodes in v5.
   -->
-  <auth>
-    <disabled>no</disabled>
-{{- range .Values.wazuh.master.service.ports }}
-  {{- if eq .name "registration" }}
-    <port>{{ .port }}</port>
-  {{- end }}
-{{- end }}
-    {{- if .Values.global.dualStack.enabled }}
-    <ipv6>yes</ipv6>
-    {{- end }}
-    <use_source_ip>no</use_source_ip>
-    <force>
-      <enabled>yes</enabled>
-      <key_mismatch>yes</key_mismatch>
-      <disconnected_time enabled="yes">1h</disconnected_time>
-      <after_registration_time>1h</after_registration_time>
-    </force>
-    <purge>no</purge>
-    <use_password>yes</use_password>
-    <ciphers>HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH</ciphers>
-    <!-- <ssl_agent_ca></ssl_agent_ca> -->
-    <ssl_verify_host>no</ssl_verify_host>
-    <ssl_manager_cert>/var/ossec/etc/sslmanager.cert</ssl_manager_cert>
-    <ssl_manager_key>/var/ossec/etc/sslmanager.key</ssl_manager_key>
-    <ssl_auto_negotiate>no</ssl_auto_negotiate>
-  </auth>
 
   <cluster>
     <name>wazuh</name>
@@ -1406,7 +1354,7 @@ wazuh_clusterd.debug=0
 
   <localfile>
     <log_format>syslog</log_format>
-    <location>/var/ossec/logs/active-responses.log</location>
+    <location>/var/wazuh-manager/logs/active-responses.log</location>
   </localfile>
 
   <localfile>

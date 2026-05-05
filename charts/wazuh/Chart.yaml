@@ -2,16 +2,24 @@ apiVersion: v2
 name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
-appVersion: 4.14.5
-version: 1.0.23
+appVersion: 5.0.0-beta1
+version: 1.0.24
 annotations:
-  artifacthub.io/prerelease: "false"
+  artifacthub.io/prerelease: "true"
   artifacthub.io/category: security
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update all components to Wazuh 4.14.5"
+      description: "Update all components to Wazuh 5.0.0-beta1"
     - kind: changed
-      description: "Update cert-manager dependency to 1.20.2"
+      description: "Replace Filebeat with native indexer-connector for event forwarding"
+    - kind: changed
+      description: "Update install path from /var/ossec to /var/wazuh-manager"
+    - kind: changed
+      description: "Remove agentless, mail and dbd daemon configs (removed in v5)"
+    - kind: changed
+      description: "Replace ossec-authd config with API-based agent enrollment"
+    - kind: changed
+      description: "Cluster is now always enabled (cluster.disabled option removed)"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh

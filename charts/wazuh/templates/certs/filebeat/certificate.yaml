@@ -2,11 +2,11 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ include "wazuh.fullname" . }}-filebeat
+  name: {{ include "wazuh.fullname" . }}-indexer-connector
   namespace: {{ .Release.Namespace }}
 spec:
   # Secret names are always required.
-  secretName: filebeat-tls
+  secretName: indexer-connector-tls
   privateKey:
     algorithm: RSA
     encoding: PKCS8
@@ -14,7 +14,7 @@ spec:
   duration: {{ .Values.certificates.duration }}
   renewBefore: {{ .Values.certificates.renewBefore }}
   isCA: false
-  commonName: filebeat
+  commonName: indexer-connector
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}
@@ -24,10 +24,5 @@ spec:
       - {{ .Values.certificates.subject.locality }}
   # Issuer references are always required.
   issuerRef:
-    # Admin Issuer have to use the CA Issuer so that the certificate can be validated with node-tls secret
     name: {{ include "wazuh.fullname" . }}-ca-issuer
-{{/*    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}*/}}
-{{/*    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}*/}}
-{{/*    kind: ClusterIssuer*/}}
-{{/*    {{- end }}*/}}
 {{- end }}

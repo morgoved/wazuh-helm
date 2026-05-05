@@ -99,7 +99,7 @@ indexer:
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
     ##
-    tag: "4.14.5"
+    tag: "5.0.0-beta1"
     pullPolicy: IfNotPresent
     ## Parameter to set the imagePullSecret
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -400,7 +400,7 @@ dashboard:
     ## @param dashboard.images.pullPolicy pullPolicy of the image.
     ## @param dashboard.images.updateStrategy updateStrategy of the image.
     ##
-    tag: "4.14.5"
+    tag: "5.0.0-beta1"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## Parameters to configure the resources allocated to the dashboard.
@@ -725,7 +725,7 @@ wazuh:
   ##
   images:
     repository: wazuh/wazuh-manager
-    tag: "4.14.5"
+    tag: "5.0.0-beta1"
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false
@@ -755,9 +755,10 @@ wazuh:
   ##
   nodeSelector: {}
   ## @skip wazuh.env Configuration of the indexer env vars, this should be only changed if needed.
+  ## Filebeat was removed in Wazuh 5.0; the manager now uses a native indexer-connector.
   ##
   env:
-    FILEBEAT_SSL_VERIFICATION_MODE: full
+    INDEXER_SSL_VERIFICATION_MODE: full
   ## Configuration of the api credentials. If username and password are left empty, they will be generated automatically.
   ## @param wazuh.apiCred.existingSecret name of the existingSecret in the namespace. Expected keys are 'API_USERNAME' and
   ## 'API_PASSWORD'
@@ -771,12 +772,15 @@ wazuh:
     username: "wazuh-wui"
     password: "MyS3cr37P450r.*-"
   ## Parameters to the authd service.
-  ## @param wazuh.authd.enabled enable password-based agent registration (required if not using API-based enrollment).
+  ## DEPRECATED in Wazuh 5.0: ossec-authd and the <auth> block have been removed.
+  ## Agent enrollment is now exclusively API-based (wazuh-authd daemon no longer exists).
+  ## This section is kept for backwards compatibility but has no effect on v5 deployments.
+  ## @param wazuh.authd.enabled enable password-based agent registration (no-op in v5).
   ## @param wazuh.authd.existingSecret name of the existingSecret in the namespace.
   ## @param wazuh.authd.pass password of the authd.
   ##
   authd:
-    enabled: true
+    enabled: false
     existingSecret: ""
     pass: "password"
   ## Parameters for the resources of the initContainer.
@@ -1181,7 +1185,7 @@ agent:
   ##
   images:
     repository: kinseii/wazuh-agent
-    tag: "4.14.5"
+    tag: "5.0.0-beta1"
     pullPolicy: IfNotPresent
 
   ## Parameters to configure securityContext of the pod.

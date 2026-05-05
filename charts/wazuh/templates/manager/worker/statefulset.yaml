@@ -32,7 +32,7 @@ spec:
       annotations:
         {{- if .Values.autoreload.enabled }}
         checksum/configmap: {{ include (print $.Template.BasePath "/manager/configmap.yaml") . | sha256sum }}
-        checksum/filebeat-certificate: {{ include (print $.Template.BasePath "/certs/filebeat/certificate.yaml") . | sha256sum }}
+        checksum/indexer-connector-certificate: {{ include (print $.Template.BasePath "/certs/filebeat/certificate.yaml") . | sha256sum }}
         checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.wazuh.worker.annotations }}
@@ -86,9 +86,9 @@ spec:
           configMap:
             name: {{ include "wazuh.fullname" . }}-manager-config
             defaultMode: 0777
-        - name: filebeat-certs
+        - name: indexer-connector-certs
           secret:
-            secretName: filebeat-tls
+            secretName: indexer-connector-tls
         - name: result-config
           emptyDir: {}
       {{- with .Values.wazuh.worker.additionalVolumes }}
@@ -157,10 +157,10 @@ spec:
                 - -c
                 - |
                   {{- range .Values.wazuh.agentGroupConf }}
-                  if [ -d "/var/ossec/etc/shared/{{ .name }}" ]; then
-                    chown -R wazuh:wazuh /var/ossec/etc/shared/{{ .name }}
-                    chmod 770 /var/ossec/etc/shared/{{ .name }}
-                    chmod 660 /var/ossec/etc/shared/{{ .name }}/* 2>/dev/null || true
+                  if [ -d "/var/wazuh-manager/etc/shared/{{ .name }}" ]; then
+                    chown -R wazuh:wazuh /var/wazuh-manager/etc/shared/{{ .name }}
+                    chmod 770 /var/wazuh-manager/etc/shared/{{ .name }}
+                    chmod 660 /var/wazuh-manager/etc/shared/{{ .name }}/* 2>/dev/null || true
                   fi
                   {{- end }}
           volumeMounts:
@@ -169,51 +169,45 @@ spec:
               name: result-config
             # Certs
             - mountPath: /etc/ssl/root-ca.pem
-              name: filebeat-certs
+              name: indexer-connector-certs
               readOnly: true
               subPath: ca.crt
-            - mountPath: /etc/ssl/filebeat.pem
-              name: filebeat-certs
+            - mountPath: /etc/ssl/indexer-connector.pem
+              name: indexer-connector-certs
               readOnly: true
               subPath: tls.crt
-            - mountPath: /etc/ssl/filebeat.key
-              name: filebeat-certs
+            - mountPath: /etc/ssl/indexer-connector.key
+              name: indexer-connector-certs
               readOnly: true
               subPath: tls.key
             # PVC
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/api/configuration
-              subPath: wazuh/var/ossec/api/configuration
+              mountPath: /var/wazuh-manager/api/configuration
+              subPath: wazuh/var/wazuh-manager/api/configuration
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/etc
-              subPath: wazuh/var/ossec/etc
+              mountPath: /var/wazuh-manager/etc
+              subPath: wazuh/var/wazuh-manager/etc
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/logs
-              subPath: wazuh/var/ossec/logs
+              mountPath: /var/wazuh-manager/logs
+              subPath: wazuh/var/wazuh-manager/logs
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/queue
-              subPath: wazuh/var/ossec/queue
+              mountPath: /var/wazuh-manager/queue
+              subPath: wazuh/var/wazuh-manager/queue
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/var/multigroups
-              subPath: wazuh/var/ossec/var/multigroups
+              mountPath: /var/wazuh-manager/var/multigroups
+              subPath: wazuh/var/wazuh-manager/var/multigroups
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/integrations
-              subPath: wazuh/var/ossec/integrations
+              mountPath: /var/wazuh-manager/integrations
+              subPath: wazuh/var/wazuh-manager/integrations
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/active-response/bin
-              subPath: wazuh/var/ossec/active-response/bin
+              mountPath: /var/wazuh-manager/active-response/bin
+              subPath: wazuh/var/wazuh-manager/active-response/bin
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/agentless
-              subPath: wazuh/var/ossec/agentless
+              mountPath: /var/wazuh-manager/agentless
+              subPath: wazuh/var/wazuh-manager/agentless
             - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/ossec/wodles
-              subPath: wazuh/var/ossec/wodles
-            - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /etc/filebeat
-              subPath: filebeat/etc/filebeat
-            - name: {{ include "wazuh.fullname" . }}-manager-worker
-              mountPath: /var/lib/filebeat
-              subPath: filebeat/var/lib/filebeat
+              mountPath: /var/wazuh-manager/wodles
+              subPath: wazuh/var/wazuh-manager/wodles
             {{- with .Values.wazuh.worker.additionalVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -242,20 +236,20 @@ spec:
                      {{- else }}
                        "{{ .Values.externalIndexer.host }}:{{ .Values.externalIndexer.port }}"
                      {{- end }}
-            - name: FILEBEAT_SSL_VERIFICATION_MODE
-              value: {{ .Values.wazuh.env.FILEBEAT_SSL_VERIFICATION_MODE | quote }}
+            - name: INDEXER_SSL_VERIFICATION_MODE
+              value: {{ .Values.wazuh.env.INDEXER_SSL_VERIFICATION_MODE | quote }}
             - name: WAZUH_CLUSTER_KEY
               valueFrom:
                 secretKeyRef:
                   key: key
                   name: "wazuh-cluster-key"
-            # Certs
+            # Indexer-connector certs (Filebeat replaced by native connector in v5)
             - name: SSL_CERTIFICATE_AUTHORITIES
               value: /etc/ssl/root-ca.pem
             - name: SSL_CERTIFICATE
-              value: /etc/ssl/filebeat.pem
+              value: /etc/ssl/indexer-connector.pem
             - name: SSL_KEY
-              value: /etc/ssl/filebeat.key
+              value: /etc/ssl/indexer-connector.key
           {{- with .Values.wazuh.worker.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
