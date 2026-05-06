@@ -85,7 +85,7 @@ spec:
         - name: config
           configMap:
             name: {{ include "wazuh.fullname" . }}-manager-config
-            defaultMode: 0777
+            defaultMode: 0640
         - name: filebeat-certs
           secret:
             secretName: filebeat-tls
