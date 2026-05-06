@@ -1,7 +1,8 @@
 # wazuh
 
-![Version: 1.0.22](https://img.shields.io/badge/Version-1.0.22-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.1](https://img.shields.io/badge/AppVersion-4.14.1-informational?style=flat-square)
+![Version: 1.0.23](https://img.shields.io/badge/Version-1.0.23-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.1](https://img.shields.io/badge/AppVersion-4.14.1-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
+
 ## Introduction
 
 Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
@@ -237,6 +238,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.master.extraConf`                           | Gets appended to the wazuh.master.conf.                      | `""`                                   |
 | `wazuh.master.dnsPolicy`                           | DNS policy for the pod.                                      | `""`                                   |
 | `wazuh.master.dnsConfig`                           | DNS configuration for the pod.                               | `{}`                                   |
+| `wazuh.master.configVolume.defaultMode`            | Allow to customize defaultMode of config volume              | `0777`                                 |
 
 ### wazuh.worker configuration of the wazuh worker component.
 
@@ -265,6 +267,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.worker.extraConf`                          | Gets appended to the wazuh.worker.conf.                      | `""`                                   |
 | `wazuh.worker.dnsPolicy`                          | DNS policy for the pod.                                      | `""`                                   |
 | `wazuh.worker.dnsConfig`                          | DNS configuration for the pod.                               | `{}`                                   |
+| `wazuh.worker.configVolume.defaultMode`           | Allow to customize defaultMode of config volume              | `0777`                                 |
 
 ### agent configuration of the wazuh agent component.
 
