@@ -69,7 +69,7 @@ spec:
         - name: config
           configMap:
             name: {{ template "wazuh.fullname" . }}-manager-config
-            defaultMode: 0777
+            defaultMode: {{ default "0500" .Values.wazuh.master.configVolume.defaultMode }}
         - name: filebeat-certs
           secret:
             secretName: filebeat-tls

@@ -911,6 +911,15 @@ wazuh:
           targetPort: 55000
           # nodePort: 31550
 
+    ## @param wazuh.master.configVolume
+    ## Allow to override defaultMode for config volume.
+    ## If not present in values.yaml, it will default to 0500.
+    ## Example:
+    ## configVolume:
+    ##   defaultMode: 0500
+    configVolume:
+      defaultMode: "0777"
+
     ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
     ## TODO
@@ -1026,6 +1035,15 @@ wazuh:
     ##     - name: ndots
     ##       value: "2"
     dnsConfig: {}
+
+    ## @param wazuh.worker.configVolume
+    ## Allow to override defaultMode for config volume.
+    ## If not present in values.yaml, it will default to 0500.
+    ## Example:
+    ## configVolume:
+    ##   defaultMode: 0500
+    configVolume:
+      defaultMode: "0777"
 
     ## Pod anti-affinity can prevent the scheduler from placing Alertmanager replicas on the same node.
     ## The default value "soft" means that the scheduler should *prefer* to not schedule two replica pods onto the same node but no guarantee is provided.
