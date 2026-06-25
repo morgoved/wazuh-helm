@@ -139,6 +139,11 @@ spec:
         secret:
           secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
           defaultMode: 0600
+      {{- if .Values.indexer.snapshot.enabled }}
+      - name: snapshot-repo
+        persistentVolumeClaim:
+          claimName: {{ .Values.indexer.snapshot.fs.existingClaim | default (printf "%s-indexer-snapshots" (include "wazuh.indexer.fullname" .)) }}
+      {{- end }}
       {{- with .Values.indexer.additionalVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
@@ -279,13 +284,19 @@ spec:
             {{- with .Values.indexer.additionalVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+            {{- if .Values.indexer.snapshot.enabled }}
+            - mountPath: {{ .Values.indexer.snapshot.fs.path }}
+              name: snapshot-repo
+            {{- end }}
           ports:
             - containerPort: {{ .Values.indexer.service.httpPort }}
               name: indexer-rest
             - containerPort: {{ .Values.indexer.service.nodes }}
               name: indexer-nodes
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: wazuh-indexer
         {{- if .Values.indexer.pvc.extraLabels }}
         labels:

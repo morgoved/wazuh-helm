@@ -69,7 +69,7 @@ spec:
         - name: config
           configMap:
             name: {{ template "wazuh.fullname" . }}-manager-config
-            defaultMode: 0755
+            defaultMode: {{ default "0500" .Values.wazuh.master.configVolume.defaultMode }}
         - name: filebeat-certs
           secret:
             secretName: filebeat-tls
@@ -265,7 +265,9 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
   volumeClaimTemplates:
-    - metadata:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
         name: {{ include "wazuh.fullname" . }}-manager-master
         {{- if .Values.wazuh.master.pvc.extraLabels }}
         labels:
