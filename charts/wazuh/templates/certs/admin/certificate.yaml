@@ -23,6 +23,9 @@ spec:
     localities:
       - {{ .Values.certificates.subject.locality }}
   issuerRef:
-    # Admin Issuer have to use the CA Issuer so that the certificate can be validated with node-tls secret
-    name: {{ include "wazuh.fullname" . }}-ca-issuer
+    # Admin cert must be signed by the CA Issuer so that it can be validated against node-tls secret
+    name: {{ .Values.certificates.issuer.name | default (printf "%s-ca-issuer" (include "wazuh.fullname" .)) }}
+    {{- if eq .Values.certificates.issuer.type "ClusterIssuer" }}
+    kind: ClusterIssuer
+    {{- end }}
 {{- end }}

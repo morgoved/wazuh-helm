@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/bitnami/readme-generator-for-helm
-    rev: "main"
+    rev: "3.0.1"
     hooks:
       - id: helm-readme-generator
         pass_filenames: false

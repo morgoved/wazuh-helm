@@ -3,6 +3,3 @@ custom:
   confMapName: wazuh-authd-pass
 secretenvs:
   authd.pass: xxxxxxxxxxxxx
-
-
-

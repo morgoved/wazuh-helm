@@ -14,28 +14,24 @@ spec:
     - Egress
   ingress:
     - ports:
-      - protocol: TCP
-        port: {{ .Values.dashboard.service.httpPort }}
+        - protocol: TCP
+          port: {{ .Values.dashboard.service.httpPort }}
     {{- with .Values.dashboard.networkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   egress:
     # Indexer
     - ports:
-      - protocol: TCP
-        port: {{ .Values.indexer.service.httpPort }}
+        - protocol: TCP
+          port: {{ .Values.indexer.service.httpPort }}
       to:
         - podSelector:
             matchLabels:
               app: {{ include "wazuh.indexer.fullname" . }}-indexer
     # Wazuh Manager
     - ports:
-      - protocol: TCP
-    {{- range .Values.wazuh.master.service.ports }}
-      {{- if eq .name "api" }}
-        port: {{ .port }}
-      {{- end }}
-    {{- end }}
+        - protocol: TCP
+          port: {{ include "wazuh.getPortByName" (dict "portName" "api" "ports" .Values.wazuh.master.service.ports) }}
       to:
         - podSelector:
             matchLabels:

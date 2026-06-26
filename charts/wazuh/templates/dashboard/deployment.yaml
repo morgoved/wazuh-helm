@@ -32,7 +32,7 @@ spec:
         checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
         checksum/api-secret: {{ include (print $.Template.BasePath "/manager/secret-api-cred.yaml") . | sha256sum }}
         {{- end }}
-        {{- with .Values.indexer.annotations }}
+        {{- with .Values.dashboard.annotations }}
             {{- toYaml . | nindent 8 }}
         {{- end }}
       name: {{ include "wazuh.fullname" . }}-dashboard
@@ -139,7 +139,9 @@ spec:
             - name: SERVER_SSL_KEY
               value: /usr/share/wazuh-dashboard/certs/key.pem
             - name: WAZUH_API_URL
-              value: "https://wazuh"
+              value: "https://{{ include "wazuh.fullname" . }}"
+            - name: WAZUH_API_PORT
+              value: "55000"
             {{- if .Values.dashboard.sso.oidc.enabled }}
             - name: OPENSEARCH_OIDC_CLIENT_ID
               valueFrom:

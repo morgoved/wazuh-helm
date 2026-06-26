@@ -4,5 +4,3 @@ custom:
 secretenvs:
   password: "xxxxxx"
   username: kibanaserver
-
-

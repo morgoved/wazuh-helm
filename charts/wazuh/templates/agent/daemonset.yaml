@@ -2,10 +2,10 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ include "wazuh.indexer.fullname" . }}-agent
+  name: {{ include "wazuh.fullname" . }}-agent
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ include "wazuh.indexer.fullname" . }}-agent
+    app: {{ include "wazuh.fullname" . }}-agent
     {{- with .Values.agent.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -19,16 +19,16 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: {{ include "wazuh.indexer.fullname" . }}-agent
+      app: {{ include "wazuh.fullname" . }}-agent
       node-type: agent
   template:
     metadata:
-      name: {{ include "wazuh.indexer.fullname" . }}-agent
+      name: {{ include "wazuh.fullname" . }}-agent
       {{- with .Values.agent.podAnnotations }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
       labels:
-        app: {{ include "wazuh.indexer.fullname" . }}-agent
+        app: {{ include "wazuh.fullname" . }}-agent
         node-type: agent
         {{- with .Values.agent.extraPodLabels }}
         {{- toYaml . | nindent 8 }}
@@ -128,22 +128,16 @@ spec:
             {{- end }}
           {{- with .Values.agent.livenessProbe }}
           livenessProbe:
-            httpGet:
-              path: /healz
-              port: 5000
-            initialDelaySeconds: 40
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 5
-          {{- end }}
-          {{- with .Values.agent.volumeMounts }}
-          volumeMounts:
             {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
             - name: local-internal-options
               mountPath: /tmp/local_internal_options.conf
               subPath: local_internal_options.conf
               readOnly: true
-          {{- end }}
+            {{- with .Values.agent.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           lifecycle:
             postStart:
               exec:
