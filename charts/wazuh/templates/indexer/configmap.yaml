@@ -10,6 +10,9 @@ metadata:
     {{- toYaml .Values.indexer.annotations | nindent 4 }}
 data:
   opensearch.yml: |
+{{- if .Values.indexer.config.opensearch }}
+{{ .Values.indexer.config.opensearch | indent 4 }}
+{{- else }}
     cluster.name: ${CLUSTER_NAME}
     node.name: ${NODE_NAME}
     network.host: ${NETWORK_HOST}
@@ -41,18 +44,31 @@ data:
     plugins.security.allow_default_init_securityindex: true
     cluster.routing.allocation.disk.threshold_enabled: false
     compatibility.override_main_response_version: true
+{{- end }}
   tenants.yml: |-
+{{- if .Values.indexer.config.tenants }}
+{{ .Values.indexer.config.tenants | indent 4 }}
+{{- else }}
     _meta:
       type: "tenants"
       config_version: 2
+{{- end }}
   nodes_dn.yml: |-
+{{- if .Values.indexer.config.nodesDn }}
+{{ .Values.indexer.config.nodesDn | indent 4 }}
+{{- else }}
     _meta:
       type: "nodes_dn"
       config_version: 2
+{{- end }}
   whitelist.yml: |-
+{{- if .Values.indexer.config.whitelist }}
+{{ .Values.indexer.config.whitelist | indent 4 }}
+{{- else }}
     _meta:
       type: "whitelist"
       config_version: 2
+{{- end }}
 {{- range $configName, $configYaml := .Values.indexer.additionalConfigs }}
   {{ $configName }}: |
     {{-   tpl $configYaml . | nindent 4 }}

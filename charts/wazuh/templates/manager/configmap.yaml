@@ -5,12 +5,12 @@ metadata:
   name: {{ include "wazuh.fullname" . }}-manager-config
   namespace: {{ .Release.Namespace }}
 data:
-  script.sh: {{ .Files.Get "files/script.sh" | default "# fallback" | quote }}
-  master.conf: {{ include "wazuh.ossec_config" (dict "root" . "type" "master") | quote }}
-  worker.conf: {{ include "wazuh.ossec_config" (dict "root" . "type" "worker") | quote }}
-  local_decoder.xml: {{ .Files.Get "files/local_decoder.xml" | default "<decoder></decoder>" | quote }}
-  local_rules.xml: {{ .Files.Get "files/local_rules.xml" | default "<group></group>" | quote }}
-  internal_options.conf: {{ .Files.Get "files/internal_options.conf" | default "# fallback" | quote }}
+  script.sh: {{ .Values.wazuh.script | default (.Files.Get "files/script.sh") | default "# fallback" | quote }}
+  master.conf: {{ .Values.wazuh.masterConf | default (include "wazuh.ossec_config" (dict "root" . "type" "master")) | quote }}
+  worker.conf: {{ .Values.wazuh.workerConf | default (include "wazuh.ossec_config" (dict "root" . "type" "worker")) | quote }}
+  local_decoder.xml: {{ .Values.wazuh.localDecoder | default (.Files.Get "files/local_decoder.xml") | default "<decoder></decoder>" | quote }}
+  local_rules.xml: {{ .Values.wazuh.localRules | default (.Files.Get "files/local_rules.xml") | default "<group></group>" | quote }}
+  internal_options.conf: {{ .Values.wazuh.internalOptions | default (.Files.Get "files/internal_options.conf") | default "# fallback" | quote }}
 
 {{- if .Values.wazuh.agentGroupConf }}
 {{- range .Values.wazuh.agentGroupConf }}

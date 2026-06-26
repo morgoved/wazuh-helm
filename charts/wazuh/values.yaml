@@ -207,31 +207,27 @@ indexer:
   additionalVolumes: []
   ## @param indexer.additionalVolumeMounts Possibility to define additional volumeMounts in the pod.
   additionalVolumeMounts: []
-  ## @param indexer.config.opensearch Configuration of opensearch.yml.
-  ## @param indexer.config.internalUsers Configuration of internalUsers of the indexer.
-  ## @param indexer.config.securityConfig Configuration of securityConfig of the indexer.
-  ## @param indexer.config.rolesMapping Configuration of rolesMapping of the indexer.
-  ## @param indexer.config.roles Configuration of roles of the indexer.
-  ## @param indexer.config.tenants Configuration of tenants.yml
-  ## @param indexer.config.nodesDn Configuration of nodes_dn.yml
-  ## @param indexer.config.whitelist Configuration of whitelist.yml
+  ## Optional overrides for the indexer config files. Each value defaults to the
+  ## content shipped in the chart (opensearch.yml in the configmap, the OpenSearch
+  ## security files in the securityconfig secret). Leave empty to use that default;
+  ## set a value to manage the config through values.yaml instead.
+  ## @param indexer.config.opensearch Override for opensearch.yml. If empty, the chart default is used.
+  ## @param indexer.config.internalUsers Override for internal_users.yml. If empty, the chart default is used.
+  ## @param indexer.config.securityConfig Override for config.yml (OpenSearch security config). If empty, the chart default is used.
+  ## @param indexer.config.rolesMapping Override for roles_mapping.yml. If empty, the chart default is used.
+  ## @param indexer.config.roles Override for roles.yml. If empty, the chart default is used.
+  ## @param indexer.config.tenants Override for tenants.yml. If empty, the chart default is used.
+  ## @param indexer.config.nodesDn Override for nodes_dn.yml. If empty, the chart default is used.
+  ## @param indexer.config.whitelist Override for whitelist.yml. If empty, the chart default is used.
   config:
-    opensearch: |-
-      {{ include "wazuh.indexer.opensearchConfig" . }}
-    internalUsers: |-
-      {{ include "wazuh.indexer.internalUsers" . }}
-    securityConfig: |-
-      {{ include "wazuh.indexer.securityConfig" . }}
-    rolesMapping: |-
-      {{ include "wazuh.indexer.rolesMapping" . }}
-    roles: |-
-      {{ include "wazuh.indexer.roles" . }}
-    tenants: |-
-      {{ include "wazuh.indexer.tenants" . }}
-    nodesDn: |-
-      {{ include "wazuh.indexer.nodes_dn" . }}
-    whitelist: |-
-      {{ include "wazuh.indexer.whitelist" . }}
+    opensearch: ""
+    internalUsers: ""
+    securityConfig: ""
+    rolesMapping: ""
+    roles: ""
+    tenants: ""
+    nodesDn: ""
+    whitelist: ""
   ## @param indexer.additionalConfigs Additional configurations to add to the configmap
   additionalConfigs: {}
   ## LDAP / Active Directory authentication for the indexer (OpenSearch Security)
@@ -685,15 +681,21 @@ wazuh:
   ## @param wazuh.extraInitContainers Parameters for the additional initContainers.
   extraInitContainers: []
 
-  ## @param wazuh.localDecoder Configuration of the local decoder.
-  localDecoder: |
-    {{ include "wazuh.localDecoder" . }}
-  ## @param wazuh.localRules Configuration of the local rules.
-  localRules: |
-    {{ include "wazuh.localRules" . }}
-  ## @param wazuh.internalOptions Configuration of the internal option.
-  internalOptions: |
-    {{ include "wazuh.internalOptions" . }}
+  ## Optional overrides for the manager config files. Each value defaults to the file
+  ## shipped in `files/` (or, for master/worker, the generated ossec config). Leave empty
+  ## to use that default; set a value to manage the config through values.yaml instead.
+  ## @param wazuh.script Override for script.sh. If empty, files/script.sh is used.
+  script: ""
+  ## @param wazuh.masterConf Override for master.conf. If empty, the generated ossec config is used.
+  masterConf: ""
+  ## @param wazuh.workerConf Override for worker.conf. If empty, the generated ossec config is used.
+  workerConf: ""
+  ## @param wazuh.localDecoder Override for local_decoder.xml. If empty, files/local_decoder.xml is used.
+  localDecoder: ""
+  ## @param wazuh.localRules Override for local_rules.xml. If empty, files/local_rules.xml is used.
+  localRules: ""
+  ## @param wazuh.internalOptions Override for internal_options.conf. If empty, files/internal_options.conf is used.
+  internalOptions: ""
   ## @skip wazuh.agentGroupConf
   agentGroupConf:
     - name: example
