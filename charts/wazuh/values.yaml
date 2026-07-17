@@ -636,9 +636,19 @@ wazuh:
       secret: {}
   ## @param wazuh.loadBalancer.enabled Enable LoadBalancer service for external agent connections
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service
+  ## @param wazuh.loadBalancer.ports Inline array of port names to expose; empty means all ports are included
+  ## @param wazuh.loadBalancer.loadBalancerSourceRanges List of CIDR ranges allowed to reach the LoadBalancer; rendered whenever non-empty
+  ## @param wazuh.loadBalancer.externalTrafficPolicy External traffic policy for the LoadBalancer (e.g. Local or Cluster); omitted if empty
+  ## @param wazuh.loadBalancer.internalTrafficPolicy Internal traffic policy for the LoadBalancer (e.g. Cluster or Local); omitted if empty
+  ## @param wazuh.loadBalancer.allocateLoadBalancerNodePorts Whether to allocate node ports for the LoadBalancer; omitted if null
   loadBalancer:
     enabled: false
     annotations: {}
+    ports: ["registration", "agents-events"]
+    loadBalancerSourceRanges: []
+    externalTrafficPolicy: ""
+    internalTrafficPolicy: ""
+    allocateLoadBalancerNodePorts: null
   ## @param wazuh.service.annotations Annotations of the created service.
   ## @param wazuh.service.port Port for the http endpoint.
   service:

@@ -13,18 +13,35 @@ metadata:
     {{- end }}
 spec:
   type: LoadBalancer
+  {{- if .Values.wazuh.loadBalancer.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml .Values.wazuh.loadBalancer.loadBalancerSourceRanges | nindent 4 }}
+  {{- end }}
+  {{- if .Values.wazuh.loadBalancer.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.wazuh.loadBalancer.externalTrafficPolicy }}
+  {{- end }}
+  {{- if .Values.wazuh.loadBalancer.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ .Values.wazuh.loadBalancer.internalTrafficPolicy }}
+  {{- end }}
+  {{- if not (kindIs "invalid" .Values.wazuh.loadBalancer.allocateLoadBalancerNodePorts) }}
+  allocateLoadBalancerNodePorts: {{ .Values.wazuh.loadBalancer.allocateLoadBalancerNodePorts }}
+  {{- end }}
   ports:
   {{- range .Values.wazuh.master.service.ports }}
+  {{- if or (empty $.Values.wazuh.loadBalancer.ports) (has .name $.Values.wazuh.loadBalancer.ports) }}
     - name: {{ .name }}
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
   {{- end }}
+  {{- end }}
   {{- range .Values.wazuh.worker.service.ports }}
+  {{- if or (empty $.Values.wazuh.loadBalancer.ports) (has .name $.Values.wazuh.loadBalancer.ports) }}
     - name: {{ .name }}
       protocol: {{ .protocol | default "TCP" }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
+  {{- end }}
   {{- end }}
   {{- if .Values.wazuh.syslog_enable }}
     - name: syslog
