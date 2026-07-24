@@ -132,8 +132,6 @@ spec:
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/whitelist.yml
               subPath: whitelist.yml
               readOnly: true
-      securityContext:
-        fsGroup: 1000
       terminationGracePeriodSeconds: 30
       volumes:
         - name: admin-certs
