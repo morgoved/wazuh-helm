@@ -1,0 +1,37 @@
+{{- if and .Values.dashboard.enabled .Values.dashboard.gateway.enabled }}
+{{- $tls := .Values.dashboard.gateway.tls | default dict }}
+{{- $tlsEnabled := ternary $tls.enabled true (hasKey $tls "enabled") }}
+{{- $defaultSecretName := printf "%s-dashboard-letsencrypt" (include "wazuh.fullname" .) }}
+{{- $secretName := $tls.secretName | default $defaultSecretName }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: {{ include "wazuh.fullname" . }}-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-dashboard
+  {{- if .Values.dashboard.gateway.annotations }}
+  annotations:
+    {{- toYaml .Values.dashboard.gateway.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.dashboard.gateway.parentRef }}
+  parentRef:
+    {{- toYaml .Values.dashboard.gateway.parentRef | nindent 4 }}
+  {{- end }}
+  listeners:
+    - name: dashboard
+      hostname: {{ .Values.dashboard.gateway.host | quote }}
+      port: {{ if $tlsEnabled }}443{{ else }}80{{ end }}
+      protocol: {{ if $tlsEnabled }}HTTPS{{ else }}HTTP{{ end }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+      {{- if $tlsEnabled }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ $secretName }}
+      {{- end }}
+{{- end }}

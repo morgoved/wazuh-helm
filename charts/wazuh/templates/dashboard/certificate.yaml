@@ -1,0 +1,18 @@
+{{- if and .Values.dashboard.enabled .Values.dashboard.gateway.enabled .Values.dashboard.gateway.tls.enabled }}
+{{- $tls := .Values.dashboard.gateway.tls | default dict }}
+{{- $defaultSecretName := printf "%s-dashboard-letsencrypt" (include "wazuh.fullname" .) }}
+{{- $secretName := $tls.secretName | default $defaultSecretName }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $secretName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-dashboard
+spec:
+  secretName:  {{ $secretName }}
+  issuerRef: 
+  {{- toYaml .Values.dashboard.gateway.tls.issuerRef | nindent 4 }}
+  dnsNames:
+    - {{ .Values.dashboard.gateway.host | quote }}
+{{- end }}

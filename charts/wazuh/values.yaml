@@ -600,6 +600,35 @@ dashboard:
     annotations: {}
     host: "wazuh.example.com"
 
+  ## @param dashboard.gateway.enabled Enable gateway record generation for dashboard.
+  ## @param dashboard.gateway.host Defines the hostname and URL under which the dashboard gets
+  ## @param dashboard.gateway.annotations Used for detailed configuration.
+  ## @param dashboard.gateway.tls.enabled Enable TLS for the gateway.
+  ## @param dashboard.gateway.tls.secretName Name of the secret containing the TLS certificate.
+  ## @param dashboard.gateway.tls.issuerRef.name Name of the issuer used for signing the certificate.
+  ## @param dashboard.gateway.tls.issuerRef.kind Kind of the issuer used for signing the certificate (Issuer or ClusterIssuer).
+  ## @param dashboard.gateway.tls.issuerRef.group Group of the issuer used for signing the certificate.
+  ## @param dashboard.gateway.parentRef.group Group of the parent reference.
+  ## @param dashboard.gateway.parentRef.kind Kind of the parent reference.
+  ## @param dashboard.gateway.parentRef.name Name of the parent reference.
+  ## @param dashboard.gateway.parentRef.namespace Namespace of the parent reference.
+  gateway:
+    enabled: false
+    host: "wazuh.example.com"
+    annotations: {}
+    parentRef:
+      group: gateway.networking.k8s.io
+      kind: Gateway
+      name: ""
+      namespace: ""
+    tls:
+      enabled: false
+      secretName: ""
+      issuerRef:
+        name: ""
+        kind: ClusterIssuer
+        group: cert-manager.io
+
   ## @skip dashboard.extraSpec
   extraSpec:
     deployment: {}
