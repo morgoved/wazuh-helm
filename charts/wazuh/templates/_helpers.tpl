@@ -178,6 +178,10 @@ Define serviceaccount names
 {{- end -}}
 {{- end -}}
 
+{{- define "wazuh.dashboard.gateway.tlsSecretName" -}}
+{{- .Values.dashboard.gateway.tls.secretName | default (printf "%s-dashboard-letsencrypt" (include "wazuh.fullname" .)) -}}
+{{- end -}}
+
 {{- define "wazuh.manager.serviceAccountName" -}}
 {{- if .Values.wazuh.serviceAccount.create -}}
     {{ default (printf "%s-manager" (include "wazuh.fullname" .)) .Values.wazuh.serviceAccount.name }}

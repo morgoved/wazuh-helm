@@ -600,18 +600,21 @@ dashboard:
     annotations: {}
     host: "wazuh.example.com"
 
-  ## @param dashboard.gateway.enabled Enable gateway record generation for dashboard.
-  ## @param dashboard.gateway.host Defines the hostname and URL under which the dashboard gets
-  ## @param dashboard.gateway.annotations Used for detailed configuration.
-  ## @param dashboard.gateway.tls.enabled Enable TLS for the gateway.
-  ## @param dashboard.gateway.tls.secretName Name of the secret containing the TLS certificate.
-  ## @param dashboard.gateway.tls.issuerRef.name Name of the issuer used for signing the certificate.
-  ## @param dashboard.gateway.tls.issuerRef.kind Kind of the issuer used for signing the certificate (Issuer or ClusterIssuer).
-  ## @param dashboard.gateway.tls.issuerRef.group Group of the issuer used for signing the certificate.
-  ## @param dashboard.gateway.parentRef.group Group of the parent reference.
-  ## @param dashboard.gateway.parentRef.kind Kind of the parent reference.
-  ## @param dashboard.gateway.parentRef.name Name of the parent reference.
-  ## @param dashboard.gateway.parentRef.namespace Namespace of the parent reference.
+  ## @param dashboard.gateway.enabled Enable Gateway API resources (HTTPRoute + parent) for dashboard, as an alternative to dashboard.ingress.
+  ## @param dashboard.gateway.host Defines the hostname under which the dashboard is exposed through the Gateway.
+  ## @param dashboard.gateway.annotations Annotations to add on the ListenerSet.
+  ## @param dashboard.gateway.parentRef.group Group of the parent Gateway reference.
+  ## @param dashboard.gateway.parentRef.kind Kind of the parent Gateway reference.
+  ## @param dashboard.gateway.parentRef.name Name of the parent Gateway. Required when dashboard.gateway.enabled is true.
+  ## @param dashboard.gateway.parentRef.namespace Namespace of the parent Gateway. Leave empty when the Gateway is in the same namespace.
+  ## @param dashboard.gateway.listenerSet.enabled Create a dedicated ListenerSet and attach the HTTPRoute to it. Disable to attach the HTTPRoute directly to the parent Gateway, for Gateways that do not allow ListenerSets (spec.allowedListeners).
+  ## @param dashboard.gateway.tls.enabled Terminate edge TLS (client to Gateway) on the listener for the dashboard hostname.
+  ## @param dashboard.gateway.tls.secretName Name of the Secret holding the edge TLS certificate. Defaults to "<fullname>-dashboard-letsencrypt" when tls.certificate.create is true.
+  ## @param dashboard.gateway.tls.certificate.create Let the chart create a cert-manager Certificate for the edge TLS secret. Set to false to reuse an existing Secret referenced by tls.secretName.
+  ## @param dashboard.gateway.tls.issuerRef.name Name of the cert-manager issuer used to sign the edge TLS certificate. Required when tls.certificate.create is true.
+  ## @param dashboard.gateway.tls.issuerRef.kind Kind of the issuer used for signing the edge TLS certificate (Issuer or ClusterIssuer).
+  ## @param dashboard.gateway.tls.issuerRef.group Group of the issuer used for signing the edge TLS certificate.
+  ## @param dashboard.gateway.backendTLS.caCertificateRef.name Name of an existing ConfigMap (key ca.crt) used by the Gateway to validate the dashboard backend TLS certificate. Required when dashboard.gateway.enabled and dashboard.enable_ssl are both true.
   gateway:
     enabled: false
     host: "wazuh.example.com"
@@ -621,13 +624,20 @@ dashboard:
       kind: Gateway
       name: ""
       namespace: ""
+    listenerSet:
+      enabled: true
     tls:
       enabled: false
       secretName: ""
+      certificate:
+        create: true
       issuerRef:
         name: ""
         kind: ClusterIssuer
         group: cert-manager.io
+    backendTLS:
+      caCertificateRef:
+        name: ""
 
   ## @skip dashboard.extraSpec
   extraSpec:

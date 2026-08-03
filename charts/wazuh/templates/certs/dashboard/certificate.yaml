@@ -15,6 +15,11 @@ spec:
   renewBefore: {{ .Values.certificates.renewBefore }}
   isCA: false
   commonName: {{ include "wazuh.fullname" . }}-dashboard
+  dnsNames:
+    - {{ include "wazuh.fullname" . }}-dashboard
+    - {{ include "wazuh.fullname" . }}-dashboard.{{ .Release.Namespace }}
+    - {{ include "wazuh.fullname" . }}-dashboard.{{ .Release.Namespace }}.svc
+    - {{ include "wazuh.fullname" . }}-dashboard.{{ .Release.Namespace }}.svc.cluster.local
   subject:
     organizations:
       - {{ .Values.certificates.subject.organization }}

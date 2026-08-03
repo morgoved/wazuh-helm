@@ -1,8 +1,7 @@
-{{- if and .Values.dashboard.enabled .Values.dashboard.gateway.enabled }}
+{{- if and .Values.dashboard.enabled .Values.dashboard.gateway.enabled .Values.dashboard.gateway.listenerSet.enabled }}
 {{- $tls := .Values.dashboard.gateway.tls | default dict }}
-{{- $tlsEnabled := ternary $tls.enabled true (hasKey $tls "enabled") }}
-{{- $defaultSecretName := printf "%s-dashboard-letsencrypt" (include "wazuh.fullname" .) }}
-{{- $secretName := $tls.secretName | default $defaultSecretName }}
+{{- $tlsEnabled := $tls.enabled }}
+{{- $secretName := include "wazuh.dashboard.gateway.tlsSecretName" . }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: ListenerSet
 metadata:
@@ -15,10 +14,13 @@ metadata:
     {{- toYaml .Values.dashboard.gateway.annotations | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.dashboard.gateway.parentRef }}
   parentRef:
-    {{- toYaml .Values.dashboard.gateway.parentRef | nindent 4 }}
-  {{- end }}
+    group: {{ .Values.dashboard.gateway.parentRef.group }}
+    kind: {{ .Values.dashboard.gateway.parentRef.kind }}
+    name: {{ required "dashboard.gateway.parentRef.name is required when dashboard.gateway.enabled is true" .Values.dashboard.gateway.parentRef.name }}
+    {{- with .Values.dashboard.gateway.parentRef.namespace }}
+    namespace: {{ . }}
+    {{- end }}
   listeners:
     - name: dashboard
       hostname: {{ .Values.dashboard.gateway.host | quote }}

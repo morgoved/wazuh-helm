@@ -9,9 +9,18 @@ metadata:
     app: {{ include "wazuh.fullname" . }}-dashboard
 spec:
   parentRefs:
+    {{- if .Values.dashboard.gateway.listenerSet.enabled }}
     - group: gateway.networking.k8s.io
       kind: ListenerSet
       name: {{ include "wazuh.fullname" . }}-dashboard
+    {{- else }}
+    - group: {{ .Values.dashboard.gateway.parentRef.group }}
+      kind: {{ .Values.dashboard.gateway.parentRef.kind }}
+      name: {{ required "dashboard.gateway.parentRef.name is required when dashboard.gateway.enabled is true" .Values.dashboard.gateway.parentRef.name }}
+      {{- with .Values.dashboard.gateway.parentRef.namespace }}
+      namespace: {{ . }}
+      {{- end }}
+    {{- end }}
   hostnames:
     - {{ .Values.dashboard.gateway.host | quote }}
   rules:

@@ -29,6 +29,20 @@ This Helm chart has been tested with Wazuh version 4.14.1. Please note:
 Wazuh supports only a single master node and multiple worker nodes. Although the configuration is prepared for a multi-master setup, Wazuh does not currently support this feature.
 All XML configuration files are automatically updated through init containers.
 
+### Gateway API support
+
+As an alternative to `dashboard.ingress`, the dashboard can be exposed through the [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) via `dashboard.gateway.enabled`. This requires:
+
+- The Gateway API CRDs installed on the cluster, Gateway API v1.5+ (`BackendTLSPolicy` and `ListenerSet` are GA as of v1.5).
+- A Gateway controller that supports `BackendTLSPolicy` if `dashboard.enable_ssl` is set, and a pre-existing `Gateway` resource referenced by `dashboard.gateway.parentRef`.
+
+By default the chart creates a dedicated `ListenerSet` (`dashboard.gateway.listenerSet.enabled: true`) attached to that `Gateway`, and attaches the dashboard `HTTPRoute` to the `ListenerSet`. Set `dashboard.gateway.listenerSet.enabled: false` to attach the `HTTPRoute` directly to the `Gateway` instead, for Gateway installations that don't allow `ListenerSet`s (`Gateway.spec.allowedListeners`) — in that case the `Gateway`'s own listener for the dashboard hostname must already exist.
+
+Edge TLS (client to Gateway) and backend TLS (Gateway to the dashboard Service) are configured independently:
+
+- `dashboard.gateway.tls.*` controls edge TLS. By default the chart creates a cert-manager `Certificate` for it; set `dashboard.gateway.tls.certificate.create: false` and `dashboard.gateway.tls.secretName` to reuse an existing Secret instead.
+- `dashboard.gateway.backendTLS.caCertificateRef.name` is required when both `dashboard.gateway.enabled` and `dashboard.enable_ssl` are true. It must name an existing `ConfigMap` (key `ca.crt`) trusted to validate the dashboard's own TLS certificate — this is decoupled from the chart's internal `dashboard-tls` Secret so any CA distribution mechanism (e.g. `trust-manager`) can be used.
+
 ### Contributing
 
 This fork welcomes contributions and is open to transitioning into the official Wazuh project repository. Contributions are encouraged and appreciated.
