@@ -11,7 +11,7 @@ metadata:
 data:
   opensearch.yml: |
 {{- if .Values.indexer.config.opensearch }}
-{{ .Values.indexer.config.opensearch | indent 4 }}
+{{ tpl .Values.indexer.config.opensearch . | indent 4 }}
 {{- else }}
     cluster.name: ${CLUSTER_NAME}
     node.name: ${NODE_NAME}
@@ -47,7 +47,7 @@ data:
 {{- end }}
   tenants.yml: |-
 {{- if .Values.indexer.config.tenants }}
-{{ .Values.indexer.config.tenants | indent 4 }}
+{{ tpl .Values.indexer.config.tenants . | indent 4 }}
 {{- else }}
     _meta:
       type: "tenants"
@@ -55,7 +55,7 @@ data:
 {{- end }}
   nodes_dn.yml: |-
 {{- if .Values.indexer.config.nodesDn }}
-{{ .Values.indexer.config.nodesDn | indent 4 }}
+{{ tpl .Values.indexer.config.nodesDn . | indent 4 }}
 {{- else }}
     _meta:
       type: "nodes_dn"
@@ -63,7 +63,7 @@ data:
 {{- end }}
   whitelist.yml: |-
 {{- if .Values.indexer.config.whitelist }}
-{{ .Values.indexer.config.whitelist | indent 4 }}
+{{ tpl .Values.indexer.config.whitelist . | indent 4 }}
 {{- else }}
     _meta:
       type: "whitelist"
