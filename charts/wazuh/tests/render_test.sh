@@ -29,6 +29,18 @@ render_only() {
   render --show-only "$tmpl" "$@"
 }
 
+expect_success() {
+  local name="$1"; shift
+  if "$@" >/dev/null 2>/tmp/wazuh-render-test.err; then
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  else
+    echo "FAIL: $name (expected helm template to succeed)"
+    cat /tmp/wazuh-render-test.err
+    fail=$((fail + 1))
+  fi
+}
+
 expect_failure() {
   local name="$1"; shift
   if "$@" >/dev/null 2>/tmp/wazuh-render-test.err; then
@@ -72,6 +84,10 @@ out=$(render_only "$LISTENERSET" "${gw_args[@]}")
 assert_contains "listener protocol is HTTP" "$out" "protocol: HTTP"
 out=$(render_only "$HTTPROUTE" "${gw_args[@]}")
 assert_contains "HTTPRoute parentRef targets the ListenerSet" "$out" "kind: ListenerSet"
+
+echo "== Gateway enabled with edge TLS disabled never needs tls.secretName =="
+expect_success "tls.enabled=false, certificate.create=false, no secretName" \
+  render_only "$LISTENERSET" "${gw_args[@]}" --set dashboard.gateway.tls.enabled=false --set dashboard.gateway.tls.certificate.create=false
 
 echo "== HTTPS backend (dashboard.enable_ssl) requires backendTLS.caCertificateRef.name =="
 expect_failure "missing backendTLS.caCertificateRef.name" render "${gw_args[@]}" --set dashboard.enable_ssl=true
