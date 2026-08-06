@@ -659,6 +659,13 @@ wazuh:
     name: "wazuh-manager"
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   syslog_enable: true
+  ## By default only alerts are indexed, so events matching no rule (forwarded syslog, for
+  ## instance) never reach the dashboard. This sets <logall_json> on master and worker and
+  ## enables filebeat's archives fileset; both are needed, hence one switch.
+  ## Archives are unfiltered, so expect a large increase in indexer storage.
+  ## @param wazuh.archives.enabled Index every event, not just alerts.
+  archives:
+    enabled: false
   ## @param wazuh.key Defines the key of the wazuh cluster.
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
   ## @param wazuh.images.repository name of the image used.
@@ -745,6 +752,12 @@ wazuh:
   localRules: ""
   ## @param wazuh.internalOptions Override for internal_options.conf. If empty, files/internal_options.conf is used.
   internalOptions: ""
+  ## Replaces the whole filebeat.yml. Keep the `hosts:` line and the commented-out
+  ## `#username:` / `#password:` / `#ssl.*` keys of the default: the entrypoint fills them
+  ## in from the chart's env vars, and ships nothing if they are missing.
+  ## @param wazuh.filebeat.config Override for filebeat.yml. If empty, the generated config is used.
+  filebeat:
+    config: ""
   ## @skip wazuh.agentGroupConf
   agentGroupConf:
     - name: example

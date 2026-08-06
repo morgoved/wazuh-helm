@@ -269,6 +269,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.serviceAccount.annotations`                 | Annotations for service account                                                        | `{}`                                   |
 | `wazuh.serviceAccount.name`                        | Name of the service account                                                            | `wazuh-manager`                        |
 | `wazuh.syslog_enable`                              | Enables the syslog of the wazuh instance.                                              | `true`                                 |
+| `wazuh.archives.enabled`                           | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                        | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
 | `wazuh.images.repository`                          | name of the image used.                                                                | `wazuh/wazuh-manager`                  |
 | `wazuh.images.tag`                                 | Tag of the image.                                                                      | `4.14.3`                               |
@@ -303,6 +304,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.localDecoder`                               | Override for local_decoder.xml. If empty, files/local_decoder.xml is used.             | `""`                                   |
 | `wazuh.localRules`                                 | Override for local_rules.xml. If empty, files/local_rules.xml is used.                 | `""`                                   |
 | `wazuh.internalOptions`                            | Override for internal_options.conf. If empty, files/internal_options.conf is used.     | `""`                                   |
+| `wazuh.filebeat.config`                            | Override for filebeat.yml. If empty, the generated config is used.                     | `""`                                   |
 | `wazuh.master.enabled`                             | Enable the master                                                                      | `true`                                 |
 | `wazuh.master.annotations`                         | additional annotations set on statefulset.                                             | `{}`                                   |
 | `wazuh.master.extraPodLabels`                      | Extra labels to add to the master pods.                                                | `{}`                                   |

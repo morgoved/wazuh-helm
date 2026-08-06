@@ -185,6 +185,12 @@ spec:
               name: config
               readOnly: true
               subPath: local_rules.xml
+            {{- if include "wazuh.filebeat.overridden" . }}
+            - mountPath: /var/ossec/data_tmp/exclusion/etc/filebeat/filebeat.yml
+              name: config
+              readOnly: true
+              subPath: filebeat.yml
+            {{- end }}
             # PVC
             - name: {{ include "wazuh.fullname" . }}-manager-master
               mountPath: /var/ossec/api/configuration
