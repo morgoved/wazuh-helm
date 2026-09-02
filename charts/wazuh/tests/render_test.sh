@@ -193,6 +193,32 @@ for sts in "$MASTER_STS" "$WORKER_STS"; do
   assert_contains "filebeat.yml is mounted in ${sts##*/manager/}" "$out" "$FILEBEAT_MOUNT"
 done
 
+echo "== #174: the new nested sections are optional (helm upgrade --reuse-values) =="
+# A release upgraded with --reuse-values carries the old release's values, which have no
+# wazuh.archives and no wazuh.filebeat at all. Absent must read as false / "", not explode.
+absent_args=(--set wazuh.archives=null --set wazuh.filebeat=null)
+expect_success "chart renders with both sections absent" render "${absent_args[@]}"
+out=$(render_only "$MANAGER_CONFIGMAP" "${absent_args[@]}")
+assert_contains "absent wazuh.archives reads as disabled" "$out" '<logall_json>no</logall_json>'
+assert_not_contains "absent wazuh.filebeat adds no filebeat.yml" "$out" "filebeat.yml:"
+out=$(render_only "$MASTER_STS" "${absent_args[@]}")
+assert_not_contains "absent sections mount nothing" "$out" "$FILEBEAT_MOUNT"
+expect_success "archives still works with only wazuh.filebeat absent" \
+  render --set wazuh.filebeat=null --set wazuh.archives.enabled=true
+
+echo "== #174: full-file overrides win over wazuh.archives.enabled =="
+# Documented precedence: an override replaces the generated file, so it takes the archives
+# setting with it. Each half can be left off, which ships no archives without failing.
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.archives.enabled=true --set 'wazuh.masterConf=<ossec_config></ossec_config>')
+assert_contains "masterConf wins: master.conf is the override verbatim" "$out" 'master.conf: "<ossec_config></ossec_config>"'
+assert_contains "the worker is still generated, so it keeps logall_json" "$out" '<logall_json>yes</logall_json>'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.archives.enabled=true --set 'wazuh.workerConf=<ossec_config></ossec_config>')
+assert_contains "workerConf wins: worker.conf is the override verbatim" "$out" 'worker.conf: "<ossec_config></ossec_config>"'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.archives.enabled=true --set 'wazuh.filebeat.config=# mine')
+assert_contains "filebeat.config wins over the archives fileset" "$out" 'filebeat.yml: "# mine"'
+assert_not_contains "the generated filebeat config is dropped entirely" "$out" 'filebeat.modules'
+assert_contains "but logall_json is still set, so managers write archives nobody ships" "$out" '<logall_json>yes</logall_json>'
+
 echo "== #174: wazuh.filebeat.config replaces the file without enabling archives =="
 override_args=(--set 'wazuh.filebeat.config=# my own filebeat')
 out=$(render_only "$MANAGER_CONFIGMAP" "${override_args[@]}")

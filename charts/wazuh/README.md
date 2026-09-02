@@ -52,6 +52,29 @@ When changing `indexer.cred.password` you also have to adjust `indexer.cred.pass
 
 Same applies when changing `dashboard.cred.password`
 
+### Archiving every event
+
+Wazuh only indexes alerts by default, so events matching no rule — syslog forwarded from
+another collector, for instance — are dropped and never reach the dashboard. To keep them:
+
+```yaml
+wazuh:
+  archives:
+    enabled: true
+```
+
+That sets `<logall_json>yes</logall_json>` on master and worker and enables filebeat's
+`archives` fileset. Both halves are required, which is why it is one switch. Archives are
+unfiltered, so expect a large increase in indexer storage.
+
+> NOTE!
+> The switch only reaches the *generated* configs. `wazuh.masterConf`, `wazuh.workerConf`
+> and `wazuh.filebeat.config` replace their file outright and therefore win over it. If you
+> set one of them, carry the setting yourself — `<logall_json>yes</logall_json>` in the ossec
+> config, `archives.enabled: true` in filebeat's `wazuh` module. Miss one half and either the
+> managers write archives that never ship, or filebeat tails a file nobody writes; neither
+> fails loudly.
+
 ## Parameters
 
 ### global These parameters control the global networking behavior across all services.

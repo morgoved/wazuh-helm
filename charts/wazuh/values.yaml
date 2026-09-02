@@ -659,10 +659,10 @@ wazuh:
     name: "wazuh-manager"
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   syslog_enable: true
-  ## By default only alerts are indexed, so events matching no rule (forwarded syslog, for
-  ## instance) never reach the dashboard. This sets <logall_json> on master and worker and
-  ## enables filebeat's archives fileset; both are needed, hence one switch.
-  ## Archives are unfiltered, so expect a large increase in indexer storage.
+  ## Without this only alerts are indexed, so events matching no rule are dropped. Sets
+  ## <logall_json> on the managers and enables filebeat's archives fileset; both are needed,
+  ## so it is one switch. Archives are unfiltered, expect much more indexer storage.
+  ## Does not apply to a file replaced by masterConf, workerConf or filebeat.config.
   ## @param wazuh.archives.enabled Index every event, not just alerts.
   archives:
     enabled: false
@@ -742,6 +742,8 @@ wazuh:
   ## to use that default; set a value to manage the config through values.yaml instead.
   ## @param wazuh.script Override for script.sh. If empty, files/script.sh is used.
   script: ""
+  ## Replaces the generated config, so wazuh.archives.enabled does not apply: set
+  ## <logall_json>yes</logall_json> here if you want archives.
   ## @param wazuh.masterConf Override for master.conf. If empty, the generated ossec config is used.
   masterConf: ""
   ## @param wazuh.workerConf Override for worker.conf. If empty, the generated ossec config is used.
@@ -752,9 +754,9 @@ wazuh:
   localRules: ""
   ## @param wazuh.internalOptions Override for internal_options.conf. If empty, files/internal_options.conf is used.
   internalOptions: ""
-  ## Replaces the whole filebeat.yml. Keep the `hosts:` line and the commented-out
-  ## `#username:` / `#password:` / `#ssl.*` keys of the default: the entrypoint fills them
-  ## in from the chart's env vars, and ships nothing if they are missing.
+  ## Replaces the whole file. Keep the `hosts:` line and the commented-out `#username:`,
+  ## `#password:` and `#ssl.*` keys: the entrypoint fills those in from the env vars, and
+  ## ships nothing without them. wazuh.archives.enabled does not apply, set archives here.
   ## @param wazuh.filebeat.config Override for filebeat.yml. If empty, the generated config is used.
   filebeat:
     config: ""

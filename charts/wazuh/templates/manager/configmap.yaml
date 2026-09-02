@@ -12,7 +12,7 @@ data:
   local_rules.xml: {{ .Values.wazuh.localRules | default (.Files.Get "files/local_rules.xml") | default "<group></group>" | quote }}
   internal_options.conf: {{ .Values.wazuh.internalOptions | default (.Files.Get "files/internal_options.conf") | default "# fallback" | quote }}
 {{- if include "wazuh.filebeat.overridden" . }}
-  filebeat.yml: {{ .Values.wazuh.filebeat.config | default (include "wazuh.filebeat_config" .) | quote }}
+  filebeat.yml: {{ (.Values.wazuh.filebeat).config | default (include "wazuh.filebeat_config" .) | quote }}
 {{- end }}
 
 {{- if .Values.wazuh.agentGroupConf }}

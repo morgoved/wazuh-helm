@@ -6,7 +6,7 @@ filebeat.modules:
     alerts:
       enabled: true
     archives:
-      enabled: {{ .Values.wazuh.archives.enabled }}
+      enabled: {{ if include "wazuh.archives.enabled" . }}true{{ else }}false{{ end }}
 
 setup.template.json.enabled: true
 setup.template.overwrite: true
