@@ -63,6 +63,17 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local name="$1" haystack="$2" needle="$3"
+  if grep -qF -- "$needle" <<<"$haystack"; then
+    echo "FAIL: $name (expected NOT to find: $needle)"
+    fail=$((fail + 1))
+  else
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  fi
+}
+
 LISTENERSET=templates/dashboard/listenerset.yaml
 HTTPROUTE=templates/dashboard/httproute.yaml
 BACKENDTLSPOLICY=templates/dashboard/backendtlspolicy.yaml
@@ -151,6 +162,71 @@ out=$(render_only "$INDEXER_SECURITYCONFIG" -f /tmp/wazuh-render-test-173-values
 assert_contains "internalUsers.hash is templated to the actual password hash" "$out" \
   "hash: '\$2a\$12\$zGWIT7wkPKT/zww3bmMyp.KuWXH4RzgxiB91Q8NGFcqpyPy.R2Rcq'"
 rm -f /tmp/wazuh-render-test-173-values.yaml
+
+MANAGER_CONFIGMAP=templates/manager/configmap.yaml
+MASTER_STS=templates/manager/master/statefulset.yaml
+WORKER_STS=templates/manager/worker/statefulset.yaml
+FILEBEAT_MOUNT=/var/ossec/data_tmp/exclusion/etc/filebeat/filebeat.yml
+
+echo "== #174: archives disabled (default) leaves the image's filebeat.yml alone =="
+out=$(render_only "$MANAGER_CONFIGMAP")
+assert_contains "logall_json stays off on the master" "$out" '<logall_json>no</logall_json>'
+assert_not_contains "no filebeat.yml is added to the ConfigMap" "$out" "filebeat.yml:"
+for sts in "$MASTER_STS" "$WORKER_STS"; do
+  out=$(render_only "$sts")
+  assert_not_contains "no filebeat.yml mount in ${sts##*/manager/}" "$out" "$FILEBEAT_MOUNT"
+done
+
+echo "== #174: wazuh.archives.enabled turns on both halves at once =="
+archives_args=(--set wazuh.archives.enabled=true)
+out=$(render_only "$MANAGER_CONFIGMAP" "${archives_args[@]}")
+assert_not_contains "logall_json is on for master and worker alike" "$out" '<logall_json>no</logall_json>'
+assert_contains "filebeat ships the archives fileset" "$out" 'archives:\n      enabled: true'
+assert_contains "the alerts fileset is left enabled" "$out" 'alerts:\n      enabled: true'
+# The entrypoint seds these lines in place; without them filebeat ships nothing.
+for placeholder in "hosts: ['https://wazuh.indexer:9200']" '#username:' '#password:' \
+                   '#ssl.verification_mode:' '#ssl.certificate_authorities:' '#ssl.certificate:' '#ssl.key:'; do
+  assert_contains "entrypoint placeholder is preserved: $placeholder" "$out" "$placeholder"
+done
+for sts in "$MASTER_STS" "$WORKER_STS"; do
+  out=$(render_only "$sts" "${archives_args[@]}")
+  assert_contains "filebeat.yml is mounted in ${sts##*/manager/}" "$out" "$FILEBEAT_MOUNT"
+done
+
+echo "== #174: the new nested sections are optional (helm upgrade --reuse-values) =="
+# A release upgraded with --reuse-values carries the old release's values, which have no
+# wazuh.archives and no wazuh.filebeat at all. Absent must read as false / "", not explode.
+absent_args=(--set wazuh.archives=null --set wazuh.filebeat=null)
+expect_success "chart renders with both sections absent" render "${absent_args[@]}"
+out=$(render_only "$MANAGER_CONFIGMAP" "${absent_args[@]}")
+assert_contains "absent wazuh.archives reads as disabled" "$out" '<logall_json>no</logall_json>'
+assert_not_contains "absent wazuh.filebeat adds no filebeat.yml" "$out" "filebeat.yml:"
+out=$(render_only "$MASTER_STS" "${absent_args[@]}")
+assert_not_contains "absent sections mount nothing" "$out" "$FILEBEAT_MOUNT"
+expect_success "archives still works with only wazuh.filebeat absent" \
+  render --set wazuh.filebeat=null --set wazuh.archives.enabled=true
+
+echo "== #174: full-file overrides win over wazuh.archives.enabled =="
+# Documented precedence: an override replaces the generated file, so it takes the archives
+# setting with it. Each half can be left off, which ships no archives without failing.
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.archives.enabled=true --set 'wazuh.masterConf=<ossec_config></ossec_config>')
+assert_contains "masterConf wins: master.conf is the override verbatim" "$out" 'master.conf: "<ossec_config></ossec_config>"'
+assert_contains "the worker is still generated, so it keeps logall_json" "$out" '<logall_json>yes</logall_json>'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.archives.enabled=true --set 'wazuh.workerConf=<ossec_config></ossec_config>')
+assert_contains "workerConf wins: worker.conf is the override verbatim" "$out" 'worker.conf: "<ossec_config></ossec_config>"'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.archives.enabled=true --set 'wazuh.filebeat.config=# mine')
+assert_contains "filebeat.config wins over the archives fileset" "$out" 'filebeat.yml: "# mine"'
+assert_not_contains "the generated filebeat config is dropped entirely" "$out" 'filebeat.modules'
+assert_contains "but logall_json is still set, so managers write archives nobody ships" "$out" '<logall_json>yes</logall_json>'
+
+echo "== #174: wazuh.filebeat.config replaces the file without enabling archives =="
+override_args=(--set 'wazuh.filebeat.config=# my own filebeat')
+out=$(render_only "$MANAGER_CONFIGMAP" "${override_args[@]}")
+assert_contains "the override replaces the generated config" "$out" '# my own filebeat'
+assert_not_contains "the generated config is not also emitted" "$out" 'filebeat.modules'
+assert_contains "an override alone does not enable archives" "$out" '<logall_json>no</logall_json>'
+out=$(render_only "$MASTER_STS" "${override_args[@]}")
+assert_contains "an override alone still mounts filebeat.yml" "$out" "$FILEBEAT_MOUNT"
 
 echo
 echo "==================================="

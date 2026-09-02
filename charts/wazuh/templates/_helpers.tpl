@@ -186,6 +186,23 @@ Define serviceaccount names
 {{- end -}}
 {{- end -}}
 
+{{/*
+Whether to mount our own filebeat.yml. Only when asked for, so existing releases keep
+using the image's own file.
+*/}}
+{{- define "wazuh.filebeat.overridden" -}}
+{{- if or (include "wazuh.archives.enabled" .) ((.Values.wazuh.filebeat).config) -}}
+true
+{{- end -}}
+{{- end -}}
+
+
+{{- define "wazuh.archives.enabled" -}}
+{{- if (.Values.wazuh.archives).enabled -}}
+true
+{{- end -}}
+{{- end -}}
+
 {{- define "wazuh.manager.serviceAccountName" -}}
 {{- if .Values.wazuh.serviceAccount.create -}}
     {{ default (printf "%s-manager" (include "wazuh.fullname" .)) .Values.wazuh.serviceAccount.name }}

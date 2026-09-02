@@ -52,6 +52,29 @@ When changing `indexer.cred.password` you also have to adjust `indexer.cred.pass
 
 Same applies when changing `dashboard.cred.password`
 
+### Archiving every event
+
+Wazuh only indexes alerts by default, so events matching no rule — syslog forwarded from
+another collector, for instance — are dropped and never reach the dashboard. To keep them:
+
+```yaml
+wazuh:
+  archives:
+    enabled: true
+```
+
+That sets `<logall_json>yes</logall_json>` on master and worker and enables filebeat's
+`archives` fileset. Both halves are required, which is why it is one switch. Archives are
+unfiltered, so expect a large increase in indexer storage.
+
+> NOTE!
+> The switch only reaches the *generated* configs. `wazuh.masterConf`, `wazuh.workerConf`
+> and `wazuh.filebeat.config` replace their file outright and therefore win over it. If you
+> set one of them, carry the setting yourself — `<logall_json>yes</logall_json>` in the ossec
+> config, `archives.enabled: true` in filebeat's `wazuh` module. Miss one half and either the
+> managers write archives that never ship, or filebeat tails a file nobody writes; neither
+> fails loudly.
+
 ## Parameters
 
 ### global These parameters control the global networking behavior across all services.
@@ -269,6 +292,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.serviceAccount.annotations`                 | Annotations for service account                                                        | `{}`                                   |
 | `wazuh.serviceAccount.name`                        | Name of the service account                                                            | `wazuh-manager`                        |
 | `wazuh.syslog_enable`                              | Enables the syslog of the wazuh instance.                                              | `true`                                 |
+| `wazuh.archives.enabled`                           | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                        | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
 | `wazuh.images.repository`                          | name of the image used.                                                                | `wazuh/wazuh-manager`                  |
 | `wazuh.images.tag`                                 | Tag of the image.                                                                      | `4.14.3`                               |
@@ -303,6 +327,7 @@ Same applies when changing `dashboard.cred.password`
 | `wazuh.localDecoder`                               | Override for local_decoder.xml. If empty, files/local_decoder.xml is used.             | `""`                                   |
 | `wazuh.localRules`                                 | Override for local_rules.xml. If empty, files/local_rules.xml is used.                 | `""`                                   |
 | `wazuh.internalOptions`                            | Override for internal_options.conf. If empty, files/internal_options.conf is used.     | `""`                                   |
+| `wazuh.filebeat.config`                            | Override for filebeat.yml. If empty, the generated config is used.                     | `""`                                   |
 | `wazuh.master.enabled`                             | Enable the master                                                                      | `true`                                 |
 | `wazuh.master.annotations`                         | additional annotations set on statefulset.                                             | `{}`                                   |
 | `wazuh.master.extraPodLabels`                      | Extra labels to add to the master pods.                                                | `{}`                                   |
