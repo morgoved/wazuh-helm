@@ -574,6 +574,8 @@ dashboard:
         -----BEGIN CERTIFICATE-----
         -----END CERTIFICATE-----
       spEntityId: "wazuh-saml"
+      ## Public dashboard URL used as SAML kibana_url. Defaults to https://<dashboard.ingress.host>
+      ## while the Ingress is enabled, otherwise https://<dashboard.gateway.host>.
       kibanaUrl: ""
       order: 1
       exchangeKey: ""

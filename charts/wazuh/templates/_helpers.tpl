@@ -107,7 +107,7 @@ opensearch_security.auth.multiple_auth_enabled: {{ gt ($authType | len) 1 }}
 opensearch_security.auth.type: {{ $authType | toJson }}
 
 {{- if .Values.dashboard.sso.oidc.enabled }}
-{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl | default .Values.dashboard.ingress.host }}
+{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl | default (include "wazuh.dashboard.publicHost" .) }}
 opensearch_security.openid.connect_url: {{ required "dashboard.sso.oidc.url is required" .Values.dashboard.sso.oidc.url }}
 opensearch_security.openid.logout_url: {{ required "dashboard.sso.oidc.logoutUrl is required" .Values.dashboard.sso.oidc.logoutUrl }}
 opensearch_security.openid.base_redirect_url: {{ required "dashboard.sso.oidc.baseRedirectUrl is required" $baseRedirectUrl }}
@@ -216,5 +216,21 @@ true
     {{ default (printf "%s-agent" (include "wazuh.fullname" .)) .Values.agent.serviceAccount.name }}
 {{- else -}}
     {{ "default" }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Public hostname of the dashboard, used to build SSO callback URLs (SAML kibana_url,
+OIDC base_redirect_url) when they are not set explicitly. Prefers the Ingress host
+while the Ingress is enabled, then falls back to the Gateway API host, so that
+switching dashboard.ingress off in favour of dashboard.gateway keeps SSO working.
+*/}}
+{{- define "wazuh.dashboard.publicHost" -}}
+{{- if .Values.dashboard.ingress.enabled -}}
+{{- .Values.dashboard.ingress.host -}}
+{{- else if .Values.dashboard.gateway.enabled -}}
+{{- .Values.dashboard.gateway.host -}}
+{{- else -}}
+{{- .Values.dashboard.ingress.host -}}
 {{- end -}}
 {{- end -}}
