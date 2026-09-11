@@ -168,9 +168,13 @@ assert_contains "explicit SSO URLs take precedence over derived URLs" "$out" "ki
 out=$(render_only "templates/dashboard/configmap.yaml" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.sso.oidc.baseRedirectUrl=https://override.example.org --set dashboard.sso.saml.kibanaUrl=https://override.example.org)
 assert_contains "explicit SSO URLs take precedence over derived URLs" "$out" "base_redirect_url: https://override.example.org"
 out=$(render_only "$INDEXER_SECURITYCONFIG" --set dashboard.ingress.enabled=true --set dashboard.ingress.host=ing.example.org --set dashboard.gateway.enabled=true --set dashboard.gateway.parentRef.name=my-gw --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=false "${sso_args[@]}")
-assert_contains "Ingress host wins when both Ingress and Gateway are enabled" "$out" "kibana_url: http://ing.example.org"
+assert_contains "Ingress host wins and keeps the existing HTTPS fallback" "$out" "kibana_url: https://ing.example.org"
 out=$(render_only "templates/dashboard/configmap.yaml" --set dashboard.ingress.enabled=true --set dashboard.ingress.host=ing.example.org --set dashboard.gateway.enabled=true --set dashboard.gateway.parentRef.name=my-gw --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=false "${sso_args[@]}")
-assert_contains "Ingress host wins when both Ingress and Gateway are enabled" "$out" "base_redirect_url: http://ing.example.org"
+assert_contains "Ingress host wins and keeps the existing HTTPS fallback" "$out" "base_redirect_url: https://ing.example.org"
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${sso_args[@]}")
+assert_contains "SAML keeps the legacy HTTPS fallback when no frontend is enabled" "$out" "kibana_url: https://wazuh.example.com"
+out=$(render_only "templates/dashboard/configmap.yaml" "${sso_args[@]}")
+assert_contains "OIDC gets a complete legacy HTTPS fallback when no frontend is enabled" "$out" "base_redirect_url: https://wazuh.example.com"
 expect_failure "direct Gateway attachment without explicit SSO URLs must fail" \
   render_only "$INDEXER_SECURITYCONFIG" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.listenerSet.enabled=false
 

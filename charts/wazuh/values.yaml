@@ -533,6 +533,9 @@ dashboard:
       primary: false
       url: ""
       logoutUrl: ""
+      ## Public dashboard URL used as OIDC base_redirect_url. Defaults to
+      ## https://<dashboard.ingress.host>, or to the chart-managed Gateway listener URL.
+      ## Set explicitly for direct Gateway attachment.
       baseRedirectUrl: ""
       scope: "openid profile email address phone"
       issuer: ""
@@ -574,8 +577,8 @@ dashboard:
         -----BEGIN CERTIFICATE-----
         -----END CERTIFICATE-----
       spEntityId: "wazuh-saml"
-      ## Public dashboard URL used as SAML kibana_url. Defaults to the Ingress URL when enabled,
-      ## otherwise to the Gateway URL when the chart manages its ListenerSet. When
+      ## Public dashboard URL used as SAML kibana_url. Defaults to https://<dashboard.ingress.host>,
+      ## or to the chart-managed Gateway listener URL. When
       ## dashboard.gateway.listenerSet.enabled=false, set this explicitly.
       kibanaUrl: ""
       order: 1

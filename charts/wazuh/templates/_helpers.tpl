@@ -221,19 +221,15 @@ true
 
 {{/*
 Public dashboard URL used to build SSO callback URLs (SAML kibana_url,
-OIDC base_redirect_url) when they are not set explicitly. Prefers the Ingress
-host while Ingress is enabled, then falls back to the Gateway API host when the
-chart manages the ListenerSet. For direct Gateway attachment the chart cannot
-infer the external protocol, so callers must provide explicit SSO URLs.
+OIDC base_redirect_url) when they are not set explicitly. The Ingress and legacy
+fallbacks preserve the existing HTTPS behaviour. A chart-managed ListenerSet
+derives its scheme from dashboard.gateway.tls.enabled. For direct Gateway
+attachment, the listener scheme is unknown, so callers must provide explicit URLs.
 */}}
 {{- define "wazuh.dashboard.publicURL" -}}
 {{- if .Values.dashboard.ingress.enabled -}}
 {{- $host := required "dashboard.ingress.host is required" .Values.dashboard.ingress.host -}}
-{{- if gt (len .Values.dashboard.ingress.tls) 0 -}}
 {{- printf "https://%s" $host -}}
-{{- else -}}
-{{- printf "http://%s" $host -}}
-{{- end -}}
 {{- else if .Values.dashboard.gateway.enabled -}}
 {{- $host := required "dashboard.gateway.host is required" .Values.dashboard.gateway.host -}}
 {{- if .Values.dashboard.gateway.listenerSet.enabled -}}
@@ -247,6 +243,6 @@ infer the external protocol, so callers must provide explicit SSO URLs.
 {{- end -}}
 {{- else -}}
 {{- $host := required "dashboard.ingress.host is required" .Values.dashboard.ingress.host -}}
-{{- printf "http://%s" $host -}}
+{{- printf "https://%s" $host -}}
 {{- end -}}
 {{- end -}}
