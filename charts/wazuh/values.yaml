@@ -574,6 +574,9 @@ dashboard:
         -----BEGIN CERTIFICATE-----
         -----END CERTIFICATE-----
       spEntityId: "wazuh-saml"
+      ## Public dashboard URL used as SAML kibana_url. Defaults to the Ingress URL when enabled,
+      ## otherwise to the Gateway URL when the chart manages its ListenerSet. When
+      ## dashboard.gateway.listenerSet.enabled=false, set this explicitly.
       kibanaUrl: ""
       order: 1
       exchangeKey: ""

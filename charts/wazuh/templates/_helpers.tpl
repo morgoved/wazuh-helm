@@ -107,10 +107,10 @@ opensearch_security.auth.multiple_auth_enabled: {{ gt ($authType | len) 1 }}
 opensearch_security.auth.type: {{ $authType | toJson }}
 
 {{- if .Values.dashboard.sso.oidc.enabled }}
-{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl | default .Values.dashboard.ingress.host }}
+{{- $baseRedirectUrl := .Values.dashboard.sso.oidc.baseRedirectUrl }}
 opensearch_security.openid.connect_url: {{ required "dashboard.sso.oidc.url is required" .Values.dashboard.sso.oidc.url }}
 opensearch_security.openid.logout_url: {{ required "dashboard.sso.oidc.logoutUrl is required" .Values.dashboard.sso.oidc.logoutUrl }}
-opensearch_security.openid.base_redirect_url: {{ required "dashboard.sso.oidc.baseRedirectUrl is required" $baseRedirectUrl }}
+opensearch_security.openid.base_redirect_url: {{ if $baseRedirectUrl }}{{ $baseRedirectUrl }}{{ else }}{{ include "wazuh.dashboard.publicURL" . }}{{ end }}
 opensearch_security.openid.scope: {{ .Values.dashboard.sso.oidc.scope }}
 opensearch_security.openid.client_id: ${OPENSEARCH_OIDC_CLIENT_ID}
 opensearch_security.openid.client_secret: ${OPENSEARCH_OIDC_CLIENT_SECRET}
@@ -216,5 +216,37 @@ true
     {{ default (printf "%s-agent" (include "wazuh.fullname" .)) .Values.agent.serviceAccount.name }}
 {{- else -}}
     {{ "default" }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Public dashboard URL used to build SSO callback URLs (SAML kibana_url,
+OIDC base_redirect_url) when they are not set explicitly. Prefers the Ingress
+host while Ingress is enabled, then falls back to the Gateway API host when the
+chart manages the ListenerSet. For direct Gateway attachment the chart cannot
+infer the external protocol, so callers must provide explicit SSO URLs.
+*/}}
+{{- define "wazuh.dashboard.publicURL" -}}
+{{- if .Values.dashboard.ingress.enabled -}}
+{{- $host := required "dashboard.ingress.host is required" .Values.dashboard.ingress.host -}}
+{{- if gt (len .Values.dashboard.ingress.tls) 0 -}}
+{{- printf "https://%s" $host -}}
+{{- else -}}
+{{- printf "http://%s" $host -}}
+{{- end -}}
+{{- else if .Values.dashboard.gateway.enabled -}}
+{{- $host := required "dashboard.gateway.host is required" .Values.dashboard.gateway.host -}}
+{{- if .Values.dashboard.gateway.listenerSet.enabled -}}
+{{- if .Values.dashboard.gateway.tls.enabled -}}
+{{- printf "https://%s" $host -}}
+{{- else -}}
+{{- printf "http://%s" $host -}}
+{{- end -}}
+{{- else -}}
+{{- fail "dashboard.gateway.listenerSet.enabled=false requires dashboard.sso.saml.kibanaUrl or dashboard.sso.oidc.baseRedirectUrl to be set explicitly" -}}
+{{- end -}}
+{{- else -}}
+{{- $host := required "dashboard.ingress.host is required" .Values.dashboard.ingress.host -}}
+{{- printf "http://%s" $host -}}
 {{- end -}}
 {{- end -}}
