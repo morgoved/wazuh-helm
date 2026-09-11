@@ -141,6 +141,39 @@ assert_contains "Ingress is still rendered" "$out" "kind: Ingress"
 out=$(render_only "$HTTPROUTE" "${coexist_args[@]}")
 assert_contains "HTTPRoute is rendered alongside the Ingress" "$out" "kind: HTTPRoute"
 
+sso_args=(
+  --set dashboard.sso.oidc.enabled=true
+  --set dashboard.sso.oidc.existingSecret=my-oidc-secret
+  --set dashboard.sso.oidc.url=https://issuer.example.com/auth
+  --set dashboard.sso.oidc.logoutUrl=https://issuer.example.com/logout
+  --set dashboard.sso.saml.enabled=true
+  --set dashboard.sso.saml.metadataUrl=https://idp.example.com/metadata
+  --set dashboard.sso.saml.idpEntityId=https://idp.example.com/entity
+  --set dashboard.sso.saml.exchangeKey=exchange-key
+)
+
+echo "== SSO callback URLs are derived from the selected public dashboard endpoint =="
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=false)
+assert_contains "SAML uses http:// when Gateway TLS is disabled" "$out" "kibana_url: http://gw.example.org"
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=true --set dashboard.gateway.tls.issuerRef.name=my-issuer)
+assert_contains "SAML uses https:// when Gateway TLS is enabled" "$out" "kibana_url: https://gw.example.org"
+out=$(render_only "templates/dashboard/configmap.yaml" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=false)
+assert_contains "OIDC uses http:// when Gateway TLS is disabled" "$out" "base_redirect_url: http://gw.example.org"
+out=$(render_only "templates/dashboard/configmap.yaml" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=true --set dashboard.gateway.tls.issuerRef.name=my-issuer)
+assert_contains "OIDC uses https:// when Gateway TLS is enabled" "$out" "base_redirect_url: https://gw.example.org"
+expect_failure "empty Gateway host fails rendering" \
+  render_only "$INDEXER_SECURITYCONFIG" "${gw_args[@]}" "${sso_args[@]}" --set-string dashboard.gateway.host=''
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.sso.oidc.baseRedirectUrl=https://override.example.org --set dashboard.sso.saml.kibanaUrl=https://override.example.org)
+assert_contains "explicit SSO URLs take precedence over derived URLs" "$out" "kibana_url: https://override.example.org"
+out=$(render_only "templates/dashboard/configmap.yaml" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.host=gw.example.org --set dashboard.sso.oidc.baseRedirectUrl=https://override.example.org --set dashboard.sso.saml.kibanaUrl=https://override.example.org)
+assert_contains "explicit SSO URLs take precedence over derived URLs" "$out" "base_redirect_url: https://override.example.org"
+out=$(render_only "$INDEXER_SECURITYCONFIG" --set dashboard.ingress.enabled=true --set dashboard.ingress.host=ing.example.org --set dashboard.gateway.enabled=true --set dashboard.gateway.parentRef.name=my-gw --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=false "${sso_args[@]}")
+assert_contains "Ingress host wins when both Ingress and Gateway are enabled" "$out" "kibana_url: http://ing.example.org"
+out=$(render_only "templates/dashboard/configmap.yaml" --set dashboard.ingress.enabled=true --set dashboard.ingress.host=ing.example.org --set dashboard.gateway.enabled=true --set dashboard.gateway.parentRef.name=my-gw --set dashboard.gateway.host=gw.example.org --set dashboard.gateway.tls.enabled=false "${sso_args[@]}")
+assert_contains "Ingress host wins when both Ingress and Gateway are enabled" "$out" "base_redirect_url: http://ing.example.org"
+expect_failure "direct Gateway attachment without explicit SSO URLs must fail" \
+  render_only "$INDEXER_SECURITYCONFIG" "${gw_args[@]}" "${sso_args[@]}" --set dashboard.gateway.listenerSet.enabled=false
+
 echo "== #173: single-quoted include() inside a templated config block renders through tpl =="
 cat >/tmp/wazuh-render-test-173-values.yaml <<'EOF'
 indexer:
