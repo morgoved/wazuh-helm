@@ -280,6 +280,12 @@ spec:
           {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- end }}
+        {{- if .Values.wazuh.worker.pvc.extraAnnotations }}
+        annotations:
+          {{- with .Values.wazuh.worker.pvc.extraAnnotations }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
       spec:
         accessModes:
           - ReadWriteOnce
