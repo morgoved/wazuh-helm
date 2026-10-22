@@ -91,8 +91,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 
 > BREAKING CHANGE when upgrading from a chart version without the schema:
 > values that used to be silently ignored now make `helm install`/`upgrade` fail. This includes
-> typos, keys the chart never supported (e.g. `dashboard.podAnnotations`: use `dashboard.annotations`,
-> which is set on both the Deployment and the pod template), and obsolete keys carried over by
+> typos, keys the chart never supported, and obsolete keys carried over by
 > `helm upgrade --reuse-values`. Each such key was a no-op, so removing it, or moving it to the
 > supported key, does not change what was deployed before. Check your values before upgrading with:
 >
