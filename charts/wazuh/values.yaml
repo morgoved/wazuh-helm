@@ -665,6 +665,12 @@ wazuh:
     name: "wazuh-manager"
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   syslog_enable: true
+  ## Sources allowed to send to the workers' syslog listener (tcp/514), one <allowed-ips> each.
+  ## Restrict it to the senders' CIDRs: the listener has neither TLS nor authentication.
+  ## @param wazuh.syslog.allowedIps IPs or CIDRs allowed to send syslog to the workers.
+  syslog:
+    allowedIps:
+      - any
   ## Without this only alerts are indexed, so events matching no rule are dropped. Sets
   ## <logall_json> on the managers and enables filebeat's archives fileset; both are needed,
   ## so it is one switch. Archives are unfiltered, expect much more indexer storage.
@@ -721,10 +727,22 @@ wazuh:
   ## @param wazuh.authd.enabled enable password-based agent registration
   ## @param wazuh.authd.existingSecret name of the existingSecret
   ## @param wazuh.authd.pass password of the authd.
+  ## @param wazuh.authd.force.enabled Replace an existing agent registered with the same name or IP.
+  ## @param wazuh.authd.force.keyMismatch Replace it when its key does not match the manager's.
+  ## @param wazuh.authd.force.disconnectedTime.enabled Replace it when it has been disconnected longer than disconnectedTime.value.
+  ## @param wazuh.authd.force.disconnectedTime.value How long the existing agent must have been disconnected.
+  ## @param wazuh.authd.force.afterRegistrationTime Replace it when it registered longer ago than this (0 = no wait).
   authd:
     enabled: true
     existingSecret: ""
     pass: "password"
+    force:
+      enabled: true
+      keyMismatch: true
+      disconnectedTime:
+        enabled: true
+        value: 1h
+      afterRegistrationTime: 1h
   ## @param wazuh.initContainer.image Image used by the update-index container
   ## @param wazuh.initContainer.resources.requests.cpu Minimum CPU assigned to the pod.
   ## @param wazuh.initContainer.resources.requests.memory Minimum memory assigned to the pod.
