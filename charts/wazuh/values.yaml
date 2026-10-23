@@ -313,8 +313,10 @@ indexer:
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
   ## @param indexer.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+  ## @param indexer.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
   pvc:
     extraLabels: {}
+    extraAnnotations: {}
   ## @param indexer.storageSize Defines the size of the pvc used by the statefulset.
   ## @param indexer.storageClass Defines the storageClass of the pvc used by the statefulset.
   storageSize: 50Gi
@@ -850,8 +852,10 @@ wazuh:
       extraIngresses: []
       extraEgresses: []
     ## @param wazuh.master.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+    ## @param wazuh.master.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
     pvc:
       extraLabels: {}
+      extraAnnotations: {}
     ## @param wazuh.master.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the statefulset.
     storageSize: 50Gi
@@ -947,8 +951,10 @@ wazuh:
       extraIngresses: []
       extraEgresses: []
     ## @param wazuh.worker.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
+    ## @param wazuh.worker.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
     pvc:
       extraLabels: {}
+      extraAnnotations: {}
     ## @param wazuh.worker.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.worker.storageClass Defines the storageClass of the pvc used by the statefulset.
     storageSize: 50Gi

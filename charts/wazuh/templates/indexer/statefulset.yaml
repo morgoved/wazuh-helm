@@ -304,6 +304,12 @@ spec:
           {{- toYaml . | nindent 10 }}
           {{- end }}
         {{- end }}
+        {{- if .Values.indexer.pvc.extraAnnotations }}
+        annotations:
+          {{- with .Values.indexer.pvc.extraAnnotations }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
       spec:
         accessModes:
           - ReadWriteOnce
