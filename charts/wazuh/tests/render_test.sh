@@ -265,6 +265,36 @@ assert_contains "an override alone does not enable archives" "$out" '<logall_jso
 out=$(render_only "$MASTER_STS" "${override_args[@]}")
 assert_contains "an override alone still mounts filebeat.yml" "$out" "$FILEBEAT_MOUNT"
 
+echo "== wazuh.syslog.allowedIps restricts the workers' syslog listener =="
+out=$(render_only "$MANAGER_CONFIGMAP")
+assert_contains "default keeps allowed-ips any" "$out" '<allowed-ips>any</allowed-ips>'
+out=$(render_only "$MANAGER_CONFIGMAP" --set 'wazuh.syslog.allowedIps={10.0.0.0/8,192.168.1.10}')
+assert_contains "one allowed-ips per entry (first)" "$out" '<allowed-ips>10.0.0.0/8</allowed-ips>'
+assert_contains "one allowed-ips per entry (second)" "$out" '<allowed-ips>192.168.1.10</allowed-ips>'
+assert_not_contains "any is gone once restricted" "$out" '<allowed-ips>any</allowed-ips>'
+expect_failure "an empty or blank allowedIps fails fast" render_only "$MANAGER_CONFIGMAP" --set 'wazuh.syslog.allowedIps={}'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.syslog=null)
+assert_contains "absent wazuh.syslog (--reuse-values) keeps any" "$out" '<allowed-ips>any</allowed-ips>'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.syslog_enable=false --set 'wazuh.syslog.allowedIps={}')
+assert_not_contains "syslog_enable=false renders no syslog remote" "$out" '<connection>syslog</connection>'
+
+echo "== wazuh.authd.force drives <auth><force> =="
+out=$(render_only "$MANAGER_CONFIGMAP")
+assert_contains "default force key_mismatch" "$out" '<key_mismatch>yes</key_mismatch>'
+assert_contains "default force disconnected_time" "$out" '<disconnected_time enabled=\"yes\">1h</disconnected_time>'
+assert_contains "default force after_registration_time" "$out" '<after_registration_time>1h</after_registration_time>'
+force_args=(--set wazuh.authd.force.keyMismatch=false --set wazuh.authd.force.disconnectedTime.enabled=false
+            --set wazuh.authd.force.disconnectedTime.value=2h --set-string wazuh.authd.force.afterRegistrationTime=0)
+out=$(render_only "$MANAGER_CONFIGMAP" "${force_args[@]}")
+assert_contains "an explicit false is not swallowed by default" "$out" '<key_mismatch>no</key_mismatch>'
+assert_contains "disconnected_time can be disabled and retimed" "$out" '<disconnected_time enabled=\"no\">2h</disconnected_time>'
+assert_contains "after_registration_time 0" "$out" '<after_registration_time>0</after_registration_time>'
+assert_contains "force stays enabled" "$out" '<enabled>yes</enabled>'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.authd.force.enabled=false)
+assert_contains "force can be disabled" "$out" '<force>\n      <enabled>no</enabled>'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.authd.force=null)
+assert_contains "absent wazuh.authd.force (--reuse-values) keeps the defaults" "$out" '<after_registration_time>1h</after_registration_time>'
+
 echo
 echo "==================================="
 echo "PASS: $pass  FAIL: $fail"

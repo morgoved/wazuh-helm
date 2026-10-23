@@ -266,11 +266,14 @@
     <ipv6>yes</ipv6>
 {{- end }}
     <use_source_ip>no</use_source_ip>
+{{- /* Optional section (helm upgrade --reuse-values): absent keys keep the previous hardcoded values. `default` would swallow an explicit false, hence hasKey. */}}
+{{- $force := (($root.Values.wazuh).authd).force | default dict }}
+{{- $disconnected := $force.disconnectedTime | default dict }}
     <force>
-      <enabled>yes</enabled>
-      <key_mismatch>yes</key_mismatch>
-      <disconnected_time enabled="yes">1h</disconnected_time>
-      <after_registration_time>1h</after_registration_time>
+      <enabled>{{ ternary "yes" "no" (ternary $force.enabled true (hasKey $force "enabled")) }}</enabled>
+      <key_mismatch>{{ ternary "yes" "no" (ternary $force.keyMismatch true (hasKey $force "keyMismatch")) }}</key_mismatch>
+      <disconnected_time enabled="{{ ternary "yes" "no" (ternary $disconnected.enabled true (hasKey $disconnected "enabled")) }}">{{ $disconnected.value | default "1h" }}</disconnected_time>
+      <after_registration_time>{{ ternary $force.afterRegistrationTime "1h" (hasKey $force "afterRegistrationTime") }}</after_registration_time>
     </force>
     <purge>no</purge>
     <use_password>yes</use_password>
@@ -321,7 +324,13 @@
     <connection>syslog</connection>
     <port>514</port>
     <protocol>tcp</protocol>
-    <allowed-ips>any</allowed-ips>
+{{- $allowedIps := compact (ternary (($root.Values.wazuh.syslog).allowedIps) (list "any") (hasKey ($root.Values.wazuh.syslog | default dict) "allowedIps")) }}
+{{- if not $allowedIps }}
+{{- fail "wazuh.syslog.allowedIps must not be empty: Wazuh rejects a syslog <remote> without <allowed-ips>" }}
+{{- end }}
+{{- range $allowedIps }}
+    <allowed-ips>{{ . }}</allowed-ips>
+{{- end }}
 {{- if ((($root.Values.global).dualStack).enabled | default false) }}
     <local_ip>::</local_ip>
     <ipv6>yes</ipv6>

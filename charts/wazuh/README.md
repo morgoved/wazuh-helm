@@ -292,6 +292,7 @@ unfiltered, so expect a large increase in indexer storage.
 | `wazuh.serviceAccount.annotations`                 | Annotations for service account                                                        | `{}`                                   |
 | `wazuh.serviceAccount.name`                        | Name of the service account                                                            | `wazuh-manager`                        |
 | `wazuh.syslog_enable`                              | Enables the syslog of the wazuh instance.                                              | `true`                                 |
+| `wazuh.syslog.allowedIps`                          | IPs or CIDRs allowed to send syslog to the workers.                                    | `["any"]`                              |
 | `wazuh.archives.enabled`                           | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                        | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
 | `wazuh.images.repository`                          | name of the image used.                                                                | `wazuh/wazuh-manager`                  |
@@ -315,6 +316,11 @@ unfiltered, so expect a large increase in indexer storage.
 | `wazuh.authd.enabled`                              | enable password-based agent registration                                               | `true`                                 |
 | `wazuh.authd.existingSecret`                       | name of the existingSecret                                                             | `""`                                   |
 | `wazuh.authd.pass`                                 | password of the authd.                                                                 | `password`                             |
+| `wazuh.authd.force.enabled`                        | Replace an existing agent registered with the same name or IP.                         | `true`                                 |
+| `wazuh.authd.force.keyMismatch`                    | Replace it when its key does not match the manager's.                                  | `true`                                 |
+| `wazuh.authd.force.disconnectedTime.enabled`       | Replace it when it has been disconnected longer than disconnectedTime.value.           | `true`                                 |
+| `wazuh.authd.force.disconnectedTime.value`         | How long the existing agent must have been disconnected.                               | `1h`                                   |
+| `wazuh.authd.force.afterRegistrationTime`          | Replace it when it registered longer ago than this (0 = no wait).                      | `1h`                                   |
 | `wazuh.initContainer.image`                        | Image used by the update-index container                                               | `alpine`                               |
 | `wazuh.initContainer.resources.requests.cpu`       | Minimum CPU assigned to the pod.                                                       | `250m`                                 |
 | `wazuh.initContainer.resources.requests.memory`    | Minimum memory assigned to the pod.                                                    | `512Mi`                                |
