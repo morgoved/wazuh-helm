@@ -6,3 +6,7 @@ repos:
         pass_filenames: false
         always_run: true
         args: [--readme=charts/wazuh/README.md, --values=charts/wazuh/values.yaml]
+  - repo: https://github.com/losisin/helm-values-schema-json
+    rev: v2.6.0
+    hooks:
+      - id: helm-schema

@@ -1,6 +1,6 @@
 # wazuh-kubernetes-helm-chart
 
-![Version: 2.0.7](https://img.shields.io/badge/Version-2.0.7-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square)
 ![AppVersion: 4.14.3](https://img.shields.io/badge/AppVersion-4.14.3-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 
@@ -46,6 +46,14 @@ Edge TLS (client to Gateway) and backend TLS (Gateway to the dashboard Service) 
 ### Contributing
 
 This fork welcomes contributions and is open to transitioning into the official Wazuh project repository. Contributions are encouraged and appreciated.
+
+`charts/wazuh/values.schema.json` is generated from `charts/wazuh/values.yaml` with the
+[helm-values-schema-json](https://github.com/losisin/helm-values-schema-json) plugin: after changing
+`values.yaml`, run `helm schema` from the repository root (or let the pre-commit hook do it). Unknown
+keys are rejected by default; annotate free-form Kubernetes objects with
+`# @schema additionalProperties: true; skipProperties: true` and nullable values with
+`# @schema type: [string, null]`. `charts/wazuh/tests/schema_test.sh` checks that the schema is up to
+date and that every `.Values` path used by the templates is declared in `values.yaml`.
 
 ## Values
 
