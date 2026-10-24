@@ -15,7 +15,7 @@ To generate the necessary certificates, refer to the instructions available [her
 To retrieve hashes, execute the following command:
 
 ```bash
-docker run --rm -ti wazuh/wazuh-indexer:4.14.1 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh`
+docker run --rm -ti wazuh/wazuh-indexer:4.14.9 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh`
 ```
 
 ### Automatic Configuration Updates
