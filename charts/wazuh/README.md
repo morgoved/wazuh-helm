@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.3](https://img.shields.io/badge/AppVersion-4.14.3-informational?style=flat-square)
+![Version: 2.0.7](https://img.shields.io/badge/Version-2.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.3](https://img.shields.io/badge/AppVersion-4.14.3-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -74,6 +74,31 @@ unfiltered, so expect a large increase in indexer storage.
 > config, `archives.enabled: true` in filebeat's `wazuh` module. Miss one half and either the
 > managers write archives that never ship, or filebeat tails a file nobody writes; neither
 > fails loudly.
+
+### Values validation
+
+The chart ships a `values.schema.json`, so Helm rejects unknown keys at `install`,
+`upgrade`, `template` and `lint` time instead of silently ignoring them:
+
+```
+Error: values don't meet the specifications of the schema(s) in the following chart(s):
+wazuh:
+- at '/dashboard': additional properties 'replica' not allowed
+```
+
+Kubernetes passthrough fields (`resources`, `affinity`, `tolerations`, `securityContext`,
+probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values stay free-form.
+
+> BREAKING CHANGE when upgrading from a chart version without the schema:
+> values that used to be silently ignored now make `helm install`/`upgrade` fail. This includes
+> typos, keys the chart never supported (e.g. `dashboard.podAnnotations`: use `dashboard.annotations`,
+> which is set on both the Deployment and the pod template), and obsolete keys carried over by
+> `helm upgrade --reuse-values`. Each such key was a no-op, so removing it, or moving it to the
+> supported key, does not change what was deployed before. Check your values before upgrading with:
+>
+> ```
+> helm template wazuh wazuh/wazuh --version <new version> -f my-values.yaml > /dev/null
+> ```
 
 ## Parameters
 
