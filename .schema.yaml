@@ -1,0 +1,8 @@
+# Config for `helm schema` (https://github.com/losisin/helm-values-schema-json).
+# Regenerate charts/wazuh/values.schema.json from the repository root with: helm schema
+values:
+  - charts/wazuh/values.yaml
+output: charts/wazuh/values.schema.json
+draft: 7
+indent: 2
+noAdditionalProperties: true

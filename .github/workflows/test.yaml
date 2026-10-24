@@ -1,0 +1,27 @@
+name: Test Chart
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v4.2.4
+      - name: Install the helm-values-schema-json plugin
+        run: helm plugin install https://github.com/losisin/helm-values-schema-json.git --version v2.6.0 --verify=false
+      - name: Render tests
+        run: charts/wazuh/tests/render_test.sh
+      - name: Schema tests
+        run: charts/wazuh/tests/schema_test.sh

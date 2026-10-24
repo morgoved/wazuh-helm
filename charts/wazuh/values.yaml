@@ -1,9 +1,9 @@
 ## @param nameOverride String to partially override the names of the components.
 ##
-nameOverride: null
+nameOverride: null # @schema type: [string, null]
 ## @param fullnameOverride String to fully override the fullname of the components.
 ##
-fullnameOverride: null
+fullnameOverride: null # @schema type: [string, null]
 ## @param autoreload.enabled if enabled annotations will be added to recreated the statefulset on config changes.
 ##
 autoreload:
@@ -11,7 +11,7 @@ autoreload:
 
 ## @section global These parameters control the global networking behavior across all services.
 ##
-global:
+global: # @schema additionalProperties: true
   ## @param global.dualStack.enabled Enables dual-stack networking logic globally.
   ## @param global.dualStack.ipFamilyPolicy Sets the IP family policy for Kubernetes Services.
   ## @param global.dualStack.ipFamilies A list defining the order of IP families.
@@ -24,7 +24,7 @@ global:
 ## can set all available values of the official Chart.
 ## Ref: https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
 ##
-cert-manager:
+cert-manager: # @schema additionalProperties: true
   ## @param cert-manager.enabled this enabled or disables the sub-chart getting deployed.
   ##
   enabled: false
@@ -42,7 +42,7 @@ certificates:
     ## @param certificates.issuer.name of the issuer used for signing the certificates. If this is null
     ## a new selfsigned issuer will be created with the chart.
     ##
-    name: null
+    name: null # @schema type: [string, null]
     ## @param certificates.issuer.type defines the type of the issuer, possible values are issuer and
     ## ClusterIssuer.
     ##
@@ -77,23 +77,27 @@ externalIndexer:
 indexer:
   ## @param indexer.enabled defines if we deploy indexer or not
   enabled: true
+  ## @param indexer.fullnameOverride String to fully override the fullname of the indexer resources.
+  fullnameOverride: null # @schema type: [string, null]
 
   ## @param indexer.serviceAccount.create Create service account for indexer
   ## @param indexer.serviceAccount.annotations Annotations for indexer service account
   ## @param indexer.serviceAccount.name Name of the indexer service account
+  ## @param indexer.serviceAccount.automountServiceAccountToken Mount the service account token in the pods
   serviceAccount:
     create: false
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     name: "wazuh-indexer"
+    automountServiceAccountToken: false
   ## @param indexer.replicas number of replicas used in statefulset.
   ##
   replicas: 3
   ## @param indexer.annotations additional annotations set on statefulset.
   ##
-  annotations: {}
+  annotations: {} # @schema additionalProperties: true; skipProperties: true
   ## @param indexer.extraPodLabels Extra labels to add to the indexer pods.
   ##
-  extraPodLabels: {}
+  extraPodLabels: {} # @schema additionalProperties: true; skipProperties: true
   ## @param indexer.updateStrategy updateStrategy for the statefulset.
   ##
   updateStrategy: RollingUpdate
@@ -110,12 +114,12 @@ indexer:
     ## @param indexer.images.imagePullSecrets.secret Map of secret names to authenticate.
     imagePullSecrets:
       enabled: false
-      secret: {}
+      secret: {} # @schema type: [object, array]; additionalProperties: true; skipProperties: true
   ## @param indexer.resources.requests.cpu Minimum CPU assigned to the pod.
   ## @param indexer.resources.requests.memory Minimum memory assigned to the pod.
   ## @param indexer.resources.limits.cpu Maximum CPU used by the pod.
   ## @param indexer.resources.limits.memory Maximum memory used by the pod.
-  resources:
+  resources: # @schema additionalProperties: true; skipProperties: true
     requests:
       cpu: 500m
       memory: 1Gi
@@ -133,7 +137,7 @@ indexer:
   ## @param indexer.livenessProbe.successThreshold Minimum successes for the probe to be considered successful after having failed.
   ## @param indexer.livenessProbe.initialDelaySeconds Delay before liveness probe is initiated.
   ## @skip indexer.livenessProbe.tcpSocket
-  livenessProbe:
+  livenessProbe: # @schema additionalProperties: true; skipProperties: true
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 10
@@ -147,7 +151,7 @@ indexer:
   ## @param indexer.readinessProbe.successThreshold Minimum successes for the probe to be considered successful after having failed.
   ## @param indexer.readinessProbe.initialDelaySeconds Delay before liveness probe is initiated.
   ## @skip indexer.readinessProbe.tcpSocket
-  readinessProbe:
+  readinessProbe: # @schema additionalProperties: true; skipProperties: true
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 10
@@ -156,7 +160,7 @@ indexer:
     tcpSocket:
       port: 9200
   ## @param indexer.securityContext.fsGroup Set the pods Security Context fsGroup.
-  securityContext:
+  securityContext: # @schema additionalProperties: true; skipProperties: true
     fsGroup: 1000
   ## @param indexer.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
   networkPolicy:
@@ -172,24 +176,24 @@ indexer:
   ## @param indexer.service.metrics Port for the metrics endpoint.
   service:
     type: ClusterIP
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     httpPort: 9200
     nodes: 9300
     metrics: 9600
   ## @param indexer.nodeSelector nodeSelector
-  nodeSelector: {}
+  nodeSelector: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param indexer.tolerations Tolerations for indexer pods
   tolerations: []
 
   ## @param indexer.affinity Affinity rules for indexer pods
-  affinity: {}
+  affinity: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param indexer.dnsPolicy DNS policy for the pod
   dnsPolicy: ""
 
   ## @param indexer.dnsConfig DNS configuration for the pod
-  dnsConfig: {}
+  dnsConfig: {} # @schema additionalProperties: true; skipProperties: true
   # Example:
   # dnsConfig:
   #   nameservers:
@@ -229,7 +233,7 @@ indexer:
     nodesDn: ""
     whitelist: ""
   ## @param indexer.additionalConfigs Additional configurations to add to the configmap
-  additionalConfigs: {}
+  additionalConfigs: {} # @schema additionalProperties: true; skipProperties: true
   ## LDAP / Active Directory authentication for the indexer (OpenSearch Security)
   ## @param indexer.ldap.enabled Enable LDAP authentication domain
   ## @param indexer.ldap.order Auth domain order (lower = higher priority)
@@ -253,22 +257,22 @@ indexer:
     verifyHostnames: true
     hosts:
       - localhost:389
-    bindDn: null
+    bindDn: null # @schema type: [string, null]
     existingSecret: ""
     bindPasswordKey: "password"
     userbase: "ou=people,dc=example,dc=com"
     usersearch: "(sAMAccountName={0})"
-    usernameAttribute: null
+    usernameAttribute: null # @schema type: [string, null]
     ## @skip indexer.ldap.authz
     authz:
       enabled: false
       hosts: []
-      bindDn: null
+      bindDn: null # @schema type: [string, null]
       existingSecret: ""
       bindPasswordKey: "password"
       rolebase: "ou=groups,dc=example,dc=com"
       rolesearch: "(member={0})"
-      userroleattribute: null
+      userroleattribute: null # @schema type: [string, null]
       userrolename: disabled
       rolename: cn
       resolveNestedRoles: true
@@ -289,7 +293,7 @@ indexer:
       manageWazuhIndex:
         backendRoles: []
     ## @skip indexer.ldap.extraRoleMappings
-    extraRoleMappings: {}
+    extraRoleMappings: {} # @schema additionalProperties: true; skipProperties: true
     # Example for a custom role:
     # wazuh_admin:
     #   reserved: false
@@ -315,12 +319,12 @@ indexer:
   ## @param indexer.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
   ## @param indexer.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
   pvc:
-    extraLabels: {}
-    extraAnnotations: {}
+    extraLabels: {} # @schema additionalProperties: true; skipProperties: true
+    extraAnnotations: {} # @schema additionalProperties: true; skipProperties: true
   ## @param indexer.storageSize Defines the size of the pvc used by the statefulset.
   ## @param indexer.storageClass Defines the storageClass of the pvc used by the statefulset.
   storageSize: 50Gi
-  storageClass: null
+  storageClass: null # @schema type: [string, null]
   ## @param indexer.cred.existingSecret Name of the existingSecret which holds the key "INDEXER_PASSWORD".
   ## @param indexer.cred.password Value of the password for the admin user.
   ## @param indexer.cred.passwordHash Hash of the password for the admin user.
@@ -331,9 +335,9 @@ indexer:
 
   ## @skip indexer.extraSpec
   extraSpec:
-    statefulSet: {}
-    pod: {}
-    container: {}
+    statefulSet: {} # @schema additionalProperties: true; skipProperties: true
+    pod: {} # @schema additionalProperties: true; skipProperties: true
+    container: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @section indexer.snapshot Configuration for OpenSearch snapshot repositories.
   ## Ref: https://docs.opensearch.org/latest/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-restore/
@@ -371,8 +375,8 @@ indexer:
   ## @param indexer.job.resources.limits.cpu Maximum CPU used by the job pod.
   ## @param indexer.job.resources.limits.memory Maximum memory used by the job pod.
   job:
-    annotations: {}
-    resources:
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
+    resources: # @schema additionalProperties: true; skipProperties: true
       requests:
         cpu: 100m
         memory: 256Mi
@@ -392,16 +396,18 @@ dashboard:
   ## @param dashboard.serviceAccount.create Create service account
   ## @param dashboard.serviceAccount.annotations Annotations for service account
   ## @param dashboard.serviceAccount.name Name of the service account
+  ## @param dashboard.serviceAccount.automountServiceAccountToken Mount the service account token in the pods
   serviceAccount:
     create: false
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     name: "wazuh-dashboard"
+    automountServiceAccountToken: false
   ## @param dashboard.replicas number of replicas used in deployment.
   replicas: 1
   ## @param dashboard.annotations additional annotations set on deployment.
-  annotations: {}
+  annotations: {} # @schema additionalProperties: true; skipProperties: true
   ## @param dashboard.extraPodLabels Extra labels to add to the dashboard pods.
-  extraPodLabels: {}
+  extraPodLabels: {} # @schema additionalProperties: true; skipProperties: true
   ## @param dashboard.images.repository name of the image used.
   ## @param dashboard.images.tag Tag of the image.
   ## @param dashboard.images.pullPolicy pullPolicy of the image.
@@ -415,7 +421,7 @@ dashboard:
   ## @param dashboard.resources.requests.memory Minimum memory assigned to the pod.
   ## @param dashboard.resources.limits.cpu Maximum CPU used by the pod.
   ## @param dashboard.resources.limits.memory Maximum memory used by the pod.
-  resources:
+  resources: # @schema additionalProperties: true; skipProperties: true
     requests:
       cpu: 500m
       memory: 512Mi
@@ -433,7 +439,7 @@ dashboard:
   ## @param dashboard.livenessProbe.successThreshold Minimum successes.
   ## @param dashboard.livenessProbe.initialDelaySeconds Delay before liveness probe.
   ## @skip dashboard.livenessProbe.httpGet
-  livenessProbe:
+  livenessProbe: # @schema additionalProperties: true; skipProperties: true
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 10
@@ -448,7 +454,7 @@ dashboard:
   ## @param dashboard.readinessProbe.successThreshold Minimum successes.
   ## @param dashboard.readinessProbe.initialDelaySeconds Delay before liveness probe.
   ## @skip dashboard.readinessProbe.httpGet
-  readinessProbe:
+  readinessProbe: # @schema additionalProperties: true; skipProperties: true
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 10
@@ -458,7 +464,7 @@ dashboard:
       path: /api/status
       port: 5601
   ## @param dashboard.securityContext Parameter to configure the securityContext of the pod.
-  securityContext: {}
+  securityContext: {} # @schema additionalProperties: true; skipProperties: true
   ## @param dashboard.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
   ## @param dashboard.networkPolicy.extraIngresses specify additional ingress rules for the NetworkPolicy.
   ## @param dashboard.networkPolicy.extraEgresses specify additional egress rules for the NetworkPolicy.
@@ -469,24 +475,26 @@ dashboard:
   ## @param dashboard.service.type Type of the created service.
   ## @param dashboard.service.annotations Annotations of the created service.
   ## @param dashboard.service.httpPort Port for the http endpoint.
+  ## @param dashboard.service.nodePort Node port of the service, only used when type is NodePort.
   service:
     type: ClusterIP
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     httpPort: 5601
+    nodePort: null # @schema type: [integer, null]
   ## @param dashboard.nodeSelector nodeSelector
-  nodeSelector: {}
+  nodeSelector: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param dashboard.tolerations Tolerations
   tolerations: []
 
   ## @param dashboard.affinity Affinity
-  affinity: {}
+  affinity: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param dashboard.dnsPolicy DNS policy for the pod
   dnsPolicy: ""
 
   ## @param dashboard.dnsConfig DNS configuration for the pod
-  dnsConfig: {}
+  dnsConfig: {} # @schema additionalProperties: true; skipProperties: true
   # Example:
   # dnsConfig:
   #   nameservers:
@@ -526,7 +534,7 @@ dashboard:
 
   ## @param dashboard.server.extraConf Set extra config for Wazuh Dashboard
   server:
-    extraConf: {}
+    extraConf: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip dashboard.sso
   sso:
@@ -555,7 +563,7 @@ dashboard:
           backendRoles: []
         kibanaUser:
           backendRoles: []
-      extraRoleMappings: {}
+      extraRoleMappings: {} # @schema additionalProperties: true; skipProperties: true
       customizeLoginButton:
         enabled: false
         text: "Log In with Single sign-on (OIDC)"
@@ -594,7 +602,7 @@ dashboard:
           backendRoles: []
         kibanaUser:
           backendRoles: []
-      extraRoleMappings: {}
+      extraRoleMappings: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param dashboard.ingress.enabled Enable ingress record generation for dashboard.
   ## @param dashboard.ingress.className Defines the ingress class name used.
@@ -605,7 +613,7 @@ dashboard:
     enabled: false
     className: ""
     tls: []
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     host: "wazuh.example.com"
 
   ## @param dashboard.gateway.enabled Enable Gateway API resources (HTTPRoute + parent) for dashboard, as an alternative to dashboard.ingress.
@@ -626,7 +634,7 @@ dashboard:
   gateway:
     enabled: false
     host: "wazuh.example.com"
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     parentRef:
       group: gateway.networking.k8s.io
       kind: Gateway
@@ -649,9 +657,9 @@ dashboard:
 
   ## @skip dashboard.extraSpec
   extraSpec:
-    deployment: {}
-    pod: {}
-    container: {}
+    deployment: {} # @schema additionalProperties: true; skipProperties: true
+    pod: {} # @schema additionalProperties: true; skipProperties: true
+    container: {} # @schema additionalProperties: true; skipProperties: true
 
 ## @section wazuh configuration of the wazuh core component.
 ##
@@ -661,10 +669,12 @@ wazuh:
   ## @param wazuh.serviceAccount.create Create service account
   ## @param wazuh.serviceAccount.annotations Annotations for service account
   ## @param wazuh.serviceAccount.name Name of the service account
+  ## @param wazuh.serviceAccount.automountServiceAccountToken Mount the service account token in the pods
   serviceAccount:
     create: false
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     name: "wazuh-manager"
+    automountServiceAccountToken: false
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   syslog_enable: true
   ## Sources allowed to send to the workers' syslog listener (tcp/514), one <allowed-ips> each.
@@ -693,7 +703,7 @@ wazuh:
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false
-      secret: {}
+      secret: {} # @schema type: [object, array]; additionalProperties: true; skipProperties: true
   ## @param wazuh.loadBalancer.enabled Enable LoadBalancer service for external agent connections
   ## @param wazuh.loadBalancer.annotations Annotations for LoadBalancer service
   ## @param wazuh.loadBalancer.ports Inline array of port names to expose; empty means all ports are included
@@ -703,19 +713,19 @@ wazuh:
   ## @param wazuh.loadBalancer.allocateLoadBalancerNodePorts Whether to allocate node ports for the LoadBalancer; omitted if null
   loadBalancer:
     enabled: false
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     ports: ["registration", "agents-events"]
     loadBalancerSourceRanges: []
     externalTrafficPolicy: ""
     internalTrafficPolicy: ""
-    allocateLoadBalancerNodePorts: null
+    allocateLoadBalancerNodePorts: null # @schema type: [boolean, null]
   ## @param wazuh.service.annotations Annotations of the created service.
   ## @param wazuh.service.port Port for the http endpoint.
   service:
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     port: 1516
   ## @param wazuh.nodeSelector nodeSelector
-  nodeSelector: {}
+  nodeSelector: {} # @schema additionalProperties: true; skipProperties: true
   ## @skip wazuh.env
   env:
     FILEBEAT_SSL_VERIFICATION_MODE: full
@@ -752,7 +762,7 @@ wazuh:
   ## @param wazuh.initContainer.resources.limits.memory Maximum memory used by the pod.
   initContainer:
     image: alpine
-    resources:
+    resources: # @schema additionalProperties: true; skipProperties: true
       requests:
         cpu: 250m
         memory: 512Mi
@@ -801,14 +811,14 @@ wazuh:
     ## @param wazuh.master.enabled Enable the master
     enabled: true
     ## @param wazuh.master.annotations additional annotations set on statefulset.
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.master.extraPodLabels Extra labels to add to the master pods.
-    extraPodLabels: {}
+    extraPodLabels: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.master.resources.requests.cpu Minimum CPU assigned to the pod.
     ## @param wazuh.master.resources.requests.memory Minimum memory assigned to the pod.
     ## @param wazuh.master.resources.limits.cpu Maximum CPU used by the pod.
     ## @param wazuh.master.resources.limits.memory Maximum memory used by the pod.
-    resources:
+    resources: # @schema additionalProperties: true; skipProperties: true
       requests:
         cpu: 500m
         memory: 512Mi
@@ -820,21 +830,21 @@ wazuh:
     tolerations: []
 
     ## @param wazuh.master.affinity Affinity rules for master pods
-    affinity: {}
+    affinity: {} # @schema additionalProperties: true; skipProperties: true
 
     ## @param wazuh.master.dnsPolicy DNS policy for the pod
     dnsPolicy: ""
 
     ## @param wazuh.master.dnsConfig DNS configuration for the pod
-    dnsConfig: {}
+    dnsConfig: {} # @schema additionalProperties: true; skipProperties: true
 
     ## @param wazuh.master.service.type Type of the created service.
     ## @param wazuh.master.service.annotations Annotations of the created service.
     ## @skip wazuh.master.service.ports
     service:
       type: ClusterIP
-      annotations: {}
-      ports:
+      annotations: {} # @schema additionalProperties: true; skipProperties: true
+      ports: # @schema itemProperties: {name: {type: string}, protocol: {type: string}, port: {type: integer}, targetPort: {type: [integer, string]}, nodePort: {type: integer}}
         - name: registration
           protocol: TCP
           port: 1515
@@ -849,9 +859,9 @@ wazuh:
       defaultMode: "0755"
 
     ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
-    livenessProbe: {}
+    livenessProbe: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.master.readinessProbe Parameter to configure the readinessProbe.
-    readinessProbe: {}
+    readinessProbe: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.master.additionalEnv Possibility to define additional env vars in the pod.
     additionalEnv: []
     ## @param wazuh.master.additionalVolumes Possibility to define additional volumes in the pod.
@@ -859,7 +869,7 @@ wazuh:
     ## @param wazuh.master.additionalVolumeMounts Possibility to define additional volumeMounts in the pod.
     additionalVolumeMounts: []
     ## @param wazuh.master.securityContext.capabilities.add Additional capabilities.
-    securityContext:
+    securityContext: # @schema additionalProperties: true; skipProperties: true
       capabilities:
         add: ["SYS_CHROOT"]
     ## @param wazuh.master.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
@@ -872,12 +882,12 @@ wazuh:
     ## @param wazuh.master.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
     ## @param wazuh.master.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
     pvc:
-      extraLabels: {}
-      extraAnnotations: {}
+      extraLabels: {} # @schema additionalProperties: true; skipProperties: true
+      extraAnnotations: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.master.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.master.storageClass Defines the storageClass of the pvc used by the statefulset.
     storageSize: 50Gi
-    storageClass: null
+    storageClass: null # @schema type: [string, null]
     ## @param wazuh.master.conf Config for the wazuh master, do not change!
     conf: |
       {{ include "wazuh.master.conf" . }}
@@ -885,9 +895,9 @@ wazuh:
     extraConf: ""
     ## @skip wazuh.master.extraSpec
     extraSpec:
-      statefulSet: {}
-      pod: {}
-      container: {}
+      statefulSet: {} # @schema additionalProperties: true; skipProperties: true
+      pod: {} # @schema additionalProperties: true; skipProperties: true
+      container: {} # @schema additionalProperties: true; skipProperties: true
 
   worker:
     ## @param wazuh.worker.enabled Enable the worker
@@ -895,14 +905,14 @@ wazuh:
     ## @param wazuh.worker.replicas number of replicas used in statefulset.
     replicas: 2
     ## @param wazuh.worker.annotations additional annotations set on deployment.
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.worker.extraPodLabels Extra labels to add to the worker pods.
-    extraPodLabels: {}
+    extraPodLabels: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.worker.resources.requests.cpu Minimum CPU assigned to the pod.
     ## @param wazuh.worker.resources.requests.memory Minimum memory assigned to the pod.
     ## @param wazuh.worker.resources.limits.cpu Maximum CPU used by the pod.
     ## @param wazuh.worker.resources.limits.memory Maximum memory used by the pod.
-    resources:
+    resources: # @schema additionalProperties: true; skipProperties: true
       requests:
         cpu: 500m
         memory: 512Mi
@@ -914,13 +924,13 @@ wazuh:
     tolerations: []
 
     ## @param wazuh.worker.affinity Affinity rules for worker pods
-    affinity: {}
+    affinity: {} # @schema additionalProperties: true; skipProperties: true
 
     ## @param wazuh.worker.dnsPolicy DNS policy for the pod
     dnsPolicy: ""
 
     ## @param wazuh.worker.dnsConfig DNS configuration for the pod
-    dnsConfig: {}
+    dnsConfig: {} # @schema additionalProperties: true; skipProperties: true
 
     ## @param wazuh.worker.configVolume.defaultMode defaultMode for the worker config volume. If not set, defaults to 0500.
     configVolume:
@@ -936,8 +946,8 @@ wazuh:
     ## @skip wazuh.worker.service.ports
     service:
       type: ClusterIP
-      annotations: {}
-      ports:
+      annotations: {} # @schema additionalProperties: true; skipProperties: true
+      ports: # @schema itemProperties: {name: {type: string}, protocol: {type: string}, port: {type: integer}, targetPort: {type: [integer, string]}, nodePort: {type: integer}}
         - name: agents-events
           protocol: TCP
           port: 1514
@@ -948,9 +958,9 @@ wazuh:
       enabled: true
       maxUnavailable: 1
     ## @param wazuh.worker.livenessProbe Parameter to configure the livenessProbe.
-    livenessProbe: {}
+    livenessProbe: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.worker.readinessProbe Parameter to configure the readinessProbe.
-    readinessProbe: {}
+    readinessProbe: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.worker.additionalEnv Possibility to define additional env vars in the pod.
     additionalEnv: []
     ## @param wazuh.worker.additionalVolumes Possibility to define additional volumes vars in the pod.
@@ -958,7 +968,7 @@ wazuh:
     ## @param wazuh.worker.additionalVolumeMounts Possibility to define additional volumeMounts vars in the pod.
     additionalVolumeMounts: []
     ## @param wazuh.worker.securityContext.capabilities.add Additional capabilities.
-    securityContext:
+    securityContext: # @schema additionalProperties: true; skipProperties: true
       capabilities:
         add: ["SYS_CHROOT"]
     ## @param wazuh.worker.networkPolicy.enabled Specifies whether a NetworkPolicy should be created.
@@ -971,12 +981,12 @@ wazuh:
     ## @param wazuh.worker.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
     ## @param wazuh.worker.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
     pvc:
-      extraLabels: {}
-      extraAnnotations: {}
+      extraLabels: {} # @schema additionalProperties: true; skipProperties: true
+      extraAnnotations: {} # @schema additionalProperties: true; skipProperties: true
     ## @param wazuh.worker.storageSize Defines the size of the pvc used by the statefulset.
     ## @param wazuh.worker.storageClass Defines the storageClass of the pvc used by the statefulset.
     storageSize: 50Gi
-    storageClass: null
+    storageClass: null # @schema type: [string, null]
     ## @param wazuh.worker.conf Config for the wazuh worker, do not change!
     conf: |
       {{ include "wazuh.worker.conf" . }}
@@ -985,9 +995,9 @@ wazuh:
 
     ## @skip wazuh.worker.extraSpec
     extraSpec:
-      statefulSet: {}
-      pod: {}
-      container: {}
+      statefulSet: {} # @schema additionalProperties: true; skipProperties: true
+      pod: {} # @schema additionalProperties: true; skipProperties: true
+      container: {} # @schema additionalProperties: true; skipProperties: true
 
 agent:
   ## @param agent.enabled Enable the agent.
@@ -999,10 +1009,12 @@ agent:
   ## @param agent.serviceAccount.create defines wazuh agent serviceAccount.
   ## @param agent.serviceAccount.annotations Annotations for the service account
   ## @param agent.serviceAccount.name Name of the service account
+  ## @param agent.serviceAccount.automountServiceAccountToken Mount the service account token in the pods
   serviceAccount:
     create: false
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
     name: "wazuh-agent"
+    automountServiceAccountToken: false
 
   ## @param agent.debug.enabled Enable debug mode for the agent.
   ## @param agent.debug.level Run the agent processes in debug mode.
@@ -1017,22 +1029,24 @@ agent:
   ## @param agent.service.port Port for the service.
   ## @param agent.service.type Type of the created service.
   ## @param agent.service.annotations Annotations of the created service.
+  ## @param agent.service.nodePort Node port of the service, only used when type is NodePort.
   service:
     port: 5000
     type: ClusterIP
-    annotations: {}
+    annotations: {} # @schema additionalProperties: true; skipProperties: true
+    nodePort: null # @schema type: [integer, null]
 
   ## @param agent.labels Extra labels for the agent.
-  labels: {}
+  labels: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param agent.annotations Extra annotations for the agent.
-  annotations: {}
+  annotations: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param agent.podAnnotations Extra annotations for the agent.
-  podAnnotations: {}
+  podAnnotations: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param agent.extraPodLabels Extra labels to add to the agent pods.
-  extraPodLabels: {}
+  extraPodLabels: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param agent.images.repository Repository
   ## @param agent.images.tag Tag
@@ -1043,14 +1057,14 @@ agent:
     pullPolicy: IfNotPresent
 
   ## @param agent.podSecurityContext Additional capabilities.
-  podSecurityContext: {}
+  podSecurityContext: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip agent.securityContext
-  securityContext:
+  securityContext: # @schema additionalProperties: true; skipProperties: true
     privileged: true
 
   ## @skip agent.resources
-  resources:
+  resources: # @schema additionalProperties: true; skipProperties: true
     requests:
       cpu: 50m
       memory: 64Mi
@@ -1059,10 +1073,10 @@ agent:
       memory: 128Mi
 
   ## @param agent.nodeSelector nodeSelector
-  nodeSelector: {}
+  nodeSelector: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param agent.affinity affinity
-  affinity: {}
+  affinity: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @param agent.tolerations tolerations
   tolerations: []
@@ -1071,7 +1085,7 @@ agent:
   dnsPolicy: ""
 
   ## @param agent.dnsConfig DNS configuration for the pod.
-  dnsConfig: {}
+  dnsConfig: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip agent.joinManager
   joinManager:
@@ -1090,71 +1104,37 @@ agent:
     password: "MyS3cr37P450r.*-"
 
   ## @skip agent.livenessProbe
-  livenessProbe: {}
+  livenessProbe: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip agent.volumes
   volumes:
-    - name: var-run
-      hostPath:
-        path: /var/run
-    - name: dev
-      hostPath:
-        path: /dev
-    - name: sys
-      hostPath:
-        path: /sys
-    - name: proc
-      hostPath:
-        path: /proc
-    - name: etc
-      hostPath:
-        path: /etc
-    - name: boot
-      hostPath:
-        path: /boot
-    - name: usr
-      hostPath:
-        path: /usr
-    - name: modules
-      hostPath:
-        path: /lib/modules
-    - name: log
-      hostPath:
-        path: /var/log
+    - {name: var-run, hostPath: {path: /var/run}} # @schema additionalProperties: true; skipProperties: true
+    - {name: dev, hostPath: {path: /dev}} # @schema additionalProperties: true; skipProperties: true
+    - {name: sys, hostPath: {path: /sys}} # @schema additionalProperties: true; skipProperties: true
+    - {name: proc, hostPath: {path: /proc}} # @schema additionalProperties: true; skipProperties: true
+    - {name: etc, hostPath: {path: /etc}} # @schema additionalProperties: true; skipProperties: true
+    - {name: boot, hostPath: {path: /boot}} # @schema additionalProperties: true; skipProperties: true
+    - {name: usr, hostPath: {path: /usr}} # @schema additionalProperties: true; skipProperties: true
+    - {name: modules, hostPath: {path: /lib/modules}} # @schema additionalProperties: true; skipProperties: true
+    - {name: log, hostPath: {path: /var/log}} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip agent.volumeMounts
   volumeMounts:
-    - mountPath: /var/run
-      name: var-run
-    - mountPath: /host/dev
-      name: dev
-    - mountPath: /host/sys
-      name: sys
-      readOnly: true
-    - mountPath: /host/proc
-      name: proc
-      readOnly: true
-    - mountPath: /host/etc
-      name: etc
-      readOnly: true
-    - mountPath: /host/boot
-      name: boot
-      readOnly: true
-    - mountPath: /host/usr
-      name: usr
-      readOnly: true
-    - mountPath: /host/lib/modules
-      name: modules
-      readOnly: true
-    - mountPath: /host/var/log
-      name: log
-      readOnly: true
+    - {mountPath: /var/run, name: var-run} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/dev, name: dev} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/sys, name: sys, readOnly: true} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/proc, name: proc, readOnly: true} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/etc, name: etc, readOnly: true} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/boot, name: boot, readOnly: true} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/usr, name: usr, readOnly: true} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/lib/modules, name: modules, readOnly: true} # @schema additionalProperties: true; skipProperties: true
+    - {mountPath: /host/var/log, name: log, readOnly: true} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip agent.extraSpec
   extraSpec:
-    daemonSet: {}
-    pod: {}
-    container: {}
+    daemonSet: {} # @schema additionalProperties: true; skipProperties: true
+    pod: {} # @schema additionalProperties: true; skipProperties: true
+    container: {} # @schema additionalProperties: true; skipProperties: true
 
   ## @skip agent.extraContainers
   extraContainers: []
