@@ -1620,7 +1620,10 @@
               "type": "object",
               "properties": {
                 "defaultMode": {
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 }
               },
               "additionalProperties": false
@@ -1844,7 +1847,10 @@
               "type": "object",
               "properties": {
                 "defaultMode": {
-                  "type": "string"
+                  "type": [
+                    "integer",
+                    "string"
+                  ]
                 }
               },
               "additionalProperties": false

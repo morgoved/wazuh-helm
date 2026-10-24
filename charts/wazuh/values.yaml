@@ -856,7 +856,7 @@ wazuh:
 
     ## @param wazuh.master.configVolume.defaultMode defaultMode for the manager config volume. If not set, defaults to 0500.
     configVolume:
-      defaultMode: "0755"
+      defaultMode: "0755" # @schema type: [integer, string]
 
     ## @param wazuh.master.livenessProbe Parameter to configure the livenessProbe.
     livenessProbe: {} # @schema additionalProperties: true; skipProperties: true
@@ -934,7 +934,7 @@ wazuh:
 
     ## @param wazuh.worker.configVolume.defaultMode defaultMode for the worker config volume. If not set, defaults to 0500.
     configVolume:
-      defaultMode: "0755"
+      defaultMode: "0755" # @schema type: [integer, string]
 
     ## @param wazuh.worker.podAntiAffinity Pod anti-affinity setting
     podAntiAffinity: "soft"

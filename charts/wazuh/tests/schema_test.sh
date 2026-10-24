@@ -4,7 +4,7 @@
 # 1. values.schema.json is up to date with values.yaml (`helm schema` from the repo root).
 # 2. Every `.Values.<path>` read by a template is declared in the schema, so a key
 #    the chart uses can never be rejected by the schema (and is documented in values.yaml).
-# 3. The schema rejects unknown keys (typos) and accepts the default values.
+# 3. The schema rejects unknown keys (typos) and accepts the default and example values.
 #
 # Usage: charts/wazuh/tests/schema_test.sh
 # Requires: helm with the schema plugin (https://github.com/losisin/helm-values-schema-json), jq.
@@ -72,6 +72,23 @@ if helm template test "$CHART_DIR" --set wazuh.master.resources.limits.ephemeral
   ok "free-form Kubernetes fields are accepted"
 else
   ko "free-form Kubernetes fields should be accepted"
+fi
+if helm template test "$CHART_DIR" --set wazuh.master.pvc.extraAnnotations.foo=bar \
+  --set wazuh.worker.pvc.extraAnnotations.foo=bar --set indexer.pvc.extraAnnotations.foo=bar >/dev/null 2>&1; then
+  ok "custom PVC annotations are accepted"
+else
+  ko "custom PVC annotations should be accepted"
+fi
+if helm template test "$CHART_DIR" --set wazuh.master.configVolume.defaultMode=493 \
+  --set-string wazuh.worker.configVolume.defaultMode=0755 >/dev/null 2>&1; then
+  ok "configVolume.defaultMode accepts an integer or a string"
+else
+  ko "configVolume.defaultMode should accept an integer or a string"
+fi
+if helm template test "$CHART_DIR" -f "$CHART_DIR/example/values.yaml" >/dev/null 2>&1; then
+  ok "example/values.yaml passes the schema"
+else
+  ko "example/values.yaml fails the schema"
 fi
 
 echo
