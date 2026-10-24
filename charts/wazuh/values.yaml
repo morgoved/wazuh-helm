@@ -108,7 +108,7 @@ indexer:
     repository: wazuh/wazuh-indexer
     ## @param indexer.images.tag Tag of the image.
     ## @param indexer.images.pullPolicy pullPolicy of the image.
-    tag: "4.14.3"
+    tag: "4.14.9"
     pullPolicy: IfNotPresent
     ## @param indexer.images.imagePullSecrets.enabled Enable pulling image using secret.
     ## @param indexer.images.imagePullSecrets.secret Map of secret names to authenticate.
@@ -414,7 +414,7 @@ dashboard:
   ## @param dashboard.images.updateStrategy updateStrategy of the image.
   images:
     repository: wazuh/wazuh-dashboard
-    tag: "4.14.3"
+    tag: "4.14.9"
     pullPolicy: IfNotPresent
     updateStrategy: OnDelete
   ## @param dashboard.resources.requests.cpu Minimum CPU assigned to the pod.
@@ -699,7 +699,7 @@ wazuh:
   ## @param wazuh.images.imagePullSecrets.secret Map of secret names to authenticate.
   images:
     repository: wazuh/wazuh-manager
-    tag: "4.14.3"
+    tag: "4.14.9"
     pullPolicy: IfNotPresent
     imagePullSecrets:
       enabled: false

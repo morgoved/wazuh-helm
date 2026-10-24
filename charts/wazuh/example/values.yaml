@@ -113,7 +113,7 @@ indexer:
   env:
     OPENSEARCH_JAVA_OPTS: "-Xms4g -Xmx4g -Dlog4j2.formatMsgNoLookups=true"
   config:
-    # To get the hashes, run: docker run --rm -ti wazuh/wazuh-indexer:4.3.9 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh
+    # To get the hashes, run: docker run --rm -ti wazuh/wazuh-indexer:4.14.9 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh
     # then update the secrets as well.
     internalUsers: |
       ---
