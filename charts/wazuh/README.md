@@ -99,6 +99,24 @@ what remoted actually listens on. On the LoadBalancer the syslog ports are named
 reaches the master, which has no listener. Only the master sits behind it when the workers
 are disabled, so no syslog port is added then.
 
+The listener has neither TLS nor authentication, and `allowedIps` only filters on the source
+IP once the packets reach remoted. `wazuh.syslog.networkPolicyFrom` also restricts the
+senders at the network level: its NetworkPolicy peers become the `from` of the worker
+NetworkPolicy's 514 rule, for every listed protocol. It is empty by default, which keeps 514
+open to any source. `wazuh.worker.networkPolicy.extraIngresses` cannot do this, since
+NetworkPolicy rules only add up.
+
+```yaml
+wazuh:
+  syslog:
+    networkPolicyFrom:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: log-shippers
+      - ipBlock:
+          cidr: 10.0.0.0/8
+```
+
 > NOTE!
 > If you added a udp `<remote>` through `wazuh.worker.extraConf` as a workaround, remove it
 > when you add `udp` to `wazuh.syslog.protocols`, otherwise remoted gets two listeners on
@@ -369,6 +387,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.syslog_enable`                               | Enables the syslog of the wazuh instance.                                              | `true`                                 |
 | `wazuh.syslog.protocols`                            | Syslog listener transports on port 514 (`tcp` and/or `udp`).                           | `["tcp"]`                              |
 | `wazuh.syslog.allowedIps`                           | IPs or CIDRs allowed to send syslog to the workers.                                    | `["any"]`                              |
+| `wazuh.syslog.networkPolicyFrom`                    | NetworkPolicy peers allowed to reach the workers' syslog port (empty: any source).     | `[]`                                   |
 | `wazuh.archives.enabled`                            | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                         | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
 | `wazuh.images.repository`                           | name of the image used.                                                                | `wazuh/wazuh-manager`                  |

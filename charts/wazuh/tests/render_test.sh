@@ -370,6 +370,20 @@ assert_not_contains "syslog_enable=false: no syslog on the LoadBalancer" "$out" 
 out=$(render_only "$WORKER_NETPOL" --set wazuh.syslog_enable=false)
 assert_not_contains "syslog_enable=false: the NetworkPolicy does not open 514" "$out" 'port: 514'
 
+echo "== wazuh.syslog.networkPolicyFrom restricts who reaches the workers' 514 =="
+out=$(flat render_only "$WORKER_NETPOL")
+assert_contains "default: the syslog rule has no from (any source)" "$out" "${NETPOL_TCP_514}    - ports:|        - protocol: TCP|          port: 1516|"
+from_args=(--set-json 'wazuh.syslog.protocols=["udp","tcp"]'
+           --set-json 'wazuh.syslog.networkPolicyFrom=[{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"otel"}}},{"ipBlock":{"cidr":"10.0.0.0/8"}}]')
+out=$(flat render_only "$WORKER_NETPOL" "${from_args[@]}")
+assert_contains "the peers are the from of the syslog rule, for every protocol" "$out" \
+  "${NETPOL_UDP_514}        ${NETPOL_TCP_514}      from:|        - namespaceSelector:|            matchLabels:|              kubernetes.io/metadata.name: otel|        - ipBlock:|            cidr: 10.0.0.0/8|"
+assert_count "the agents and cluster rules keep their own sources" "$out" 'from:|' 2
+out=$(flat render_only "$WORKER_NETPOL" --set wazuh.syslog=null)
+assert_contains "absent wazuh.syslog (--reuse-values) keeps any source" "$out" "${NETPOL_TCP_514}    - ports:|"
+expect_failure "the schema rejects an unknown peer type" render_only "$WORKER_NETPOL" \
+  --set-json 'wazuh.syslog.networkPolicyFrom=[{"fromCidr":"10.0.0.0/8"}]'
+
 expect_failure "the schema rejects an unknown protocol" render_only "$MANAGER_CONFIGMAP" --set-json 'wazuh.syslog.protocols=["tls"]'
 # The template validates too, for values that never went through the schema.
 for bad in '[]' '["tls"]' '["tcp","tcp"]'; do

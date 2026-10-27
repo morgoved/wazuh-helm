@@ -10,6 +10,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: added
       description: "wazuh.syslog.protocols selects the workers' syslog transports (tcp, udp or both)"
+    - kind: added
+      description: "wazuh.syslog.networkPolicyFrom restricts the sources allowed to reach the workers' syslog port"
     - kind: fixed
       description: "The syslog listener, worker ports, Service, NetworkPolicy and LoadBalancer now use the same protocols"
     - kind: fixed
