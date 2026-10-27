@@ -3,13 +3,15 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.9
-version: 2.1.1
+version: 2.1.2
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
-    - kind: changed
-      description: "Update the manager, indexer and dashboard to Wazuh 4.14.9"
+    - kind: fixed
+      description: "The NetworkPolicies allow DNS over TCP as well as UDP"
+    - kind: added
+      description: "global.networkPolicy.dns.to sets the DNS servers the NetworkPolicies allow (e.g. NodeLocal DNSCache)"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh
