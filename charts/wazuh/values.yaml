@@ -19,6 +19,27 @@ global: # @schema additionalProperties: true
     enabled: false
     ipFamilyPolicy: ""
     ipFamilies: []
+  ## DNS egress of every NetworkPolicy (dashboard, indexer, master, workers): UDP and TCP 53 to these
+  ## NetworkPolicy peers. An empty list allows 53 to any destination. With NodeLocal DNSCache the pods
+  ## query a link-local IP on the node, which no pod selector matches: add it as an ipBlock, e.g.
+  ## `- ipBlock: {cidr: 169.254.25.10/32}`.
+  ## See "NetworkPolicy DNS egress" in the README.
+  ## @skip global.networkPolicy.dns.to
+  networkPolicy:
+    dns:
+      to: # @schema item: object; itemProperties: {podSelector: {type: object, additionalProperties: true}, namespaceSelector: {type: object, additionalProperties: true}, ipBlock: {type: object, additionalProperties: true}}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: coredns
 
 ## @section cert-manager This are the parameters for the official sub-chart for cert-manager, here you
 ## can set all available values of the official Chart.

@@ -246,3 +246,25 @@ attachment, the listener scheme is unknown, so callers must provide explicit URL
 {{- printf "https://%s" $host -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+DNS egress rule shared by every NetworkPolicy: UDP and TCP 53 (answers over 512 bytes fall back to
+TCP) to global.networkPolicy.dns.to. An absent key (--reuse-values from an older release) keeps the
+kube-dns/coredns pods; an empty list allows 53 to any destination.
+*/}}
+{{- define "wazuh.networkPolicy.dnsEgress" -}}
+{{- $default := list -}}
+{{- range list "kube-dns" "coredns" -}}
+{{- $default = append $default (dict "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" "kube-system")) "podSelector" (dict "matchLabels" (dict "k8s-app" .))) -}}
+{{- end -}}
+{{- $to := dig "networkPolicy" "dns" "to" $default (.Values.global | default dict) -}}
+- ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  {{- with $to }}
+  to:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

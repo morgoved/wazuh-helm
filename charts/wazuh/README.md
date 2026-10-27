@@ -75,6 +75,34 @@ unfiltered, so expect a large increase in indexer storage.
 > managers write archives that never ship, or filebeat tails a file nobody writes; neither
 > fails loudly.
 
+### NetworkPolicy DNS egress
+
+Every NetworkPolicy (dashboard, indexer, master, workers) allows DNS over UDP and TCP 53 to
+the peers in `global.networkPolicy.dns.to`, by default the `kube-dns`/`coredns` pods in
+`kube-system`. Replace the list when your DNS servers live elsewhere. With NodeLocal DNSCache
+the pods query a link-local IP on their node, which no pod selector matches, so add it as an
+`ipBlock`:
+
+```yaml
+global:
+  networkPolicy:
+    dns:
+      to:
+        - ipBlock:
+            cidr: 169.254.25.10/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+```
+
+An empty list (`to: []`) allows 53 to any destination.
+
+> UPGRADE NOTES from 2.1.1: DNS was UDP-only, so answers too large for UDP failed. TCP 53 is
+> now allowed to the same peers. The default peers are unchanged.
+
 ### Values validation
 
 The chart ships a `values.schema.json`, so Helm rejects unknown keys at `install`,
