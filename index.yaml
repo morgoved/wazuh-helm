@@ -4,6 +4,71 @@ entries:
   - annotations:
       artifacthub.io/category: security
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "The NetworkPolicies allow DNS over TCP as well as UDP"
+        - kind: added
+          description: "global.networkPolicy.dns.to sets the DNS servers the NetworkPolicies allow (e.g. NodeLocal DNSCache)"
+      artifacthub.io/links: |
+        - name: application source
+          url: https://github.com/wazuh/wazuh
+        - name: kustomize source
+          url: https://github.com/wazuh/wazuh-kubernetes
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/screenshots: |
+        - title: Home Page
+          url: https://morgoved.github.io/wazuh-helm/images/dashboard.png
+        - title: Agent Deployment
+          url: https://morgoved.github.io/wazuh-helm/images/agent-deploy.png
+        - title: Threat Hunting
+          url: https://morgoved.github.io/wazuh-helm/images/threat-hunting.png
+    apiVersion: v2
+    appVersion: 4.14.9
+    created: "2026-10-27T11:37:11.488535348Z"
+    dependencies:
+    - condition: cert-manager.enabled
+      name: cert-manager
+      repository: https://charts.jetstack.io
+      version: 1.19.3
+    description: Wazuh is a free and open source security platform that unifies XDR
+      and SIEM protection for endpoints and cloud workloads.
+    digest: dadb5dd809c7d54ba243fd7dd6c3afe3dc9e3742fb46532b0b22643a4d216763
+    home: https://wazuh.com/
+    icon: https://morgoved.github.io/wazuh-helm/images/icon.png
+    keywords:
+    - security
+    - information
+    - threat
+    - management
+    - kubernetes
+    - wazuh
+    - opendistro
+    - elasticsearch
+    maintainers:
+    - email: morgyes@gmail.com
+      name: Morgoved
+      url: https://github.com/morgoved
+    - email: jinyi_lie@yahoo.com
+      name: Kaslie
+      url: https://github.com/Kaslie
+    - email: andre.gomes@promptlyhealth.com
+      name: Dani
+      url: https://github.com/Ca-moes
+    - name: TrueDru
+      url: https://github.com/TrueDru
+    - name: 71g3pf4c3
+      url: https://github.com/71g3pf4c3
+    - name: ShorMario
+      url: https://github.com/ShorMario
+    name: wazuh
+    sources:
+    - https://github.com/morgoved/wazuh-helm
+    type: application
+    urls:
+    - https://github.com/morgoved/wazuh-helm/releases/download/wazuh-2.1.2/wazuh-2.1.2.tgz
+    version: 2.1.2
+  - annotations:
+      artifacthub.io/category: security
+      artifacthub.io/changes: |
         - kind: changed
           description: "Update the manager, indexer and dashboard to Wazuh 4.14.9"
       artifacthub.io/links: |
@@ -4124,4 +4189,4 @@ entries:
     urls:
     - https://github.com/morgoved/wazuh-helm/releases/download/wazuh-0.0.1/wazuh-0.0.1.tgz
     version: 0.0.1
-generated: "2026-10-24T19:37:05.50411098Z"
+generated: "2026-10-27T11:37:11.488664142Z"
