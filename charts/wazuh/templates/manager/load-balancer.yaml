@@ -43,11 +43,18 @@ spec:
       targetPort: {{ .targetPort }}
   {{- end }}
   {{- end }}
-  {{- if .Values.wazuh.syslog_enable }}
-    - name: syslog
+  {{- /* the selector also matches the master, which has no syslog listener: the named
+         targetPort only exists on the workers, so only they become endpoints */}}
+  {{- if and .Values.wazuh.syslog_enable .Values.wazuh.worker.enabled }}
+  {{- range include "wazuh.syslog.protocols" . | fromJsonArray }}
+  {{- $name := printf "syslog-%s" . }}
+  {{- if or (empty $.Values.wazuh.loadBalancer.ports) (has $name $.Values.wazuh.loadBalancer.ports) }}
+    - name: {{ $name }}
+      protocol: {{ upper . }}
       port: 514
-      targetPort: 514
-      protocol: UDP
+      targetPort: {{ $name }}
+  {{- end }}
+  {{- end }}
   {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager

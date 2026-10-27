@@ -1813,6 +1813,18 @@
               "items": {
                 "type": "string"
               }
+            },
+            "protocols": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "tcp",
+                  "udp"
+                ]
+              }
             }
           },
           "additionalProperties": false

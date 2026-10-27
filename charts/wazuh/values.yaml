@@ -677,10 +677,17 @@ wazuh:
     automountServiceAccountToken: false
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   syslog_enable: true
-  ## Sources allowed to send to the workers' syslog listener (tcp/514), one <allowed-ips> each.
+  ## Transports of the workers' syslog listener on port 514: tcp, udp or both. One <remote> is
+  ## rendered per protocol, and the worker ports, Service, NetworkPolicy and LoadBalancer follow
+  ## the same list. Drop a `wazuh.worker.extraConf` udp <remote> workaround when adding udp here,
+  ## or remoted gets two listeners on udp/514.
+  ## Sources allowed to send to that listener, one <allowed-ips> each.
   ## Restrict it to the senders' CIDRs: the listener has neither TLS nor authentication.
+  ## @param wazuh.syslog.protocols Syslog listener transports on port 514 (`tcp` and/or `udp`).
   ## @param wazuh.syslog.allowedIps IPs or CIDRs allowed to send syslog to the workers.
   syslog:
+    protocols: # @schema itemEnum: [tcp, udp]; uniqueItems: true; minItems: 1
+      - tcp
     allowedIps:
       - any
   ## Without this only alerts are indexed, so events matching no rule are dropped. Sets

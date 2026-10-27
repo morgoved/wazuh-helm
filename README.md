@@ -43,6 +43,10 @@ Edge TLS (client to Gateway) and backend TLS (Gateway to the dashboard Service) 
 - `dashboard.gateway.tls.*` controls edge TLS. By default the chart creates a cert-manager `Certificate` for it; set `dashboard.gateway.tls.certificate.create: false` and `dashboard.gateway.tls.secretName` to reuse an existing Secret instead.
 - `dashboard.gateway.backendTLS.caCertificateRef.name` is required when both `dashboard.gateway.enabled` and `dashboard.enable_ssl` are true. It must name an existing `ConfigMap` (key `ca.crt`) trusted to validate the dashboard's own TLS certificate — this is decoupled from the chart's internal `dashboard-tls` Secret so any CA distribution mechanism (e.g. `trust-manager`) can be used.
 
+### Syslog
+
+The workers receive syslog on port 514 over the transports listed in `wazuh.syslog.protocols` (`tcp` by default, `udp` or both). The listener, the worker Service and NetworkPolicy, and the LoadBalancer (when `wazuh.loadBalancer.ports` lists `syslog-tcp`/`syslog-udp`, or is empty) all follow that list. See [Receiving syslog](./charts/wazuh/README.md#receiving-syslog) for the upgrade notes from 2.1.x, including the Helm flags needed when adding or removing a protocol on an existing release.
+
 ### Contributing
 
 This fork welcomes contributions and is open to transitioning into the official Wazuh project repository. Contributions are encouraged and appreciated.

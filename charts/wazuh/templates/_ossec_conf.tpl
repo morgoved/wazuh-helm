@@ -320,14 +320,16 @@
 
 {{- if eq $type "worker" }}
   {{- if $root.Values.wazuh.syslog_enable }}
-  <remote>
-    <connection>syslog</connection>
-    <port>514</port>
-    <protocol>tcp</protocol>
 {{- $allowedIps := compact (ternary (($root.Values.wazuh.syslog).allowedIps) (list "any") (hasKey ($root.Values.wazuh.syslog | default dict) "allowedIps")) }}
 {{- if not $allowedIps }}
 {{- fail "wazuh.syslog.allowedIps must not be empty: Wazuh rejects a syslog <remote> without <allowed-ips>" }}
 {{- end }}
+{{- /* remoted takes a single protocol per syslog <remote>, hence one block each */}}
+{{- range $protocol := include "wazuh.syslog.protocols" $root | fromJsonArray }}
+  <remote>
+    <connection>syslog</connection>
+    <port>514</port>
+    <protocol>{{ $protocol }}</protocol>
 {{- range $allowedIps }}
     <allowed-ips>{{ . }}</allowed-ips>
 {{- end }}
@@ -338,6 +340,7 @@
     <local_ip>0.0.0.0</local_ip>
 {{- end }}
   </remote>
+{{- end }}
   {{- end }}
 {{- end }}
 

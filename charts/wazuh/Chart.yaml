@@ -3,13 +3,19 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.9
-version: 2.1.1
+version: 2.2.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
+    - kind: added
+      description: "wazuh.syslog.protocols selects the workers' syslog transports (tcp, udp or both)"
+    - kind: fixed
+      description: "The syslog listener, worker ports, Service, NetworkPolicy and LoadBalancer now use the same protocols"
+    - kind: fixed
+      description: "The LoadBalancer sends syslog to the workers only, not to the master"
     - kind: changed
-      description: "Update the manager, indexer and dashboard to Wazuh 4.14.9"
+      description: "Syslog on the LoadBalancer follows wazuh.loadBalancer.ports (syslog-tcp, syslog-udp)"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh

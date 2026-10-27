@@ -75,6 +75,51 @@ unfiltered, so expect a large increase in indexer storage.
 > managers write archives that never ship, or filebeat tails a file nobody writes; neither
 > fails loudly.
 
+### Receiving syslog
+
+With `wazuh.syslog_enable: true` (the default) the workers listen for syslog on port 514.
+`wazuh.syslog.protocols` picks the transports, `tcp` (default), `udp` or both:
+
+```yaml
+wazuh:
+  syslog:
+    protocols: [udp, tcp]
+    allowedIps:
+      - 10.0.0.0/8
+  loadBalancer:
+    enabled: true
+    ports: ["registration", "agents-events", "syslog-udp", "syslog-tcp"]
+```
+
+Each protocol gets its own `<remote>` in the worker config, with the same `allowedIps` and
+dual-stack settings. The worker container ports, the worker Service, the worker
+NetworkPolicy and the LoadBalancer are generated from the same list, so they always match
+what remoted actually listens on. On the LoadBalancer the syslog ports are named
+`syslog-tcp` and `syslog-udp`, and they target the workers' named ports, so syslog never
+reaches the master, which has no listener. Only the master sits behind it when the workers
+are disabled, so no syslog port is added then.
+
+> NOTE!
+> If you added a udp `<remote>` through `wazuh.worker.extraConf` as a workaround, remove it
+> when you add `udp` to `wazuh.syslog.protocols`, otherwise remoted gets two listeners on
+> udp/514.
+
+> UPGRADE NOTES from 2.1.x:
+>
+> - The LoadBalancer used to always expose 514/UDP, which nothing listened on unless you added
+>   the `extraConf` workaround. Syslog ports now follow `wazuh.loadBalancer.ports`: the default
+>   (`registration`, `agents-events`) leaves them out. Add `syslog-tcp` and/or `syslog-udp`
+>   to keep syslog on the LoadBalancer.
+> - The worker NetworkPolicy used to allow both 514/TCP and 514/UDP. It now only allows the
+>   listed protocols, so add `udp` to `wazuh.syslog.protocols` if your devices send over UDP.
+> - The syslog Service ports are renamed from `syslog` to `syslog-tcp`/`syslog-udp`.
+> - Helm's client-side apply (the default for Helm 3, and for Helm 4 releases first installed
+>   client-side) merges Service ports on the port number alone. An upgrade that adds or
+>   removes one protocol while the other is also on 514 then drops ports from the Services. Run
+>   that upgrade with `--server-side=true --force-conflicts` (Helm 4) or `--force` (Helm 3) /
+>   `--force-replace` (Helm 4). Fresh installs, and upgrades that keep a single protocol, are
+>   not affected.
+
 ### Values validation
 
 The chart ships a `values.schema.json`, so Helm rejects unknown keys at `install`,
@@ -322,6 +367,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.serviceAccount.name`                         | Name of the service account                                                            | `wazuh-manager`                        |
 | `wazuh.serviceAccount.automountServiceAccountToken` | Mount the service account token in the pods                                            | `false`                                |
 | `wazuh.syslog_enable`                               | Enables the syslog of the wazuh instance.                                              | `true`                                 |
+| `wazuh.syslog.protocols`                            | Syslog listener transports on port 514 (`tcp` and/or `udp`).                           | `["tcp"]`                              |
 | `wazuh.syslog.allowedIps`                           | IPs or CIDRs allowed to send syslog to the workers.                                    | `["any"]`                              |
 | `wazuh.archives.enabled`                            | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                         | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
