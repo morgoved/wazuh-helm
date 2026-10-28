@@ -74,6 +74,17 @@ assert_not_contains() {
   fi
 }
 
+assert_eq() {
+  local name="$1" got="$2" want="$3"
+  if [ "$got" = "$want" ]; then
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  else
+    echo "FAIL: $name (got: $got, want: $want)"
+    fail=$((fail + 1))
+  fi
+}
+
 LISTENERSET=templates/dashboard/listenerset.yaml
 HTTPROUTE=templates/dashboard/httproute.yaml
 BACKENDTLSPOLICY=templates/dashboard/backendtlspolicy.yaml
@@ -437,6 +448,34 @@ err=$(render --set wazuh.rulesetReload.enabled=true 2>&1 >/dev/null)
 assert_contains "guard message names autoreload" "$err" "wazuh.rulesetReload.enabled requires autoreload.enabled"
 expect_success "ruleset reload with autoreload renders" render "${RR[@]}"
 expect_failure "schema rejects unknown rulesetReload key" render --set wazuh.rulesetReload.bogus=1
+
+RR_JOB=templates/manager/ruleset-reload/job.yaml
+job_env() { yq ".spec.template.spec.containers[0].env[] | select(.name == \"$1\") | .value"; }
+out=$(render_only "$RR_JOB" "${RR[@]}")
+assert_contains "job helm hook" "$out" "helm.sh/hook: post-install,post-upgrade,post-rollback"
+assert_contains "job helm hook delete policy" "$out" "helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded"
+assert_contains "job argo hook" "$out" "argocd.argoproj.io/hook: PostSync"
+assert_contains "job argo hook delete policy" "$out" "argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded"
+assert_eq "hooks on the Job metadata, not the pod template" "$(yq '.spec.template.metadata.annotations["helm.sh/hook"] // "none"' <<<"$out")" "none"
+assert_eq "job backoffLimit 0" "$(yq '.spec.backoffLimit' <<<"$out")" "0"
+assert_eq "job deadline = timeout + 20" "$(yq '.spec.activeDeadlineSeconds' <<<"$out")" "290"
+assert_eq "job uses the manager image" "$(yq '.spec.template.spec.containers[0].image' <<<"$out")" "wazuh/wazuh-manager:4.14.9"
+assert_eq "job api url" "$(job_env WAZUH_API_URL <<<"$out")" "https://test-wazuh:55000"
+assert_eq "expected nodes, 2 workers" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.worker.replicas=2 | job_env EXPECTED_NODES)" "test-wazuh-manager-master-0,test-wazuh-manager-worker-0,test-wazuh-manager-worker-1"
+assert_eq "expected nodes, workers disabled" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.worker.enabled=false | job_env EXPECTED_NODES)" "test-wazuh-manager-master-0"
+assert_eq "worker sts empty when workers disabled" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.worker.enabled=false | job_env WORKER_STS)" ""
+out=$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.apiCred.existingSecret=my-api)
+assert_contains "job reads the existing api secret" "$out" "name: my-api"
+assert_not_contains "job does not read the default api secret" "$out" "wazuh-api-cred"
+out=$(render_only templates/manager/ruleset-reload/role.yaml "${RR[@]}")
+assert_contains "role limited to the master sts" "$out" "- test-wazuh-manager-master"
+assert_contains "role limited to the worker sts" "$out" "- test-wazuh-manager-worker"
+assert_not_contains "role grants no exec" "$out" "pods/exec"
+out=$(render_only templates/manager/master/networkpolicy.yaml "${RR[@]}")
+assert_contains "master netpol lets the job reach the api" "$out" "app: test-wazuh-ruleset-reload"
+out=$(render_only templates/manager/master/networkpolicy.yaml)
+assert_not_contains "master netpol unchanged when disabled" "$out" "ruleset-reload"
+expect_success "ruleset reload with master netpol disabled renders" render "${RR[@]}" --set wazuh.master.networkPolicy.enabled=false
 
 echo
 echo "==================================="
