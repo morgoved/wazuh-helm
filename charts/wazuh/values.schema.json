@@ -1846,6 +1846,39 @@
               "items": {
                 "type": "string"
               }
+            },
+            "networkPolicyFrom": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ipBlock": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "namespaceSelector": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "podSelector": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "protocols": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "tcp",
+                  "udp"
+                ]
+              }
             }
           },
           "additionalProperties": false

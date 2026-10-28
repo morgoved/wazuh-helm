@@ -268,3 +268,26 @@ kube-dns/coredns pods; an empty list allows 53 to any destination.
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
+
+{{/*
+Transports of the workers' syslog listener, as a JSON list ("tcp" and/or "udp"). The
+ossec <remote> blocks, the worker container ports, the worker Service, the LoadBalancer
+and the worker NetworkPolicy are all generated from it, so they cannot disagree.
+An absent key (--reuse-values from an older chart) keeps the historical tcp listener.
+*/}}
+{{- define "wazuh.syslog.protocols" -}}
+{{- $syslog := .Values.wazuh.syslog | default dict -}}
+{{- $protocols := ternary $syslog.protocols (list "tcp") (hasKey $syslog "protocols") -}}
+{{- if not $protocols -}}
+{{- fail "wazuh.syslog.protocols must list at least one of tcp, udp (or set wazuh.syslog_enable: false)" -}}
+{{- end -}}
+{{- range $protocols -}}
+{{- if not (has . (list "tcp" "udp")) -}}
+{{- fail (printf "wazuh.syslog.protocols: %q is not supported, use tcp and/or udp" (toString .)) -}}
+{{- end -}}
+{{- end -}}
+{{- if ne (len $protocols) (len (uniq $protocols)) -}}
+{{- fail "wazuh.syslog.protocols must not list a protocol twice" -}}
+{{- end -}}
+{{- toJson $protocols -}}
+{{- end -}}

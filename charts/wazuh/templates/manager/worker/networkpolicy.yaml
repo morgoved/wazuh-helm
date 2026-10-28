@@ -21,11 +21,14 @@ spec:
         {{- end }}
     {{- if .Values.wazuh.syslog_enable }}
     - ports:
-        - protocol: TCP
+        {{- range include "wazuh.syslog.protocols" . | fromJsonArray }}
+        - protocol: {{ upper . }}
           port: 514
-    - ports:
-        - protocol: UDP
-          port: 514
+        {{- end }}
+      {{- with dig "networkPolicyFrom" list (.Values.wazuh.syslog | default dict) }}
+      from:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     {{- end }}
     - ports:
         - protocol: TCP

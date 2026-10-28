@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.1.1](https://img.shields.io/badge/Version-2.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -102,6 +102,53 @@ An empty list (`to: []`) allows 53 to any destination.
 
 > UPGRADE NOTES from 2.1.1: DNS was UDP-only, so answers too large for UDP failed. TCP 53 is
 > now allowed to the same peers. The default peers are unchanged.
+
+### Receiving syslog
+
+With `wazuh.syslog_enable: true` (the default) the workers listen for syslog on port 514.
+`wazuh.syslog.protocols` picks the transports, `tcp` (default), `udp` or both:
+
+```yaml
+wazuh:
+  syslog:
+    protocols: [udp, tcp]
+    allowedIps:
+      - 10.0.0.0/8
+  loadBalancer:
+    enabled: true
+    ports: ["registration", "agents-events", "syslog-udp", "syslog-tcp"]
+```
+
+Each protocol gets its own `<remote>` in the worker config, with the same `allowedIps` and
+dual-stack settings. The worker container ports, the worker Service, the worker
+NetworkPolicy and the LoadBalancer are generated from the same list, so they always match
+what remoted actually listens on. On the LoadBalancer the syslog ports are named
+`syslog-tcp` and `syslog-udp`, and they target the workers' named ports, so syslog never
+reaches the master, which has no listener. Only the master sits behind it when the workers
+are disabled, so no syslog port is added then.
+
+The listener has neither TLS nor authentication, and `allowedIps` only filters on the source
+IP once the packets reach remoted. `wazuh.syslog.networkPolicyFrom` also restricts the
+senders at the network level: its NetworkPolicy peers become the `from` of the worker
+NetworkPolicy's 514 rule, for every listed protocol. It is empty by default, which keeps 514
+open to any source. `wazuh.worker.networkPolicy.extraIngresses` cannot do this, since
+NetworkPolicy rules only add up.
+
+```yaml
+wazuh:
+  syslog:
+    networkPolicyFrom:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: log-shippers
+      - ipBlock:
+          cidr: 10.0.0.0/8
+```
+
+> UPGRADE NOTES from 2.1.x: the LoadBalancer no longer exposes syslog by default, the worker
+> NetworkPolicy only opens the listed protocols, and the syslog Service ports are renamed.
+> Adding or removing a protocol on an existing release needs extra steps. See
+> [UPGRADING.md](./UPGRADING.md#21x--220).
 
 ### Values validation
 
@@ -350,7 +397,9 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.serviceAccount.name`                         | Name of the service account                                                            | `wazuh-manager`                        |
 | `wazuh.serviceAccount.automountServiceAccountToken` | Mount the service account token in the pods                                            | `false`                                |
 | `wazuh.syslog_enable`                               | Enables the syslog of the wazuh instance.                                              | `true`                                 |
+| `wazuh.syslog.protocols`                            | Syslog listener transports on port 514 (`tcp` and/or `udp`).                           | `["tcp"]`                              |
 | `wazuh.syslog.allowedIps`                           | IPs or CIDRs allowed to send syslog to the workers.                                    | `["any"]`                              |
+| `wazuh.syslog.networkPolicyFrom`                    | NetworkPolicy peers allowed to reach the workers' syslog port (empty: any source).     | `[]`                                   |
 | `wazuh.archives.enabled`                            | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                         | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
 | `wazuh.images.repository`                           | name of the image used.                                                                | `wazuh/wazuh-manager`                  |

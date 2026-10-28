@@ -239,8 +239,11 @@ spec:
               name: {{ .name }}
             {{- end }}
             {{- if .Values.wazuh.syslog_enable }}
+            {{- range include "wazuh.syslog.protocols" . | fromJsonArray }}
             - containerPort: 514
-              name: syslog
+              name: syslog-{{ . }}
+              protocol: {{ upper . }}
+            {{- end }}
             {{- end }}
           envFrom:
             - secretRef:

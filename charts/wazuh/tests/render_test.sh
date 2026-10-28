@@ -297,6 +297,118 @@ for np in templates/dashboard/networkpolicy.yaml templates/indexer/networkpolicy
 done
 expect_failure "the schema rejects an unknown DNS peer type" render_only templates/manager/worker/networkpolicy.yaml \
   --set-json 'global.networkPolicy.dns.to=[{"toFQDNs":"x"}]'
+echo "== #185: wazuh.syslog.protocols drives the listener, the ports and the NetworkPolicy =="
+WORKER_SVC=templates/manager/worker/service.yaml
+WORKER_NETPOL=templates/manager/worker/networkpolicy.yaml
+MANAGER_LB=templates/manager/load-balancer.yaml
+# Joins the lines with '|', so a multi-line YAML snippet is matched as one needle
+# (grep -F would otherwise treat each line of the needle as a separate pattern).
+flat() { "$@" | tr '\n' '|'; }
+assert_count() {
+  local name="$1" haystack="$2" needle="$3" want="$4" got
+  got=$(grep -oF -- "$needle" <<<"$haystack" | wc -l | tr -d ' ')
+  if [ "$got" = "$want" ]; then
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  else
+    echo "FAIL: $name (expected $want x '$needle', got $got)"
+    fail=$((fail + 1))
+  fi
+}
+SYSLOG_TCP_REMOTE='<connection>syslog</connection>\n    <port>514</port>\n    <protocol>tcp</protocol>'
+SYSLOG_UDP_REMOTE='<connection>syslog</connection>\n    <port>514</port>\n    <protocol>udp</protocol>'
+NETPOL_TCP_514='- protocol: TCP|          port: 514|'
+NETPOL_UDP_514='- protocol: UDP|          port: 514|'
+
+out=$(render_only "$MANAGER_CONFIGMAP")
+assert_count "default renders a single syslog remote" "$out" '<connection>syslog</connection>' 1
+assert_contains "default listener is tcp" "$out" "$SYSLOG_TCP_REMOTE"
+out=$(flat render_only "$WORKER_SVC")
+assert_contains "default worker Service exposes syslog-tcp on the named port" "$out" \
+  '- name: syslog-tcp|      protocol: TCP|      port: 514|      targetPort: syslog-tcp|'
+assert_not_contains "default worker Service has no udp syslog" "$out" 'syslog-udp'
+out=$(flat render_only "$WORKER_STS")
+assert_contains "default worker container port is syslog-tcp/TCP" "$out" \
+  '- containerPort: 514|              name: syslog-tcp|              protocol: TCP|'
+assert_not_contains "default worker has no syslog-udp port" "$out" 'syslog-udp'
+out=$(flat render_only "$WORKER_NETPOL")
+assert_contains "default NetworkPolicy allows tcp/514" "$out" "$NETPOL_TCP_514"
+assert_not_contains "default NetworkPolicy no longer opens udp/514" "$out" "$NETPOL_UDP_514"
+out=$(render_only "$MANAGER_LB" --set wazuh.loadBalancer.enabled=true)
+assert_not_contains "default loadBalancer.ports filter leaves syslog out" "$out" 'port: 514'
+out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.syslog=null)
+assert_contains "absent wazuh.syslog (--reuse-values) keeps the tcp listener" "$out" "$SYSLOG_TCP_REMOTE"
+
+udp_args=(--set-json 'wazuh.syslog.protocols=["udp"]')
+out=$(render_only "$MANAGER_CONFIGMAP" "${udp_args[@]}")
+assert_count "udp only renders a single syslog remote" "$out" '<connection>syslog</connection>' 1
+assert_contains "udp only listener is udp" "$out" "$SYSLOG_UDP_REMOTE"
+out=$(flat render_only "$WORKER_SVC" "${udp_args[@]}")
+assert_contains "udp only worker Service exposes syslog-udp" "$out" \
+  '- name: syslog-udp|      protocol: UDP|      port: 514|      targetPort: syslog-udp|'
+assert_not_contains "udp only worker Service has no tcp syslog" "$out" 'syslog-tcp'
+out=$(flat render_only "$WORKER_STS" "${udp_args[@]}")
+assert_contains "udp only worker container port is syslog-udp/UDP" "$out" \
+  '- containerPort: 514|              name: syslog-udp|              protocol: UDP|'
+out=$(flat render_only "$WORKER_NETPOL" "${udp_args[@]}")
+assert_contains "udp only NetworkPolicy allows udp/514" "$out" "$NETPOL_UDP_514"
+assert_not_contains "udp only NetworkPolicy does not open tcp/514" "$out" "$NETPOL_TCP_514"
+
+both_args=(--set-json 'wazuh.syslog.protocols=["udp","tcp"]' --set-json 'wazuh.syslog.allowedIps=["10.0.0.0/8","192.168.1.10"]')
+out=$(render_only "$MANAGER_CONFIGMAP" "${both_args[@]}")
+assert_count "both renders one syslog remote per protocol" "$out" '<connection>syslog</connection>' 2
+assert_contains "both has a udp remote" "$out" "$SYSLOG_UDP_REMOTE"
+assert_contains "both has a tcp remote" "$out" "$SYSLOG_TCP_REMOTE"
+assert_count "allowedIps are repeated in each remote" "$out" \
+  '<allowed-ips>10.0.0.0/8</allowed-ips>\n    <allowed-ips>192.168.1.10</allowed-ips>\n    <local_ip>0.0.0.0</local_ip>' 2
+out=$(render_only "$MANAGER_CONFIGMAP" "${both_args[@]}" --set global.dualStack.enabled=true)
+assert_count "dual-stack applies to each syslog remote" "$out" \
+  '<allowed-ips>192.168.1.10</allowed-ips>\n    <local_ip>::</local_ip>\n    <ipv6>yes</ipv6>' 2
+out=$(flat render_only "$WORKER_STS" "${both_args[@]}")
+assert_count "both declares two worker container ports" "$out" '- containerPort: 514|' 2
+out=$(flat render_only "$WORKER_SVC" "${both_args[@]}")
+assert_count "both worker Service exposes 514 twice" "$out" 'port: 514|' 2
+out=$(flat render_only "$WORKER_NETPOL" "${both_args[@]}")
+assert_contains "both NetworkPolicy opens udp and tcp/514 in one rule" "$out" "- ports:|        $NETPOL_UDP_514        $NETPOL_TCP_514"
+lb_args=(--set wazuh.loadBalancer.enabled=true --set-json 'wazuh.loadBalancer.ports=[]')
+out=$(flat render_only "$MANAGER_LB" "${both_args[@]}" "${lb_args[@]}")
+assert_contains "empty loadBalancer.ports exposes syslog-udp, targeting the workers' named port" "$out" \
+  '- name: syslog-udp|      protocol: UDP|      port: 514|      targetPort: syslog-udp|'
+assert_contains "empty loadBalancer.ports exposes syslog-tcp, targeting the workers' named port" "$out" \
+  '- name: syslog-tcp|      protocol: TCP|      port: 514|      targetPort: syslog-tcp|'
+out=$(render_only "$MANAGER_LB" "${both_args[@]}" --set wazuh.loadBalancer.enabled=true \
+  --set-json 'wazuh.loadBalancer.ports=["registration","syslog-udp"]')
+assert_contains "loadBalancer.ports can pick syslog-udp" "$out" 'name: syslog-udp'
+assert_not_contains "and leave syslog-tcp out" "$out" 'syslog-tcp'
+out=$(render_only "$MANAGER_LB" "${both_args[@]}" "${lb_args[@]}" --set wazuh.worker.enabled=false)
+assert_not_contains "workers disabled: no syslog on the LoadBalancer" "$out" 'port: 514'
+assert_contains "workers disabled: the master ports stay" "$out" 'name: registration'
+expect_failure "workers disabled: no worker Service" render_only "$WORKER_SVC" "${both_args[@]}" --set wazuh.worker.enabled=false
+out=$(render_only "$MANAGER_LB" "${lb_args[@]}" --set wazuh.syslog_enable=false)
+assert_not_contains "syslog_enable=false: no syslog on the LoadBalancer" "$out" 'port: 514'
+out=$(render_only "$WORKER_NETPOL" --set wazuh.syslog_enable=false)
+assert_not_contains "syslog_enable=false: the NetworkPolicy does not open 514" "$out" 'port: 514'
+
+echo "== wazuh.syslog.networkPolicyFrom restricts who reaches the workers' 514 =="
+out=$(flat render_only "$WORKER_NETPOL")
+assert_contains "default: the syslog rule has no from (any source)" "$out" "${NETPOL_TCP_514}    - ports:|        - protocol: TCP|          port: 1516|"
+from_args=(--set-json 'wazuh.syslog.protocols=["udp","tcp"]'
+           --set-json 'wazuh.syslog.networkPolicyFrom=[{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"otel"}}},{"ipBlock":{"cidr":"10.0.0.0/8"}}]')
+out=$(flat render_only "$WORKER_NETPOL" "${from_args[@]}")
+assert_contains "the peers are the from of the syslog rule, for every protocol" "$out" \
+  "${NETPOL_UDP_514}        ${NETPOL_TCP_514}      from:|        - namespaceSelector:|            matchLabels:|              kubernetes.io/metadata.name: otel|        - ipBlock:|            cidr: 10.0.0.0/8|"
+assert_count "the agents and cluster rules keep their own sources" "$out" 'from:|' 2
+out=$(flat render_only "$WORKER_NETPOL" --set wazuh.syslog=null)
+assert_contains "absent wazuh.syslog (--reuse-values) keeps any source" "$out" "${NETPOL_TCP_514}    - ports:|"
+expect_failure "the schema rejects an unknown peer type" render_only "$WORKER_NETPOL" \
+  --set-json 'wazuh.syslog.networkPolicyFrom=[{"fromCidr":"10.0.0.0/8"}]'
+
+expect_failure "the schema rejects an unknown protocol" render_only "$MANAGER_CONFIGMAP" --set-json 'wazuh.syslog.protocols=["tls"]'
+# The template validates too, for values that never went through the schema.
+for bad in '[]' '["tls"]' '["tcp","tcp"]'; do
+  expect_failure "the template rejects protocols=$bad" render_only "$MANAGER_CONFIGMAP" --skip-schema-validation \
+    --set-json "wazuh.syslog.protocols=$bad"
+done
 
 echo "== wazuh.authd.force drives <auth><force> =="
 out=$(render_only "$MANAGER_CONFIGMAP")

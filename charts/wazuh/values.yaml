@@ -698,12 +698,23 @@ wazuh:
     automountServiceAccountToken: false
   ## @param wazuh.syslog_enable Enables the syslog of the wazuh instance.
   syslog_enable: true
-  ## Sources allowed to send to the workers' syslog listener (tcp/514), one <allowed-ips> each.
+  ## Transports of the workers' syslog listener on port 514: tcp, udp or both. One <remote> is
+  ## rendered per protocol, and the worker ports, Service, NetworkPolicy and LoadBalancer follow
+  ## the same list. Drop a `wazuh.worker.extraConf` udp <remote> workaround when adding udp here,
+  ## or remoted gets two listeners on udp/514.
+  ## Sources allowed to send to that listener, one <allowed-ips> each.
   ## Restrict it to the senders' CIDRs: the listener has neither TLS nor authentication.
+  ## @param wazuh.syslog.protocols Syslog listener transports on port 514 (`tcp` and/or `udp`).
   ## @param wazuh.syslog.allowedIps IPs or CIDRs allowed to send syslog to the workers.
+  ## NetworkPolicy peers (podSelector, namespaceSelector, ipBlock) allowed to reach port 514 on the
+  ## workers, rendered as `from` on the worker NetworkPolicy's syslog rule. Empty: any source.
+  ## @param wazuh.syslog.networkPolicyFrom NetworkPolicy peers allowed to reach the workers' syslog port (empty: any source).
   syslog:
+    protocols: # @schema itemEnum: [tcp, udp]; uniqueItems: true; minItems: 1
+      - tcp
     allowedIps:
       - any
+    networkPolicyFrom: [] # @schema item: object; itemProperties: {podSelector: {type: object, additionalProperties: true}, namespaceSelector: {type: object, additionalProperties: true}, ipBlock: {type: object, additionalProperties: true}}
   ## Without this only alerts are indexed, so events matching no rule are dropped. Sets
   ## <logall_json> on the managers and enables filebeat's archives fileset; both are needed,
   ## so it is one switch. Archives are unfiltered, expect much more indexer storage.

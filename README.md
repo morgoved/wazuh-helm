@@ -1,6 +1,6 @@
 # wazuh-kubernetes-helm-chart
 
-![Version: 2.1.1](https://img.shields.io/badge/Version-2.1.1-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square)
 ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 
@@ -42,6 +42,10 @@ Edge TLS (client to Gateway) and backend TLS (Gateway to the dashboard Service) 
 
 - `dashboard.gateway.tls.*` controls edge TLS. By default the chart creates a cert-manager `Certificate` for it; set `dashboard.gateway.tls.certificate.create: false` and `dashboard.gateway.tls.secretName` to reuse an existing Secret instead.
 - `dashboard.gateway.backendTLS.caCertificateRef.name` is required when both `dashboard.gateway.enabled` and `dashboard.enable_ssl` are true. It must name an existing `ConfigMap` (key `ca.crt`) trusted to validate the dashboard's own TLS certificate — this is decoupled from the chart's internal `dashboard-tls` Secret so any CA distribution mechanism (e.g. `trust-manager`) can be used.
+
+### Syslog
+
+The workers receive syslog on port 514 over the transports listed in `wazuh.syslog.protocols` (`tcp` by default, `udp` or both). The listener, the worker Service and NetworkPolicy, and the LoadBalancer (when `wazuh.loadBalancer.ports` lists `syslog-tcp`/`syslog-udp`, or is empty) all follow that list. `wazuh.syslog.networkPolicyFrom` restricts which sources the worker NetworkPolicy lets reach 514 (any by default). See [Receiving syslog](./charts/wazuh/README.md#receiving-syslog) for the configuration, and [UPGRADING.md](./charts/wazuh/UPGRADING.md#21x--220) for the changes from 2.1.x and the steps needed when adding or removing a protocol on an existing release.
 
 ### Contributing
 

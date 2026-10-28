@@ -30,10 +30,13 @@ spec:
       nodePort: {{ .nodePort }}
       {{- end }}
   {{- end }}
-{{- if .Values.wazuh.syslog_enable }}
-    - name: syslog
+  {{- if .Values.wazuh.syslog_enable }}
+  {{- range include "wazuh.syslog.protocols" . | fromJsonArray }}
+    - name: syslog-{{ . }}
+      protocol: {{ upper . }}
       port: 514
-      targetPort: 514
+      targetPort: syslog-{{ . }}
+  {{- end }}
   {{- end }}
   selector:
     app: {{ include "wazuh.fullname" . }}-manager
