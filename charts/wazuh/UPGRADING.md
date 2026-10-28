@@ -75,6 +75,11 @@ helm upgrade wazuh wazuh/wazuh -n wazuh --version 2.2.0 -f values.yaml
 `networkpolicy.yaml` when `wazuh.worker.networkPolicy.enabled` is false, and
 `load-balancer.yaml` when `wazuh.loadBalancer.enabled` is false.
 
+The worker NetworkPolicy and the LoadBalancer must already belong to the release. If you want
+to enable either of them as well, do it in a separate `helm upgrade` first, keeping the
+current `wazuh.syslog.protocols`. Otherwise `kubectl apply` creates it without Helm's ownership
+metadata, and the `helm upgrade` that follows fails because the object already exists.
+
 #### Helm 3, removing a protocol
 
 Run the same `helm upgrade` twice. The first one updates the ConfigMap, restarts the workers on
@@ -83,11 +88,12 @@ second one puts back the remaining protocol and restarts the workers again.
 
 #### Downtime
 
-The workers restart in parallel (`podManagementPolicy: Parallel`), so syslog and agent
-connections to the workers stop while they come back, once per StatefulSet change: once with
-Helm 4 or the Helm 3 path for adding a protocol, twice when removing one with Helm 3. Between
-the two upgrades of the removal path, the workers listen on the remaining protocol but no
-Service or LoadBalancer port reaches it, so syslog stops until the second upgrade.
+Each StatefulSet change rolls the workers, one at a time with the default `RollingUpdate`
+strategy: once with Helm 4 or the Helm 3 path for adding a protocol, twice when removing one
+with Helm 3. The syslog and agent connections of each worker are interrupted while it
+restarts, and with a single worker syslog stops until it is back. Between the two upgrades of
+the Helm 3 removal path, the workers listen on the remaining protocol but no Service or
+LoadBalancer port reaches it, so syslog stops until the second upgrade.
 
 #### Do not use `--force` or `--force-replace`
 
