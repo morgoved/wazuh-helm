@@ -820,6 +820,30 @@ wazuh:
   localDecoder: ""
   ## @param wazuh.localRules Override for local_rules.xml. If empty, files/local_rules.xml is used.
   localRules: ""
+  ## @param wazuh.rulesetReload.enabled Run a post-install/upgrade/rollback (Argo CD PostSync) Job that makes every worker run the master's ruleset, reloading analysisd once if one does not. Requires autoreload.enabled.
+  ## @param wazuh.rulesetReload.timeoutSeconds Time budget of the Job (rollout wait, sync and reload together). Keep Helm's --timeout above it.
+  ## @param wazuh.rulesetReload.pollIntervalSeconds Seconds between two checks while waiting.
+  ## @param wazuh.rulesetReload.resources Resources of the Job container.
+  ## @param wazuh.rulesetReload.podSecurityContext Security context of the Job pod.
+  ## @param wazuh.rulesetReload.securityContext Security context of the Job container.
+  ## @param wazuh.rulesetReload.nodeSelector nodeSelector of the Job pod.
+  ## @param wazuh.rulesetReload.tolerations Tolerations of the Job pod.
+  ## @param wazuh.rulesetReload.affinity Affinity of the Job pod.
+  rulesetReload:
+    enabled: false
+    timeoutSeconds: 270 # @schema minimum: 30
+    pollIntervalSeconds: 10 # @schema minimum: 1
+    resources: # @schema additionalProperties: true; skipProperties: true
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        memory: 256Mi
+    podSecurityContext: {} # @schema additionalProperties: true; skipProperties: true
+    securityContext: {} # @schema additionalProperties: true; skipProperties: true
+    nodeSelector: {} # @schema additionalProperties: true; skipProperties: true
+    tolerations: []
+    affinity: {} # @schema additionalProperties: true; skipProperties: true
   ## @param wazuh.internalOptions Override for internal_options.conf. If empty, files/internal_options.conf is used.
   internalOptions: ""
   ## Replaces the whole file. Keep the `hosts:` line and the commented-out `#username:`,

@@ -1,0 +1,3 @@
+{{- if and .Values.wazuh.enabled .Values.wazuh.rulesetReload.enabled (not .Values.autoreload.enabled) }}
+{{- fail "wazuh.rulesetReload.enabled requires autoreload.enabled: the master only reads a new ruleset after a restart" }}
+{{- end }}

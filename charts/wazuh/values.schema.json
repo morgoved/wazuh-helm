@@ -1803,6 +1803,46 @@
           "type": "object",
           "additionalProperties": true
         },
+        "rulesetReload": {
+          "type": "object",
+          "properties": {
+            "affinity": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "nodeSelector": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "podSecurityContext": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "pollIntervalSeconds": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "resources": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "securityContext": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "minimum": 30
+            },
+            "tolerations": {
+              "type": "array"
+            }
+          },
+          "additionalProperties": false
+        },
         "script": {
           "type": "string"
         },

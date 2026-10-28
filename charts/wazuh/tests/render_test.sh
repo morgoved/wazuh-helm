@@ -427,6 +427,17 @@ assert_contains "force can be disabled" "$out" '<force>\n      <enabled>no</enab
 out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.authd.force=null)
 assert_contains "absent wazuh.authd.force (--reuse-values) keeps the defaults" "$out" '<after_registration_time>1h</after_registration_time>'
 
+# --- ruleset reload (#184) ---
+RR=(--set autoreload.enabled=true --set wazuh.rulesetReload.enabled=true)
+expect_success "ruleset reload disabled by default renders" render
+out=$(render 2>/dev/null)
+assert_not_contains "no ruleset reload objects by default" "$out" "ruleset-reload"
+expect_failure "ruleset reload without autoreload fails" render --set wazuh.rulesetReload.enabled=true
+err=$(render --set wazuh.rulesetReload.enabled=true 2>&1 >/dev/null)
+assert_contains "guard message names autoreload" "$err" "wazuh.rulesetReload.enabled requires autoreload.enabled"
+expect_success "ruleset reload with autoreload renders" render "${RR[@]}"
+expect_failure "schema rejects unknown rulesetReload key" render --set wazuh.rulesetReload.bogus=1
+
 echo
 echo "==================================="
 echo "PASS: $pass  FAIL: $fail"
