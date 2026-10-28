@@ -278,6 +278,25 @@ assert_contains "absent wazuh.syslog (--reuse-values) keeps any" "$out" '<allowe
 out=$(render_only "$MANAGER_CONFIGMAP" --set wazuh.syslog_enable=false --set 'wazuh.syslog.allowedIps={}')
 assert_not_contains "syslog_enable=false renders no syslog remote" "$out" '<connection>syslog</connection>'
 
+echo "== global.networkPolicy.dns drives the DNS egress of every NetworkPolicy =="
+DNS_PORTS='- protocol: UDP|          port: 53|        - protocol: TCP|          port: 53|'
+for np in templates/dashboard/networkpolicy.yaml templates/indexer/networkpolicy.yaml \
+          templates/manager/master/networkpolicy.yaml templates/manager/worker/networkpolicy.yaml; do
+  out=$(render_only "$np" | tr '\n' '|')
+  assert_contains "$np: default allows udp and tcp 53 to kube-dns/coredns" "$out" \
+    "${DNS_PORTS}      to:|        - namespaceSelector:|            matchLabels:|              kubernetes.io/metadata.name: kube-system|          podSelector:|            matchLabels:|              k8s-app: kube-dns|"
+  assert_contains "$np: default keeps coredns" "$out" 'k8s-app: coredns|'
+  out=$(render_only "$np" --set-json 'global.networkPolicy.dns.to=[{"ipBlock":{"cidr":"169.254.25.10/32"}}]' | tr '\n' '|')
+  assert_contains "$np: custom peers replace the defaults" "$out" "${DNS_PORTS}      to:|        - ipBlock:|            cidr: 169.254.25.10/32|"
+  assert_not_contains "$np: custom peers drop kube-dns" "$out" 'k8s-app: kube-dns'
+  out=$(render_only "$np" --set-json 'global.networkPolicy.dns.to=[]' | tr '\n' '|')
+  assert_contains "$np: an empty list allows 53 anywhere" "$out" "$DNS_PORTS"
+  assert_not_contains "$np: an empty list renders no to" "$out" "${DNS_PORTS}      to:"
+  out=$(render_only "$np" --set global.networkPolicy=null | tr '\n' '|')
+  assert_contains "$np: absent global.networkPolicy (--reuse-values) keeps kube-dns" "$out" "k8s-app: kube-dns|"
+done
+expect_failure "the schema rejects an unknown DNS peer type" render_only templates/manager/worker/networkpolicy.yaml \
+  --set-json 'global.networkPolicy.dns.to=[{"toFQDNs":"x"}]'
 echo "== #185: wazuh.syslog.protocols drives the listener, the ports and the NetworkPolicy =="
 WORKER_SVC=templates/manager/worker/service.yaml
 WORKER_NETPOL=templates/manager/worker/networkpolicy.yaml

@@ -866,6 +866,39 @@
             }
           },
           "additionalProperties": false
+        },
+        "networkPolicy": {
+          "type": "object",
+          "properties": {
+            "dns": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ipBlock": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "namespaceSelector": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "podSelector": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": true

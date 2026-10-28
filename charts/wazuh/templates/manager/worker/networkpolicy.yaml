@@ -61,18 +61,7 @@ spec:
               app: {{ include "wazuh.fullname" . }}-manager
               node-type: master
     # DNS
-    {{- range $dnsServerLabelsList := list "kube-dns" "coredns" }}
-    - ports:
-        - protocol: UDP
-          port: 53
-      to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-          podSelector:
-            matchLabels:
-              k8s-app: {{ $dnsServerLabelsList }}
-    {{- end }}
+    {{- include "wazuh.networkPolicy.dnsEgress" . | nindent 4 }}
     {{- with .Values.wazuh.worker.networkPolicy.extraEgresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
