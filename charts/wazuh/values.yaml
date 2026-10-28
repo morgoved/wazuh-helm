@@ -820,10 +820,12 @@ wazuh:
   localDecoder: ""
   ## @param wazuh.localRules Override for local_rules.xml. If empty, files/local_rules.xml is used.
   localRules: ""
-  ## @param wazuh.rulesetReload.enabled Run a post-install/upgrade/rollback (Argo CD PostSync) Job that makes every worker run the master's ruleset, reloading analysisd once if one does not. Requires autoreload.enabled.
-  ## @param wazuh.rulesetReload.timeoutSeconds Time budget of the Job (rollout wait, sync and reload together). Keep Helm's --timeout above it.
-  ## @param wazuh.rulesetReload.pollIntervalSeconds Seconds between two checks while waiting.
-  ## @param wazuh.rulesetReload.resources Resources of the Job container.
+  ## @param wazuh.rulesetReload.enabled Post-upgrade Job that reloads the workers' ruleset if needed (needs autoreload).
+  ## @param wazuh.rulesetReload.timeoutSeconds Time budget of the Job; keep Helm's --timeout above it.
+  ## @param wazuh.rulesetReload.pollIntervalSeconds Seconds between two checks while the Job waits.
+  ## @param wazuh.rulesetReload.resources.requests.cpu Minimum CPU assigned to the Job pod.
+  ## @param wazuh.rulesetReload.resources.requests.memory Minimum memory assigned to the Job pod.
+  ## @param wazuh.rulesetReload.resources.limits.memory Maximum memory used by the Job pod.
   ## @param wazuh.rulesetReload.podSecurityContext Security context of the Job pod.
   ## @param wazuh.rulesetReload.securityContext Security context of the Job container.
   ## @param wazuh.rulesetReload.nodeSelector nodeSelector of the Job pod.
