@@ -25,3 +25,5 @@ jobs:
         run: charts/wazuh/tests/render_test.sh
       - name: Schema tests
         run: charts/wazuh/tests/schema_test.sh
+      - name: Ruleset reload script tests
+        run: python3 charts/wazuh/tests/ruleset_reload_test.py
