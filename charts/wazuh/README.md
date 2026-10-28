@@ -145,47 +145,10 @@ wazuh:
           cidr: 10.0.0.0/8
 ```
 
-> NOTE!
-> If you added a udp `<remote>` through `wazuh.worker.extraConf` as a workaround, remove it
-> when you add `udp` to `wazuh.syslog.protocols`, otherwise remoted gets two listeners on
-> udp/514.
-
-> UPGRADE NOTES from 2.1.x:
->
-> - The LoadBalancer used to always expose 514/UDP, which nothing listened on unless you added
->   the `extraConf` workaround. Syslog ports now follow `wazuh.loadBalancer.ports`: the default
->   (`registration`, `agents-events`) leaves them out. Add `syslog-tcp` and/or `syslog-udp`
->   to keep syslog on the LoadBalancer.
-> - The worker NetworkPolicy used to allow both 514/TCP and 514/UDP. It now only allows the
->   listed protocols, so add `udp` to `wazuh.syslog.protocols` if your devices send over UDP.
-> - The syslog Service ports are renamed from `syslog` to `syslog-tcp`/`syslog-udp`.
-> - Helm's client-side apply (the default for Helm 3, and for Helm 4 releases first installed
->   client-side) merges Service ports on `port` and container ports on `containerPort` alone.
->   An upgrade that adds or removes a protocol while the other one stays on 514 then drops ports
->   from the worker StatefulSet, the worker Service and the LoadBalancer, and a Service whose
->   named `targetPort` is gone from the pods loses its endpoints. Fresh installs, the 2.1.x
->   upgrade with a single protocol, and switching between `[tcp]` and `[udp]` are not affected.
->   - Helm 4: run that upgrade with `--server-side=true --force-conflicts`. Later upgrades can
->     stay server-side.
->   - Helm 3, adding a protocol: apply the new objects server-side first, then run the upgrade
->     with the same values:
->
->     ```bash
->     helm template wazuh wazuh/wazuh -n wazuh -f values.yaml \
->       --show-only templates/manager/worker/statefulset.yaml \
->       --show-only templates/manager/worker/service.yaml \
->       --show-only templates/manager/worker/networkpolicy.yaml \
->       --show-only templates/manager/load-balancer.yaml \
->       | kubectl -n wazuh apply --server-side --force-conflicts --field-manager=syslog-protocols -f -
->     helm upgrade wazuh wazuh/wazuh -n wazuh -f values.yaml
->     ```
->
->     Leave out `load-balancer.yaml` when `wazuh.loadBalancer.enabled` is false.
->   - Helm 3, removing a protocol: run the same `helm upgrade` twice. The first one drops 514
->     entirely, the second one puts back the remaining protocol, so syslog stops between the two.
->   - Do not use `--force` (Helm 3) or `--force-replace` (Helm 4) for this. They replace every
->     object of the release, and replacing a bound chart-managed PVC (e.g. the indexer snapshot
->     PVC) fails, because the rendered PVC has no `spec.volumeName`.
+> UPGRADE NOTES from 2.1.x: the LoadBalancer no longer exposes syslog by default, the worker
+> NetworkPolicy only opens the listed protocols, and the syslog Service ports are renamed.
+> Adding or removing a protocol on an existing release needs extra steps. See
+> [UPGRADING.md](./UPGRADING.md#21x--220).
 
 ### Values validation
 

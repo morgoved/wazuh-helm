@@ -45,7 +45,7 @@ Edge TLS (client to Gateway) and backend TLS (Gateway to the dashboard Service) 
 
 ### Syslog
 
-The workers receive syslog on port 514 over the transports listed in `wazuh.syslog.protocols` (`tcp` by default, `udp` or both). The listener, the worker Service and NetworkPolicy, and the LoadBalancer (when `wazuh.loadBalancer.ports` lists `syslog-tcp`/`syslog-udp`, or is empty) all follow that list. `wazuh.syslog.networkPolicyFrom` restricts which sources the worker NetworkPolicy lets reach 514 (any by default). See [Receiving syslog](./charts/wazuh/README.md#receiving-syslog) for the upgrade notes from 2.1.x, including the Helm flags needed when adding or removing a protocol on an existing release.
+The workers receive syslog on port 514 over the transports listed in `wazuh.syslog.protocols` (`tcp` by default, `udp` or both). The listener, the worker Service and NetworkPolicy, and the LoadBalancer (when `wazuh.loadBalancer.ports` lists `syslog-tcp`/`syslog-udp`, or is empty) all follow that list. `wazuh.syslog.networkPolicyFrom` restricts which sources the worker NetworkPolicy lets reach 514 (any by default). See [Receiving syslog](./charts/wazuh/README.md#receiving-syslog) for the configuration, and [UPGRADING.md](./charts/wazuh/UPGRADING.md#21x--220) for the changes from 2.1.x and the steps needed when adding or removing a protocol on an existing release.
 
 ### Contributing
 
