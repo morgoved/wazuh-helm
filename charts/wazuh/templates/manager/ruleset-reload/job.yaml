@@ -24,7 +24,8 @@ metadata:
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
 spec:
   backoffLimit: 0
-  activeDeadlineSeconds: {{ add (int $r.timeoutSeconds) 20 }}
+  # Leaves the pod time to start and the script time to log its own timeout first.
+  activeDeadlineSeconds: {{ add (int $r.timeoutSeconds) 50 }}
   template:
     metadata:
       labels:
@@ -91,10 +92,9 @@ spec:
               value: /opt/ruleset/local_rules.xml
             - name: LOCAL_DECODER_FILE
               value: /opt/ruleset/local_decoder.xml
-          {{- with $r.securityContext }}
+          {{- $hardened := dict "allowPrivilegeEscalation" false "readOnlyRootFilesystem" true "capabilities" (dict "drop" (list "ALL")) }}
           securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- toYaml (mergeOverwrite $hardened $r.securityContext) | nindent 12 }}
           resources:
             {{- toYaml $r.resources | nindent 12 }}
           volumeMounts:

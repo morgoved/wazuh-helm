@@ -239,7 +239,79 @@ class Rules(unittest.TestCase):
         api = FakeApi({n: (lambda a: m.ApiError(500, "boom")) for n in NODES})
         self.assertEqual(self.run_main(api), 1)
         self.assertEqual(api.reloads, 0)
-        self.assertIn("timeout: master ruleset not readable: " + MASTER, self.log())
+        self.assertIn("timeout: ruleset not readable on: " + MASTER, self.log())
+
+    def test_unreadable_worker_is_reread_not_reloaded(self):
+        reads = {"n": 0}
+
+        def w0(api):
+            reads["n"] += 1
+            return m.ApiError(502, "proxy error") if reads["n"] <= 3 else "v2"
+
+        api = FakeApi({MASTER: lambda a: "v2", W0: w0, W1: lambda a: "v2", W2: lambda a: "v2"})
+        self.assertEqual(self.run_main(api), 0)
+        self.assertEqual(api.reloads, 0)
+        self.assertIn("ruleset already up to date on all nodes, no reload", self.log())
+
+    def test_worker_unreadable_before_reload_times_out_without_reload(self):
+        api = FakeApi({MASTER: lambda a: "v2", W0: lambda a: m.ApiError(502, "proxy error"),
+                       W1: lambda a: "v1", W2: lambda a: "v2"})
+        self.assertEqual(self.run_main(api), 1)
+        self.assertEqual(api.reloads, 0)
+        self.assertIn("timeout: ruleset not readable on: " + W0, self.log())
+
+    def test_node_erroring_after_reload_is_named_at_timeout(self):
+        api = FakeApi({MASTER: lambda a: "v2", W0: after_reload("v1", m.ApiError(400, "not connected")),
+                       W1: lambda a: "v2", W2: lambda a: "v2"})
+        self.assertEqual(self.run_main(api), 1)
+        self.assertIn("timeout: nodes not running the master's ruleset: %s;" % W0, self.log())
+
+    def test_slow_checks_do_not_overrun_the_deadline(self):
+        api = FakeApi({n: (lambda a: "v2") for n in NODES}, connected=lambda a: [MASTER, W0, W1])
+        orig = api.get
+
+        def slow(path):
+            self.time.t += 50
+            return orig(path)
+
+        api.get = slow
+        self.assertEqual(self.run_main(api), 1)
+        self.assertIn("timeout: nodes not connected: " + W2, self.log())
+        self.assertLessEqual(self.time.t, 270)
+
+    def test_reload_api_error_is_reported(self):
+        api = FakeApi({MASTER: lambda a: "v2", W0: lambda a: "v1", W1: lambda a: "v2", W2: lambda a: "v2"})
+
+        def put(path):
+            raise m.ApiError(0, "connection refused")
+
+        api.put = put
+        self.assertEqual(self.run_main(api), 1)
+        self.assertIn("master API error while reloading the ruleset: HTTP 0: connection refused", self.log())
+
+    def test_file_check_api_error_is_reported(self):
+        api = FakeApi({n: (lambda a: "v2") for n in NODES})
+
+        def get_text(path):
+            raise m.ApiError(503, "unavailable")
+
+        api.get_text = get_text
+        self.assertEqual(self.run_main(api), 1)
+        self.assertIn("master API error while reading local_rules.xml: HTTP 503: unavailable", self.log())
+
+    def test_unexpected_response_is_waited_for(self):
+        state = {"n": 0}
+        api = FakeApi({n: (lambda a: "v2") for n in NODES})
+        orig = api.get
+
+        def odd(path):
+            if path == "/cluster/healthcheck" and state["n"] < 2:
+                state["n"] += 1
+                return {"error": 1}
+            return orig(path)
+
+        api.get = odd
+        self.assertEqual(self.run_main(api), 0)
 
     def test_master_file_differs_fails_before_reload(self):
         api = FakeApi({n: (lambda a: "v1") for n in NODES},

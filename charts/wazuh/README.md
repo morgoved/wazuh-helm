@@ -181,8 +181,12 @@ credentials of `wazuh.apiCred` (or its `existingSecret`). The chart's API certif
 self-signed, so the Job does not verify it.
 
 - Helm waits for the Job up to `--timeout` (5m by default). The default
-  `timeoutSeconds: 270` covers the rollout, the sync and the reload; if you raise it, keep
-  `--timeout` at least 30s above it.
+  `timeoutSeconds: 240` covers the rollout, the sync and the reload; if you raise it, keep
+  `--timeout` at least 60s above it, so that the Job reports which node it waited for.
+- On a first `helm install`, the budget also covers volume provisioning and the first boot of
+  every manager. If the Job runs out of time there, the release is marked failed (and removed
+  with `--atomic` or `--rollback-on-failure`); raise `timeoutSeconds` and `--timeout` for a
+  slow cluster.
 - Argo CD runs the Job after a full sync, once the application is healthy. Selective syncs do
   not run hooks.
 - The Job does not run when the ConfigMap is edited outside Helm or Argo CD, or when pods are
@@ -192,7 +196,8 @@ self-signed, so the Job does not verify it.
 - A reload drops the events analysisd has queued and resets the state of frequency and
   timeframe rules. The Job reloads at most once per run.
 - When the Job fails, read its log (`kubectl logs job/<release>-wazuh-ruleset-reload`). A
-  worker writes the outcome of its reload only to its own `logs/cluster.log`.
+  worker writes the outcome of its reload only to its own `logs/cluster.log`. A failed Job is
+  kept until the next run, and `helm uninstall` does not delete it.
 - Each comparison returns a node's whole loaded ruleset (about 4.5 MB of JSON with the default
   rules) through the master's API, which grows the master's API processes by a few hundred MiB.
   The Job reads the master's ruleset once and polls only the nodes that still differ, but a
@@ -488,13 +493,13 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.localDecoder`                                | Override for local_decoder.xml. If empty, files/local_decoder.xml is used.             | `""`                                   |
 | `wazuh.localRules`                                  | Override for local_rules.xml. If empty, files/local_rules.xml is used.                 | `""`                                   |
 | `wazuh.rulesetReload.enabled`                       | Post-upgrade Job that reloads the workers' ruleset if needed (needs autoreload).       | `false`                                |
-| `wazuh.rulesetReload.timeoutSeconds`                | Time budget of the Job; keep Helm's --timeout above it.                                | `270`                                  |
+| `wazuh.rulesetReload.timeoutSeconds`                | Time budget of the Job; keep Helm's --timeout above it.                                | `240`                                  |
 | `wazuh.rulesetReload.pollIntervalSeconds`           | Seconds between two checks while the Job waits.                                        | `10`                                   |
 | `wazuh.rulesetReload.resources.requests.cpu`        | Minimum CPU assigned to the Job pod.                                                   | `50m`                                  |
 | `wazuh.rulesetReload.resources.requests.memory`     | Minimum memory assigned to the Job pod.                                                | `64Mi`                                 |
 | `wazuh.rulesetReload.resources.limits.memory`       | Maximum memory used by the Job pod.                                                    | `256Mi`                                |
 | `wazuh.rulesetReload.podSecurityContext`            | Security context of the Job pod.                                                       | `{}`                                   |
-| `wazuh.rulesetReload.securityContext`               | Security context of the Job container.                                                 | `{}`                                   |
+| `wazuh.rulesetReload.securityContext`               | Job container security context, merged over a hardened default.                        | `{}`                                   |
 | `wazuh.rulesetReload.nodeSelector`                  | nodeSelector of the Job pod.                                                           | `{}`                                   |
 | `wazuh.rulesetReload.tolerations`                   | Tolerations of the Job pod.                                                            | `[]`                                   |
 | `wazuh.rulesetReload.affinity`                      | Affinity of the Job pod.                                                               | `{}`                                   |

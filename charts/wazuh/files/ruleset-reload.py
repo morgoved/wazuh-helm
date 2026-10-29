@@ -30,7 +30,7 @@ class ApiError(Exception):
 
 def _request(req, context):
     try:
-        with urllib.request.urlopen(req, context=context, timeout=60) as resp:
+        with urllib.request.urlopen(req, context=context, timeout=30) as resp:
             return resp.read().decode()
     except urllib.error.HTTPError as e:
         raise ApiError(e.code, e.read().decode(errors="replace"))
@@ -144,16 +144,20 @@ def main(api, kube, env, clock, sleep, log):
     master = nodes[0]
 
     def wait(what, check, hint=""):
-        """Poll `check() -> (done, pending)` until done or the deadline."""
+        """Poll `check() -> (done, pending)` until done, or until the next poll could end
+        past the deadline (counting how long the last one took)."""
         pending = None
         while True:
+            started = clock()
             try:
                 done, pending = check()
             except ApiError as e:
                 done, pending = False, "API: %s" % e
+            except (KeyError, TypeError, ValueError) as e:
+                done, pending = False, "unexpected API response: %r" % e
             if done:
                 return True
-            if clock() + interval > deadline:
+            if clock() + interval + (clock() - started) > deadline:
                 log("timeout: %s: %s%s" % (what, pending, hint))
                 return False
             sleep(interval)
@@ -194,33 +198,47 @@ def main(api, kube, env, clock, sleep, log):
                                  "LOCAL_DECODER_FILE")):
         with open(env[env_key]) as f:
             want = f.read().strip()
-        if api.get_text(path).strip() != want:
+        try:
+            served = api.get_text(path).strip()
+        except ApiError as e:
+            log("master API error while reading %s: %s" % (name, e))
+            return 1
+        if served != want:
             log("master %s differs from the ConfigMap; was the master restarted (autoreload.enabled)?" % name)
             return 1
 
-    # 4. Already running the master's ruleset everywhere: nothing to do. Each digest pulls a
-    # node's whole ruleset through the master API, so the master's is read once and only
-    # the nodes that still differ are polled again.
-    want = {}
+    # 4. Already running the master's ruleset everywhere: nothing to do. A node whose
+    # ruleset cannot be read is read again, not counted as different. Each digest pulls a
+    # node's whole ruleset through the master API, so a node is read until it answers,
+    # then only the nodes that still differ are polled.
+    digests = {}
 
-    def read_master():
-        want["digest"] = ruleset_digest(api, master)
-        return want["digest"] is not None, master
+    def read_all():
+        for n in nodes:
+            if digests.get(n) is None:
+                digests[n] = ruleset_digest(api, n)
+        left = [n for n in nodes if digests[n] is None]
+        return not left, ", ".join(left)
 
-    if not wait("master ruleset not readable", read_master):
+    if not wait("ruleset not readable on", read_all):
         return 1
+    want = digests[master]
 
     def differing(names):
-        return [n for n in names if ruleset_digest(api, n) != want["digest"]]
+        return [n for n in names if ruleset_digest(api, n) != want]
 
-    stale = differing(nodes[1:])
+    stale = [n for n in nodes[1:] if digests[n] != want]
     if not stale:
         log("ruleset already up to date on all nodes, no reload")
         return 0
 
     # 5. One reload. Workers apply it at the end of their next integrity cycle.
     log("reloading ruleset on: %s" % ", ".join(stale))
-    response = api.put("/cluster/analysisd/reload")
+    try:
+        response = api.put("/cluster/analysisd/reload")
+    except ApiError as e:
+        log("master API error while reloading the ruleset: %s" % e)
+        return 1
     failures = reload_failures(response)
     if failures:
         for line in failures:

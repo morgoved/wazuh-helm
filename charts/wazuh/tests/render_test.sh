@@ -447,6 +447,9 @@ expect_failure "ruleset reload without autoreload fails" render --set wazuh.rule
 err=$(render --set wazuh.rulesetReload.enabled=true 2>&1 >/dev/null)
 assert_contains "guard message names autoreload" "$err" "wazuh.rulesetReload.enabled requires autoreload.enabled"
 expect_success "ruleset reload with autoreload renders" render "${RR[@]}"
+expect_failure "ruleset reload without the master fails" render "${RR[@]}" --set wazuh.master.enabled=false
+err=$(render "${RR[@]}" --set wazuh.master.enabled=false 2>&1 >/dev/null)
+assert_contains "guard message names the master" "$err" "wazuh.rulesetReload.enabled requires wazuh.master.enabled"
 expect_failure "schema rejects unknown rulesetReload key" render --set wazuh.rulesetReload.bogus=1
 
 RR_JOB=templates/manager/ruleset-reload/job.yaml
@@ -458,7 +461,12 @@ assert_contains "job argo hook" "$out" "argocd.argoproj.io/hook: PostSync"
 assert_contains "job argo hook delete policy" "$out" "argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded"
 assert_eq "hooks on the Job metadata, not the pod template" "$(yq '.spec.template.metadata.annotations["helm.sh/hook"] // "none"' <<<"$out")" "none"
 assert_eq "job backoffLimit 0" "$(yq '.spec.backoffLimit' <<<"$out")" "0"
-assert_eq "job deadline = timeout + 20" "$(yq '.spec.activeDeadlineSeconds' <<<"$out")" "290"
+assert_eq "job deadline = timeout + 50" "$(yq '.spec.activeDeadlineSeconds' <<<"$out")" "290"
+assert_eq "job timeout default" "$(job_env TIMEOUT_SECONDS <<<"$out")" "240"
+assert_eq "job container drops all capabilities" "$(yq '.spec.template.spec.containers[0].securityContext.capabilities.drop[0]' <<<"$out")" "ALL"
+assert_eq "job container read-only root" "$(yq '.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem' <<<"$out")" "true"
+assert_eq "job container no privilege escalation" "$(yq '.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation' <<<"$out")" "false"
+assert_eq "job container securityContext can be overridden" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.rulesetReload.securityContext.readOnlyRootFilesystem=false | yq '.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem')" "false"
 assert_eq "job uses the manager image" "$(yq '.spec.template.spec.containers[0].image' <<<"$out")" "wazuh/wazuh-manager:4.14.9"
 assert_eq "job api url" "$(job_env WAZUH_API_URL <<<"$out")" "https://test-wazuh:55000"
 assert_eq "expected nodes, 2 workers" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.worker.replicas=2 | job_env EXPECTED_NODES)" "test-wazuh-manager-master-0,test-wazuh-manager-worker-0,test-wazuh-manager-worker-1"

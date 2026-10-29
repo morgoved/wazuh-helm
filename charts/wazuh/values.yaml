@@ -827,13 +827,13 @@ wazuh:
   ## @param wazuh.rulesetReload.resources.requests.memory Minimum memory assigned to the Job pod.
   ## @param wazuh.rulesetReload.resources.limits.memory Maximum memory used by the Job pod.
   ## @param wazuh.rulesetReload.podSecurityContext Security context of the Job pod.
-  ## @param wazuh.rulesetReload.securityContext Security context of the Job container.
+  ## @param wazuh.rulesetReload.securityContext Job container security context, merged over a hardened default.
   ## @param wazuh.rulesetReload.nodeSelector nodeSelector of the Job pod.
   ## @param wazuh.rulesetReload.tolerations Tolerations of the Job pod.
   ## @param wazuh.rulesetReload.affinity Affinity of the Job pod.
   rulesetReload:
     enabled: false
-    timeoutSeconds: 270 # @schema minimum: 30
+    timeoutSeconds: 240 # @schema minimum: 30
     pollIntervalSeconds: 10 # @schema minimum: 1
     resources: # @schema additionalProperties: true; skipProperties: true
       requests:
