@@ -5,7 +5,11 @@ Usage: python3 charts/wazuh/tests/ruleset_reload_test.py
 """
 import importlib.util
 import os
+import sys
 import unittest
+
+# Importing files/ruleset-reload.py must not leave a __pycache__ in the chart's files/.
+sys.dont_write_bytecode = True
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 spec = importlib.util.spec_from_file_location(
