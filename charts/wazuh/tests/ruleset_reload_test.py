@@ -155,9 +155,6 @@ class Rules(unittest.TestCase):
     def test_expected_nodes_without_workers(self):
         self.assertEqual(m.expected_nodes(MASTER), [MASTER])
 
-    def test_mismatched_lists_none_and_different(self):
-        self.assertEqual(m.mismatched({"m": "a", "w0": "a", "w1": "b", "w2": None}, "m"), ["w1", "w2"])
-
     def test_reload_failures_formats_failed_items(self):
         resp = {"data": {"failed_items": [{"id": ["w1"], "error": {"message": "Failed to reload ruleset"}}]}}
         self.assertEqual(m.reload_failures(resp), ["w1: Failed to reload ruleset"])
@@ -207,6 +204,42 @@ class Rules(unittest.TestCase):
         api = FakeApi({MASTER: lambda a: "v2", W0: w0, W1: lambda a: "v2", W2: lambda a: "v2"})
         self.assertEqual(self.run_main(api), 0)
         self.assertEqual(api.reloads, 1)
+
+    def ruleset_calls(self, api, node):
+        return sum(1 for c in api.calls if c[1].startswith("/cluster/%s/configuration/" % node))
+
+    def test_master_ruleset_read_once(self):
+        polls = {"n": 0}
+
+        def w1(api):
+            if not api.reloads:
+                return "v1"
+            polls["n"] += 1
+            return "v2" if polls["n"] > 3 else "v1"
+
+        api = FakeApi({MASTER: lambda a: "v2", W0: lambda a: "v2", W1: w1, W2: lambda a: "v2"})
+        self.assertEqual(self.run_main(api), 0)
+        self.assertEqual(self.ruleset_calls(api, MASTER), 2)
+
+    def test_converged_nodes_not_polled_again(self):
+        polls = {"n": 0}
+
+        def w1(api):
+            if not api.reloads:
+                return "v1"
+            polls["n"] += 1
+            return "v2" if polls["n"] > 3 else "v1"
+
+        api = FakeApi({MASTER: lambda a: "v2", W0: after_reload("v1", "v2"), W1: w1, W2: lambda a: "v2"})
+        self.assertEqual(self.run_main(api), 0)
+        self.assertEqual(self.ruleset_calls(api, W0), 4)  # before + first poll, decoders and rules
+        self.assertEqual(self.ruleset_calls(api, W2), 2)  # matched before the reload
+
+    def test_master_ruleset_unreadable_times_out(self):
+        api = FakeApi({n: (lambda a: m.ApiError(500, "boom")) for n in NODES})
+        self.assertEqual(self.run_main(api), 1)
+        self.assertEqual(api.reloads, 0)
+        self.assertIn("timeout: master ruleset not readable: " + MASTER, self.log())
 
     def test_master_file_differs_fails_before_reload(self):
         api = FakeApi({n: (lambda a: "v1") for n in NODES},

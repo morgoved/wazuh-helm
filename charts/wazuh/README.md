@@ -193,6 +193,10 @@ self-signed, so the Job does not verify it.
   timeframe rules. The Job reloads at most once per run.
 - When the Job fails, read its log (`kubectl logs job/<release>-wazuh-ruleset-reload`). A
   worker writes the outcome of its reload only to its own `logs/cluster.log`.
+- Each comparison returns a node's whole loaded ruleset (about 4.5 MB of JSON with the default
+  rules) through the master's API, which grows the master's API processes by a few hundred MiB.
+  The Job reads the master's ruleset once and polls only the nodes that still differ, but a
+  master already close to its memory limit (`wazuh.master.resources`) can be OOM-killed.
 
 ### Values validation
 

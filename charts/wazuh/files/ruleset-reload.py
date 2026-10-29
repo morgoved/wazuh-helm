@@ -123,11 +123,6 @@ def ruleset_digest(api, node):
     return h.hexdigest()
 
 
-def mismatched(digests, master):
-    want = digests.get(master)
-    return sorted(n for n, d in digests.items() if d is None or d != want)
-
-
 def reload_failures(response):
     lines = []
     for item in (response.get("data") or {}).get("failed_items", []):
@@ -203,11 +198,22 @@ def main(api, kube, env, clock, sleep, log):
             log("master %s differs from the ConfigMap; was the master restarted (autoreload.enabled)?" % name)
             return 1
 
-    # 4. Already running the master's ruleset everywhere: nothing to do.
-    def digests():
-        return {n: ruleset_digest(api, n) for n in nodes}
+    # 4. Already running the master's ruleset everywhere: nothing to do. Each digest pulls a
+    # node's whole ruleset through the master API, so the master's is read once and only
+    # the nodes that still differ are polled again.
+    want = {}
 
-    stale = mismatched(digests(), master)
+    def read_master():
+        want["digest"] = ruleset_digest(api, master)
+        return want["digest"] is not None, master
+
+    if not wait("master ruleset not readable", read_master):
+        return 1
+
+    def differing(names):
+        return [n for n in names if ruleset_digest(api, n) != want["digest"]]
+
+    stale = differing(nodes[1:])
     if not stale:
         log("ruleset already up to date on all nodes, no reload")
         return 0
@@ -228,8 +234,8 @@ def main(api, kube, env, clock, sleep, log):
 
     # 6. Wait until every node reports the master's ruleset in memory.
     def converged():
-        left = mismatched(digests(), master)
-        return not left, ", ".join(left)
+        stale[:] = differing(stale)
+        return not stale, ", ".join(stale)
 
     if not wait("nodes not running the master's ruleset", converged, "; check logs/cluster.log on them"):
         return 1
