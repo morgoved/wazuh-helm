@@ -291,3 +291,11 @@ An absent key (--reuse-values from an older chart) keeps the historical tcp list
 {{- end -}}
 {{- toJson $protocols -}}
 {{- end -}}
+
+{{/*
+"true" when the ruleset reload Job is enabled. Releases upgraded with --reuse-values from a
+chart without wazuh.rulesetReload have no such block: treat it as disabled.
+*/}}
+{{- define "wazuh.rulesetReload.enabled" -}}
+{{- if and .Values.wazuh.enabled (dig "rulesetReload" "enabled" false .Values.wazuh) }}true{{- end }}
+{{- end }}

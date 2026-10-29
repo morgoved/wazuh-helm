@@ -1,4 +1,4 @@
-{{- if and .Values.wazuh.enabled .Values.wazuh.rulesetReload.enabled }}
+{{- if include "wazuh.rulesetReload.enabled" . }}
 {{- $fullname := include "wazuh.fullname" . }}
 {{- $r := .Values.wazuh.rulesetReload }}
 {{- $nodes := list (printf "%s-manager-master-0" $fullname) }}

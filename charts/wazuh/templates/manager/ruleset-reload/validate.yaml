@@ -1,6 +1,6 @@
-{{- if and .Values.wazuh.enabled .Values.wazuh.rulesetReload.enabled (not .Values.autoreload.enabled) }}
+{{- if and (include "wazuh.rulesetReload.enabled" .) (not .Values.autoreload.enabled) }}
 {{- fail "wazuh.rulesetReload.enabled requires autoreload.enabled: the master only reads a new ruleset after a restart" }}
 {{- end }}
-{{- if and .Values.wazuh.enabled .Values.wazuh.rulesetReload.enabled (not .Values.wazuh.master.enabled) }}
+{{- if and (include "wazuh.rulesetReload.enabled" .) (not .Values.wazuh.master.enabled) }}
 {{- fail "wazuh.rulesetReload.enabled requires wazuh.master.enabled: the Job reloads through the master's API" }}
 {{- end }}

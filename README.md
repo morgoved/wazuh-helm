@@ -49,7 +49,7 @@ The workers receive syslog on port 514 over the transports listed in `wazuh.sysl
 
 ### Ruleset reload
 
-After an upgrade that changes `wazuh.localRules` or `wazuh.localDecoder`, the workers keep running the previous ruleset: they start analysisd before the cluster sync delivers the new files. `wazuh.rulesetReload.enabled` (with `autoreload.enabled`) adds a post-upgrade Job, also an Argo CD `PostSync` hook, that checks what each node has loaded and reloads the ruleset once when a worker differs. See [Reloading the ruleset after upgrades](./charts/wazuh/README.md#reloading-the-ruleset-after-upgrades).
+After an upgrade that changes `wazuh.localRules` or `wazuh.localDecoder`, the workers keep running the previous ruleset: they start analysisd before the cluster sync delivers the new files. `wazuh.rulesetReload.enabled` (with `autoreload.enabled`) adds a post-upgrade Job, also an Argo CD `PostSync` hook, that reloads the ruleset once and waits until every node has reloaded it and runs the master's rules and decoders. See [Reloading the ruleset after upgrades](./charts/wazuh/README.md#reloading-the-ruleset-after-upgrades).
 
 ### Contributing
 

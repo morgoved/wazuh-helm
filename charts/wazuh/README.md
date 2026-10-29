@@ -172,10 +172,11 @@ wazuh:
 The Job waits for both manager StatefulSets to finish their rollout, for every expected node
 (the master and `wazuh.worker.replicas` workers) to join the cluster, and for their ruleset
 files to be synced. It checks that the master serves the ConfigMap's `local_rules.xml` and
-`local_decoder.xml`, then compares the decoders and rules analysisd has loaded on each node
-with the master's, through the Wazuh API. If they all match, it stops there. Otherwise it calls
-`PUT /cluster/analysisd/reload` once and waits until every node reports the master's ruleset.
-It fails, naming the nodes, if that does not happen within `wazuh.rulesetReload.timeoutSeconds`.
+`local_decoder.xml`, then calls `PUT /cluster/analysisd/reload` once. A worker only applies a
+reload at the end of its next cluster sync and reports the outcome in its own logs, so the Job
+then waits until every node has logged a new `Ruleset reloaded successfully` and, through the
+Wazuh API, runs the decoders and rules the master has loaded. It fails, naming the nodes, if
+that does not happen within `wazuh.rulesetReload.timeoutSeconds`.
 It only reads the two manager StatefulSets through the Kubernetes API, and uses the API
 credentials of `wazuh.apiCred` (or its `existingSecret`). The chart's API certificate is
 self-signed, so the Job does not verify it.
@@ -191,16 +192,19 @@ self-signed, so the Job does not verify it.
   not run hooks.
 - The Job does not run when the ConfigMap is edited outside Helm or Argo CD, or when pods are
   restarted by another tool (e.g. Reloader). Run `PUT /cluster/analysisd/reload` then.
-- No API shows the CDB lists analysisd has loaded. A change that only touches `etc/lists`
-  does not make the nodes differ, so the Job does not reload for it.
-- A reload drops the events analysisd has queued and resets the state of frequency and
-  timeframe rules. The Job reloads at most once per run.
+- The Job reloads once on every run, even when nothing in the ruleset changed: the loaded
+  rules the API returns leave out some options (e.g. `no_full_log`, `json_null_field`), so
+  matching nodes do not prove that a node runs the current ruleset. A reload drops the events
+  analysisd has queued and resets the state of frequency and timeframe rules.
+- No API shows the CDB lists analysisd has loaded: they are reloaded, but not compared.
+- Every expected node must be in the cluster. If workers keep leaving it (see the master's
+  `logs/cluster.log`), the Job fails the release rather than reload part of the cluster.
 - When the Job fails, read its log (`kubectl logs job/<release>-wazuh-ruleset-reload`). A
   worker writes the outcome of its reload only to its own `logs/cluster.log`. A failed Job is
   kept until the next run, and `helm uninstall` does not delete it.
 - Each comparison returns a node's whole loaded ruleset (about 4.5 MB of JSON with the default
   rules) through the master's API, which grows the master's API processes by a few hundred MiB.
-  The Job reads the master's ruleset once and polls only the nodes that still differ, but a
+  The Job reads the master's ruleset once and polls only the nodes not done yet, but a
   master already close to its memory limit (`wazuh.master.resources`) can be OOM-killed.
 
 ### Values validation
@@ -492,7 +496,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.workerConf`                                  | Override for worker.conf. If empty, the generated ossec config is used.                | `""`                                   |
 | `wazuh.localDecoder`                                | Override for local_decoder.xml. If empty, files/local_decoder.xml is used.             | `""`                                   |
 | `wazuh.localRules`                                  | Override for local_rules.xml. If empty, files/local_rules.xml is used.                 | `""`                                   |
-| `wazuh.rulesetReload.enabled`                       | Post-upgrade Job that reloads the workers' ruleset if needed (needs autoreload).       | `false`                                |
+| `wazuh.rulesetReload.enabled`                       | Post-deployment Job that reloads the ruleset on all nodes (needs autoreload).          | `false`                                |
 | `wazuh.rulesetReload.timeoutSeconds`                | Time budget of the Job; keep Helm's --timeout above it.                                | `240`                                  |
 | `wazuh.rulesetReload.pollIntervalSeconds`           | Seconds between two checks while the Job waits.                                        | `10`                                   |
 | `wazuh.rulesetReload.resources.requests.cpu`        | Minimum CPU assigned to the Job pod.                                                   | `50m`                                  |

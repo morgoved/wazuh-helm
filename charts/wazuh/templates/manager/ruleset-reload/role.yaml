@@ -1,4 +1,4 @@
-{{- if and .Values.wazuh.enabled .Values.wazuh.rulesetReload.enabled }}
+{{- if include "wazuh.rulesetReload.enabled" . }}
 # Read-only access to the two manager StatefulSets, to wait for their rollout.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

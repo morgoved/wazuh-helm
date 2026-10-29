@@ -820,7 +820,7 @@ wazuh:
   localDecoder: ""
   ## @param wazuh.localRules Override for local_rules.xml. If empty, files/local_rules.xml is used.
   localRules: ""
-  ## @param wazuh.rulesetReload.enabled Post-upgrade Job that reloads the workers' ruleset if needed (needs autoreload).
+  ## @param wazuh.rulesetReload.enabled Post-deployment Job that reloads the ruleset on all nodes (needs autoreload).
   ## @param wazuh.rulesetReload.timeoutSeconds Time budget of the Job; keep Helm's --timeout above it.
   ## @param wazuh.rulesetReload.pollIntervalSeconds Seconds between two checks while the Job waits.
   ## @param wazuh.rulesetReload.resources.requests.cpu Minimum CPU assigned to the Job pod.

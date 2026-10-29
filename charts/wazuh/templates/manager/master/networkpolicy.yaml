@@ -35,7 +35,7 @@ spec:
             matchLabels:
               app: {{ include "wazuh.fullname" . }}-manager
               node-type: worker
-    {{- if .Values.wazuh.rulesetReload.enabled }}
+    {{- if include "wazuh.rulesetReload.enabled" . }}
     # The ruleset reload Job calls the Wazuh API.
     - ports:
         - protocol: TCP

@@ -2,8 +2,9 @@
 
 Workers start analysisd before the cluster integrity sync delivers new rules and
 decoders, and nothing reloads it afterwards, so they keep the previous ruleset.
-This Job waits for the manager rollout and the sync, compares what analysisd has
-loaded on each node with the master, and reloads the ruleset once if a node differs.
+This Job waits for the manager rollout and the sync, reloads the ruleset once, and
+waits until every node has logged a new successful reload and runs the master's
+decoders and rules in memory.
 
 Runs with the manager image's bundled interpreter; stdlib only.
 """
@@ -19,6 +20,8 @@ import urllib.parse
 import urllib.request
 
 SA_DIR = "/var/run/secrets/kubernetes.io/serviceaccount"
+REQUEST_TIMEOUT = 30
+RELOAD_LINE = "Ruleset reloaded successfully"
 
 
 class ApiError(Exception):
@@ -28,9 +31,14 @@ class ApiError(Exception):
         self.body = body
 
 
-def _request(req, context):
+class BudgetExhausted(ApiError):
+    def __init__(self, budget):
+        super().__init__(0, "time budget of %ss exhausted" % budget)
+
+
+def _request(req, context, timeout):
     try:
-        with urllib.request.urlopen(req, context=context, timeout=30) as resp:
+        with urllib.request.urlopen(req, context=context, timeout=timeout) as resp:
             return resp.read().decode()
     except urllib.error.HTTPError as e:
         raise ApiError(e.code, e.read().decode(errors="replace"))
@@ -50,34 +58,34 @@ class WazuhApi:
         self.context.check_hostname = False
         self.context.verify_mode = ssl.CERT_NONE
 
-    def _authenticate(self):
+    def _authenticate(self, timeout):
         req = urllib.request.Request(self.base_url + "/security/user/authenticate?raw=true", method="POST")
         creds = base64.b64encode(("%s:%s" % (self.user, self.password)).encode()).decode()
         req.add_header("Authorization", "Basic " + creds)
-        self.token = _request(req, self.context).strip()
+        self.token = _request(req, self.context, timeout).strip()
 
-    def _call(self, method, path):
+    def _call(self, method, path, timeout):
         for attempt in (0, 1):
             if self.token is None:
-                self._authenticate()
+                self._authenticate(timeout)
             req = urllib.request.Request(self.base_url + path, method=method)
             req.add_header("Authorization", "Bearer " + self.token)
             try:
-                return _request(req, self.context)
+                return _request(req, self.context, timeout)
             except ApiError as e:
                 if e.status == 401 and attempt == 0:
                     self.token = None
                     continue
                 raise
 
-    def get(self, path):
-        return json.loads(self._call("GET", path))
+    def get(self, path, timeout):
+        return json.loads(self._call("GET", path, timeout))
 
-    def get_text(self, path):
-        return self._call("GET", path)
+    def get_text(self, path, timeout):
+        return self._call("GET", path, timeout)
 
-    def put(self, path):
-        return json.loads(self._call("PUT", path))
+    def put(self, path, timeout):
+        return json.loads(self._call("PUT", path, timeout))
 
 
 class Kube:
@@ -89,13 +97,13 @@ class Kube:
                                            os.environ.get("KUBERNETES_SERVICE_PORT", "443"))
         self.context = ssl.create_default_context(cafile=os.path.join(SA_DIR, "ca.crt"))
 
-    def get_statefulset(self, name):
+    def get_statefulset(self, name, timeout):
         with open(os.path.join(SA_DIR, "token")) as f:
             token = f.read().strip()
         req = urllib.request.Request("%s/apis/apps/v1/namespaces/%s/statefulsets/%s"
                                      % (self.base_url, self.namespace, name))
         req.add_header("Authorization", "Bearer " + token)
-        return json.loads(_request(req, self.context))
+        return json.loads(_request(req, self.context, timeout))
 
 
 def rollout_done(sts):
@@ -111,18 +119,6 @@ def expected_nodes(env_value):
     return [n for n in env_value.split(",") if n]
 
 
-def ruleset_digest(api, node):
-    """SHA-256 of the decoders and rules analysisd has loaded on `node`, or None."""
-    h = hashlib.sha256()
-    try:
-        for kind in ("decoders", "rules"):
-            items = api.get("/cluster/%s/configuration/analysis/%s" % (node, kind))["data"]["affected_items"]
-            h.update(json.dumps(items, sort_keys=True, separators=(",", ":")).encode())
-    except (ApiError, KeyError, TypeError, ValueError):
-        return None
-    return h.hexdigest()
-
-
 def reload_failures(response):
     lines = []
     for item in (response.get("data") or {}).get("failed_items", []):
@@ -132,16 +128,57 @@ def reload_failures(response):
     return lines
 
 
+def affected(response, allow_empty=False):
+    """affected_items of a Wazuh API answer. The API answers HTTP 200 with failed_items
+    when a node cannot answer: that, or an empty result, is an error."""
+    failures = reload_failures(response)
+    if failures:
+        raise ApiError(200, "failed_items: " + "; ".join(failures))
+    items = response["data"]["affected_items"]
+    if not items and not allow_empty:
+        raise ApiError(200, "empty affected_items")
+    return items
+
+
+def ruleset_digest(api, node, timeout):
+    """SHA-256 of the decoders and rules analysisd has loaded on `node`, or None."""
+    h = hashlib.sha256()
+    try:
+        for kind in ("decoders", "rules"):
+            items = affected(api.get("/cluster/%s/configuration/analysis/%s" % (node, kind), timeout))
+            if not all(i.get(kind) for i in items):
+                return None
+            h.update(json.dumps(items, sort_keys=True, separators=(",", ":")).encode())
+    except (ApiError, KeyError, TypeError, ValueError, AttributeError):
+        return None
+    return h.hexdigest()
+
+
+def last_reload_line(api, node, timeout):
+    """Timestamp of the newest "Ruleset reloaded successfully" analysisd line on `node`, or ""."""
+    path = "/cluster/%s/logs?tag=wazuh-analysisd&search=%s&sort=-timestamp&limit=1" % (
+        node, urllib.parse.quote(RELOAD_LINE))
+    items = affected(api.get(path, timeout), allow_empty=True)
+    return items[0]["timestamp"] if items else ""
+
+
 def _names(items):
     return [i["info"]["name"] for i in items]
 
 
 def main(api, kube, env, clock, sleep, log):
-    timeout = float(env["TIMEOUT_SECONDS"])
+    budget = float(env["TIMEOUT_SECONDS"])
     interval = float(env["POLL_INTERVAL_SECONDS"])
-    deadline = clock() + timeout
+    deadline = clock() + budget
     nodes = expected_nodes(env["EXPECTED_NODES"])
     master = nodes[0]
+
+    def remaining():
+        """Timeout for the next request: never past the deadline."""
+        left = deadline - clock()
+        if left < 1:
+            raise BudgetExhausted(env["TIMEOUT_SECONDS"])
+        return min(REQUEST_TIMEOUT, left)
 
     def wait(what, check, hint=""):
         """Poll `check() -> (done, pending)` until done, or until the next poll could end
@@ -151,9 +188,12 @@ def main(api, kube, env, clock, sleep, log):
             started = clock()
             try:
                 done, pending = check()
+            except BudgetExhausted as e:
+                # Report what was still pending, not the budget running out mid-check.
+                done, pending = False, pending or "API: %s" % e
             except ApiError as e:
                 done, pending = False, "API: %s" % e
-            except (KeyError, TypeError, ValueError) as e:
+            except (KeyError, TypeError, ValueError, AttributeError) as e:
                 done, pending = False, "unexpected API response: %r" % e
             if done:
                 return True
@@ -166,7 +206,7 @@ def main(api, kube, env, clock, sleep, log):
     sets = [s for s in (env["MASTER_STS"], env.get("WORKER_STS", "")) if s]
 
     def rolled_out():
-        left = [s for s in sets if not rollout_done(kube.get_statefulset(s))]
+        left = [s for s in sets if not rollout_done(kube.get_statefulset(s, remaining()))]
         return not left, ", ".join(left)
 
     if not wait("StatefulSets not rolled out", rolled_out):
@@ -175,7 +215,7 @@ def main(api, kube, env, clock, sleep, log):
 
     # 2. Every expected node connected, and its ruleset files synced with the master.
     def connected():
-        names = set(_names(api.get("/cluster/healthcheck")["data"]["affected_items"]))
+        names = set(_names(affected(api.get("/cluster/healthcheck", remaining()))))
         missing = [n for n in nodes if n not in names]
         return not missing, ", ".join(missing)
 
@@ -183,7 +223,7 @@ def main(api, kube, env, clock, sleep, log):
         return 1
 
     def synced():
-        items = api.get("/cluster/ruleset/synchronization")["data"]["affected_items"]
+        items = affected(api.get("/cluster/ruleset/synchronization", remaining()))
         ok = {i["name"] for i in items if i.get("synced")}
         left = [n for n in nodes if n not in ok]
         return not left, ", ".join(left)
@@ -199,7 +239,7 @@ def main(api, kube, env, clock, sleep, log):
         with open(env[env_key]) as f:
             want = f.read().strip()
         try:
-            served = api.get_text(path).strip()
+            served = api.get_text(path, remaining()).strip()
         except ApiError as e:
             log("master API error while reading %s: %s" % (name, e))
             return 1
@@ -207,35 +247,29 @@ def main(api, kube, env, clock, sleep, log):
             log("master %s differs from the ConfigMap; was the master restarted (autoreload.enabled)?" % name)
             return 1
 
-    # 4. Already running the master's ruleset everywhere: nothing to do. A node whose
-    # ruleset cannot be read is read again, not counted as different. Each digest pulls a
-    # node's whole ruleset through the master API, so a node is read until it answers,
-    # then only the nodes that still differ are polled.
-    digests = {}
+    # 4. The newest reload line of each node, so that step 6 only counts a reload logged
+    # after this request (compared on each node's own clock).
+    before = {}
 
-    def read_all():
+    def read_baseline():
         for n in nodes:
-            if digests.get(n) is None:
-                digests[n] = ruleset_digest(api, n)
-        left = [n for n in nodes if digests[n] is None]
+            if n not in before:
+                try:
+                    before[n] = last_reload_line(api, n, remaining())
+                except (ApiError, KeyError, IndexError, TypeError, ValueError):
+                    pass
+        left = [n for n in nodes if n not in before]
         return not left, ", ".join(left)
 
-    if not wait("ruleset not readable on", read_all):
+    if not wait("reload log not readable on", read_baseline):
         return 1
-    want = digests[master]
 
-    def differing(names):
-        return [n for n in names if ruleset_digest(api, n) != want]
-
-    stale = [n for n in nodes[1:] if digests[n] != want]
-    if not stale:
-        log("ruleset already up to date on all nodes, no reload")
-        return 0
-
-    # 5. One reload. Workers apply it at the end of their next integrity cycle.
-    log("reloading ruleset on: %s" % ", ".join(stale))
+    # 5. One reload, every run: the loaded ruleset the API shows does not include every
+    # rule option, so matching digests do not prove a node is current. Workers apply it
+    # at the end of their next integrity cycle.
+    log("reloading the ruleset on all nodes")
     try:
-        response = api.put("/cluster/analysisd/reload")
+        response = api.put("/cluster/analysisd/reload", remaining())
     except ApiError as e:
         log("master API error while reloading the ruleset: %s" % e)
         return 1
@@ -250,23 +284,36 @@ def main(api, kube, env, clock, sleep, log):
         if msg:
             log("%s: %s" % (item.get("name", "?"), msg[:300]))
 
-    # 6. Wait until every node reports the master's ruleset in memory.
-    def converged():
-        stale[:] = differing(stale)
-        return not stale, ", ".join(stale)
+    # 6. Wait until every node has logged a new successful reload and runs the master's
+    # decoders and rules in memory. Each digest pulls a node's whole ruleset through the
+    # master API: the master's is read once, and nodes already done are not read again.
+    want = {}
 
-    if not wait("nodes not running the master's ruleset", converged, "; check logs/cluster.log on them"):
+    def read_master():
+        want["digest"] = ruleset_digest(api, master, remaining())
+        return want["digest"] is not None, master
+
+    if not wait("master ruleset not readable", read_master):
+        return 1
+
+    pending = list(nodes)
+
+    def reloaded(n):
+        try:
+            if not last_reload_line(api, n, remaining()) > before[n]:
+                return False
+        except (ApiError, KeyError, IndexError, TypeError, ValueError):
+            return False
+        return n == master or ruleset_digest(api, n, remaining()) == want["digest"]
+
+    def converged():
+        pending[:] = [n for n in pending if not reloaded(n)]
+        return not pending, ", ".join(pending)
+
+    if not wait("nodes that did not reload the master's ruleset", converged,
+                "; check logs/cluster.log and logs/ossec.log on them"):
         return 1
     log("ruleset reloaded on all nodes")
-
-    # 7. Informational: the reload line each node logged.
-    for n in nodes:
-        try:
-            q = urllib.parse.quote("Ruleset reloaded successfully")
-            items = api.get("/cluster/%s/logs?tag=wazuh-analysisd&search=%s&limit=1" % (n, q))["data"]["affected_items"]
-            log("%s: %s" % (n, items[0]["timestamp"] if items else "no reload line in the last log entries"))
-        except (ApiError, KeyError, IndexError, TypeError):
-            pass
     return 0
 
 

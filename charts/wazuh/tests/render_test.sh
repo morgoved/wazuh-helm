@@ -441,6 +441,10 @@ assert_contains "absent wazuh.authd.force (--reuse-values) keeps the defaults" "
 # --- ruleset reload (#184) ---
 RR=(--set autoreload.enabled=true --set wazuh.rulesetReload.enabled=true)
 expect_success "ruleset reload disabled by default renders" render
+# --reuse-values from a chart without the block (e.g. 2.2.0): the release values have no rulesetReload.
+expect_success "ruleset reload block absent renders" render --set wazuh.rulesetReload=null
+out=$(render --set wazuh.rulesetReload=null 2>/dev/null)
+assert_not_contains "no ruleset reload objects when the block is absent" "$out" "ruleset-reload"
 out=$(render 2>/dev/null)
 assert_not_contains "no ruleset reload objects by default" "$out" "ruleset-reload"
 expect_failure "ruleset reload without autoreload fails" render --set wazuh.rulesetReload.enabled=true
