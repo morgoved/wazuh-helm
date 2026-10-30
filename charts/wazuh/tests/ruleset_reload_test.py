@@ -61,7 +61,7 @@ class FakeKube:
         self.timeouts = []
 
     def get_statefulset(self, name, timeout):
-        self.timeouts.append(timeout)
+        self.timeouts.append(timeout())
         v = self.sets.get(name) or sts(name)
         return v(self) if callable(v) else v
 
@@ -93,7 +93,7 @@ class FakeApi:
 
     def get(self, path, timeout):
         self.calls.append(("GET", path))
-        self.timeouts.append(timeout)
+        self.timeouts.append(timeout())
         if path == "/cluster/healthcheck":
             return {"data": {"affected_items": [{"info": {"name": n}} for n in self.connected(self)]}}
         if path == "/cluster/ruleset/synchronization":
@@ -115,12 +115,12 @@ class FakeApi:
 
     def get_text(self, path, timeout):
         self.calls.append(("GET", path))
-        self.timeouts.append(timeout)
+        self.timeouts.append(timeout())
         return self.files[path]
 
     def put(self, path, timeout):
         self.calls.append(("PUT", path))
-        self.timeouts.append(timeout)
+        self.timeouts.append(timeout())
         assert path == "/cluster/analysisd/reload", path
         self.reloads += 1
         return self.reload_response
@@ -165,8 +165,9 @@ class Rules(unittest.TestCase):
         orig = api.get
 
         def get(path, timeout):
-            if timeout < seconds:
-                self.time.t += timeout
+            t = timeout()
+            if t < seconds:
+                self.time.t += t
                 raise m.ApiError(0, "timed out")
             self.time.t += seconds
             return orig(path, timeout)
@@ -199,23 +200,23 @@ class Rules(unittest.TestCase):
 
     def test_ruleset_digest_none_on_api_error(self):
         api = FakeApi({MASTER: lambda a: m.ApiError(400, "node not connected")})
-        self.assertIsNone(m.ruleset_digest(api, MASTER, 30))
+        self.assertIsNone(m.ruleset_digest(api, MASTER, lambda: 30))
 
     def test_ruleset_digest_none_on_failed_items(self):
         api = FakeApi({MASTER: lambda a: "failed"})
-        self.assertIsNone(m.ruleset_digest(api, MASTER, 30))
+        self.assertIsNone(m.ruleset_digest(api, MASTER, lambda: 30))
 
     def test_ruleset_digest_none_on_empty_result(self):
         api = FakeApi({MASTER: lambda a: "v2"})
         orig = api.get
         api.get = lambda path, timeout: {"data": {"affected_items": [], "failed_items": []}} \
             if "rules" in path else orig(path, timeout)
-        self.assertIsNone(m.ruleset_digest(api, MASTER, 30))
+        self.assertIsNone(m.ruleset_digest(api, MASTER, lambda: 30))
 
     def test_ruleset_digest_differs_between_versions(self):
         api = FakeApi({W0: lambda a: "v1", W1: lambda a: "v2", W2: lambda a: "v2"})
-        self.assertNotEqual(m.ruleset_digest(api, W0, 30), m.ruleset_digest(api, W1, 30))
-        self.assertEqual(m.ruleset_digest(api, W1, 30), m.ruleset_digest(api, W2, 30))
+        self.assertNotEqual(m.ruleset_digest(api, W0, lambda: 30), m.ruleset_digest(api, W1, lambda: 30))
+        self.assertEqual(m.ruleset_digest(api, W1, lambda: 30), m.ruleset_digest(api, W2, lambda: 30))
 
     # --- main flow ---
 
@@ -437,11 +438,97 @@ class Rules(unittest.TestCase):
         self.assertEqual(self.run_main(api, kube, TIMEOUT_SECONDS="45"), 0)
         self.assertTrue(all(0 < t <= 30 for t in api.timeouts + kube.timeouts), api.timeouts + kube.timeouts)
 
+    def test_last_digest_near_the_deadline_stays_in_budget(self):
+        # The last worker's digest starts with 16s left and each read takes 15s: the rules
+        # read must get the 1s left, not the 16s computed before the decoders read.
+        api = FakeApi({n: (lambda a: "v2") for n in NODES})
+        orig = api.get
+
+        def get(path, timeout):
+            if path.startswith("/cluster/%s/configuration/" % W2):
+                if path.endswith("/decoders"):
+                    self.time.t = 224
+                t = timeout()
+                if t < 15:
+                    self.time.t += t
+                    raise m.ApiError(0, "timed out")
+                self.time.t += 15
+            return orig(path, timeout)
+
+        api.get = get
+        self.assertEqual(self.run_main(api), 1)
+        self.assertLessEqual(self.time.t, 240)
+        self.assertIn("timeout: nodes that did not reload the master's ruleset: %s;" % W2, self.log())
+
+    def test_success_after_the_deadline_is_a_timeout(self):
+        # A check that only returns once the budget is spent must not count as success.
+        api = FakeApi({n: (lambda a: "v2") for n in NODES})
+        orig = api.get
+
+        def get(path, timeout):
+            r = orig(path, timeout)
+            if path == "/cluster/healthcheck":
+                self.time.t = 241
+            return r
+
+        api.get = get
+        self.assertEqual(self.run_main(api), 1)
+        self.assertIn("timeout: nodes not connected: checks finished after the 240s budget", self.log())
+        self.assertEqual(api.reloads, 0)
+
     def test_budget_exhausted_stops_before_any_request(self):
         kube = FakeKube({"t-wazuh-manager-worker": sts("t-wazuh-manager-worker", current="r1")})
         api = FakeApi({n: (lambda a: "v2") for n in NODES})
         self.assertEqual(self.run_main(api, kube, TIMEOUT_SECONDS="30"), 1)
         self.assertLessEqual(self.time.t, 30)
+
+
+class Client(unittest.TestCase):
+    def setUp(self):
+        self.t = 0.0
+        self.sent = []
+        self.orig = m._request
+        self.addCleanup(lambda: setattr(m, "_request", self.orig))
+
+    def remaining(self):
+        return 100 - self.t
+
+    def fake(self, answers):
+        """Each HTTP request takes 10s and pops the next answer (a body, or an ApiError)."""
+        def request(req, context, timeout):
+            self.sent.append((req.get_method(), req.full_url.split("/", 3)[-1], timeout))
+            self.t += 10
+            a = answers.pop(0)
+            if isinstance(a, Exception):
+                raise a
+            return a
+        m._request = request
+
+    def test_401_reauthenticates_and_retries_with_fresh_timeouts(self):
+        api = m.WazuhApi("https://h:55000", "u", "p")
+        api.token = "expired"
+        self.fake([m.ApiError(401, "expired"), "new-token", '{"data": {}}'])
+        self.assertEqual(api.get("/cluster/healthcheck", self.remaining), {"data": {}})
+        self.assertEqual([(s[0], s[1].split("?")[0], s[2]) for s in self.sent], [
+            ("GET", "cluster/healthcheck", 100),
+            ("POST", "security/user/authenticate", 90),
+            ("GET", "cluster/healthcheck", 80)])
+        self.assertEqual(api.token, "new-token")
+
+    def test_authentication_gets_its_own_timeout(self):
+        api = m.WazuhApi("https://h:55000", "u", "p")
+        self.fake(["token", '{"data": {}}'])
+        api.get("/x", self.remaining)
+        self.assertEqual([s[2] for s in self.sent], [100, 90])
+
+    def test_second_401_is_raised(self):
+        api = m.WazuhApi("https://h:55000", "u", "p")
+        api.token = "expired"
+        self.fake([m.ApiError(401, "a"), "token", m.ApiError(401, "b")])
+        with self.assertRaises(m.ApiError) as e:
+            api.get("/x", self.remaining)
+        self.assertEqual(e.exception.status, 401)
+        self.assertEqual(len(self.sent), 3)
 
 
 if __name__ == "__main__":
