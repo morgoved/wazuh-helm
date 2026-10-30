@@ -35,6 +35,16 @@ spec:
             matchLabels:
               app: {{ include "wazuh.fullname" . }}-manager
               node-type: worker
+    {{- if include "wazuh.rulesetReload.enabled" . }}
+    # The ruleset reload Job calls the Wazuh API.
+    - ports:
+        - protocol: TCP
+          port: 55000
+      from:
+        - podSelector:
+            matchLabels:
+              app: {{ include "wazuh.fullname" . }}-ruleset-reload
+    {{- end }}
     {{- with .Values.wazuh.master.networkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

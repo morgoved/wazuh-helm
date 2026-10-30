@@ -1,0 +1,12 @@
+{{- if include "wazuh.rulesetReload.enabled" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wazuh.fullname" . }}-ruleset-reload
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-ruleset-reload
+    app.kubernetes.io/component: manager
+data:
+  ruleset-reload.py: {{ .Files.Get "files/ruleset-reload.py" | quote }}
+{{- end }}

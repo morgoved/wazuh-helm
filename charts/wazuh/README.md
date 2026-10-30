@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -149,6 +149,63 @@ wazuh:
 > NetworkPolicy only opens the listed protocols, and the syslog Service ports are renamed.
 > Adding or removing a protocol on an existing release needs extra steps. See
 > [UPGRADING.md](./UPGRADING.md#21x--220).
+
+### Reloading the ruleset after upgrades
+
+Only the master reads `wazuh.localRules` and `wazuh.localDecoder` from the ConfigMap, when it
+starts. The workers receive the master's `etc/rules`, `etc/decoders` and `etc/lists` through
+the Wazuh cluster sync, but they start analysisd before that sync, and nothing reloads it
+afterwards. After an upgrade that changes the ruleset, the workers therefore keep running the
+previous one, even when every pod was restarted.
+
+`wazuh.rulesetReload.enabled` adds a Job, run after `helm install`, `upgrade` and `rollback`
+(and as an Argo CD `PostSync` hook), that fixes this:
+
+```yaml
+autoreload:
+  enabled: true # required: restarts the master when the ConfigMap changes
+wazuh:
+  rulesetReload:
+    enabled: true
+```
+
+The Job waits for both manager StatefulSets to finish their rollout, for every expected node
+(the master and `wazuh.worker.replicas` workers) to join the cluster, and for their ruleset
+files to be synced. It checks that the master serves the ConfigMap's `local_rules.xml` and
+`local_decoder.xml`, then calls `PUT /cluster/analysisd/reload` once. A worker only applies a
+reload at the end of its next cluster sync and reports the outcome in its own logs, so the Job
+then waits until every node has logged a new `Ruleset reloaded successfully` and, through the
+Wazuh API, runs the decoders and rules the master has loaded. It fails, naming the nodes, if
+that does not happen within `wazuh.rulesetReload.timeoutSeconds`.
+It only reads the two manager StatefulSets through the Kubernetes API, and uses the API
+credentials of `wazuh.apiCred` (or its `existingSecret`). The chart's API certificate is
+self-signed, so the Job does not verify it.
+
+- Helm waits for the Job up to `--timeout` (5m by default). The default
+  `timeoutSeconds: 240` covers the rollout, the sync and the reload; if you raise it, keep
+  `--timeout` at least 60s above it, so that the Job reports which node it waited for.
+- On a first `helm install`, the budget also covers volume provisioning and the first boot of
+  every manager. If the Job runs out of time there, the release is marked failed (and removed
+  with `--atomic` or `--rollback-on-failure`); raise `timeoutSeconds` and `--timeout` for a
+  slow cluster.
+- Argo CD runs the Job after a full sync, once the application is healthy. Selective syncs do
+  not run hooks.
+- The Job does not run when the ConfigMap is edited outside Helm or Argo CD, or when pods are
+  restarted by another tool (e.g. Reloader). Run `PUT /cluster/analysisd/reload` then.
+- The Job reloads once on every run, even when nothing in the ruleset changed: the loaded
+  rules the API returns leave out some options (e.g. `no_full_log`, `json_null_field`), so
+  matching nodes do not prove that a node runs the current ruleset. A reload drops the events
+  analysisd has queued and resets the state of frequency and timeframe rules.
+- No API shows the CDB lists analysisd has loaded: they are reloaded, but not compared.
+- Every expected node must be in the cluster. If workers keep leaving it (see the master's
+  `logs/cluster.log`), the Job fails the release rather than reload part of the cluster.
+- When the Job fails, read its log (`kubectl logs job/<release>-wazuh-ruleset-reload`). A
+  worker writes the outcome of its reload only to its own `logs/cluster.log`. A failed Job is
+  kept until the next run, and `helm uninstall` does not delete it.
+- Each comparison returns a node's whole loaded ruleset (about 4.5 MB of JSON with the default
+  rules) through the master's API, which grows the master's API processes by a few hundred MiB.
+  The Job reads the master's ruleset once and polls only the nodes not done yet, but a
+  master already close to its memory limit (`wazuh.master.resources`) can be OOM-killed.
 
 ### Values validation
 
@@ -439,6 +496,17 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.workerConf`                                  | Override for worker.conf. If empty, the generated ossec config is used.                | `""`                                   |
 | `wazuh.localDecoder`                                | Override for local_decoder.xml. If empty, files/local_decoder.xml is used.             | `""`                                   |
 | `wazuh.localRules`                                  | Override for local_rules.xml. If empty, files/local_rules.xml is used.                 | `""`                                   |
+| `wazuh.rulesetReload.enabled`                       | Post-deployment Job that reloads the ruleset on all nodes (needs autoreload).          | `false`                                |
+| `wazuh.rulesetReload.timeoutSeconds`                | Time budget of the Job; keep Helm's --timeout above it.                                | `240`                                  |
+| `wazuh.rulesetReload.pollIntervalSeconds`           | Seconds between two checks while the Job waits.                                        | `10`                                   |
+| `wazuh.rulesetReload.resources.requests.cpu`        | Minimum CPU assigned to the Job pod.                                                   | `50m`                                  |
+| `wazuh.rulesetReload.resources.requests.memory`     | Minimum memory assigned to the Job pod.                                                | `64Mi`                                 |
+| `wazuh.rulesetReload.resources.limits.memory`       | Maximum memory used by the Job pod.                                                    | `256Mi`                                |
+| `wazuh.rulesetReload.podSecurityContext`            | Security context of the Job pod.                                                       | `{}`                                   |
+| `wazuh.rulesetReload.securityContext`               | Job container security context, merged over a hardened default.                        | `{}`                                   |
+| `wazuh.rulesetReload.nodeSelector`                  | nodeSelector of the Job pod.                                                           | `{}`                                   |
+| `wazuh.rulesetReload.tolerations`                   | Tolerations of the Job pod.                                                            | `[]`                                   |
+| `wazuh.rulesetReload.affinity`                      | Affinity of the Job pod.                                                               | `{}`                                   |
 | `wazuh.internalOptions`                             | Override for internal_options.conf. If empty, files/internal_options.conf is used.     | `""`                                   |
 | `wazuh.filebeat.config`                             | Override for filebeat.yml. If empty, the generated config is used.                     | `""`                                   |
 | `wazuh.master.enabled`                              | Enable the master                                                                      | `true`                                 |

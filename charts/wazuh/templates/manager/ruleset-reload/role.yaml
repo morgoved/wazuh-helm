@@ -1,0 +1,35 @@
+{{- if include "wazuh.rulesetReload.enabled" . }}
+# Read-only access to the two manager StatefulSets, to wait for their rollout.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "wazuh.fullname" . }}-ruleset-reload
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-ruleset-reload
+    app.kubernetes.io/component: manager
+rules:
+  - apiGroups: ["apps"]
+    resources: ["statefulsets"]
+    verbs: ["get"]
+    resourceNames:
+      - {{ include "wazuh.fullname" . }}-manager-master
+      - {{ include "wazuh.fullname" . }}-manager-worker
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "wazuh.fullname" . }}-ruleset-reload
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-ruleset-reload
+    app.kubernetes.io/component: manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "wazuh.fullname" . }}-ruleset-reload
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "wazuh.fullname" . }}-ruleset-reload
+    namespace: {{ .Release.Namespace }}
+{{- end }}

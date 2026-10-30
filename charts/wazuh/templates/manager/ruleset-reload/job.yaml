@@ -1,0 +1,119 @@
+{{- if include "wazuh.rulesetReload.enabled" . }}
+{{- $fullname := include "wazuh.fullname" . }}
+{{- $r := .Values.wazuh.rulesetReload }}
+{{- $nodes := list (printf "%s-manager-master-0" $fullname) }}
+{{- if .Values.wazuh.worker.enabled }}
+{{- range $i := until (int .Values.wazuh.worker.replicas) }}
+{{- $nodes = append $nodes (printf "%s-manager-worker-%d" $fullname $i) }}
+{{- end }}
+{{- end }}
+# Makes every worker run the master's ruleset after a deployment: the workers start
+# analysisd before the cluster sync delivers the new rules, and nothing reloads it.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $fullname }}-ruleset-reload
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ $fullname }}-ruleset-reload
+    app.kubernetes.io/component: manager
+  annotations:
+    helm.sh/hook: post-install,post-upgrade,post-rollback
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation,HookSucceeded
+spec:
+  backoffLimit: 0
+  # Leaves the pod time to start and the script time to log its own timeout first.
+  activeDeadlineSeconds: {{ add (int $r.timeoutSeconds) 50 }}
+  template:
+    metadata:
+      labels:
+        app: {{ $fullname }}-ruleset-reload
+        app.kubernetes.io/component: manager
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ $fullname }}-ruleset-reload
+      {{- if .Values.wazuh.images.imagePullSecrets.enabled }}
+      imagePullSecrets:
+      {{- range .Values.wazuh.images.imagePullSecrets.secret }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- with $r.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $r.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $r.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $r.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: ruleset-reload
+          image: "{{ .Values.wazuh.images.repository }}:{{ .Values.wazuh.images.tag }}"
+          imagePullPolicy: {{ .Values.wazuh.images.pullPolicy }}
+          command: ["/var/ossec/framework/python/bin/python3", "/opt/ruleset-reload/ruleset-reload.py"]
+          env:
+            - name: WAZUH_API_URL
+              value: "https://{{ $fullname }}:55000"
+            - name: API_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.wazuh.apiCred.existingSecret | default "wazuh-api-cred" }}
+                  key: API_USERNAME
+            - name: API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.wazuh.apiCred.existingSecret | default "wazuh-api-cred" }}
+                  key: API_PASSWORD
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MASTER_STS
+              value: {{ $fullname }}-manager-master
+            - name: WORKER_STS
+              value: {{ if .Values.wazuh.worker.enabled }}{{ $fullname }}-manager-worker{{ end }}
+            - name: EXPECTED_NODES
+              value: {{ join "," $nodes }}
+            - name: TIMEOUT_SECONDS
+              value: {{ $r.timeoutSeconds | quote }}
+            - name: POLL_INTERVAL_SECONDS
+              value: {{ $r.pollIntervalSeconds | quote }}
+            - name: LOCAL_RULES_FILE
+              value: /opt/ruleset/local_rules.xml
+            - name: LOCAL_DECODER_FILE
+              value: /opt/ruleset/local_decoder.xml
+          {{- $hardened := dict "allowPrivilegeEscalation" false "readOnlyRootFilesystem" true "capabilities" (dict "drop" (list "ALL")) }}
+          securityContext:
+            {{- toYaml (mergeOverwrite $hardened $r.securityContext) | nindent 12 }}
+          resources:
+            {{- toYaml $r.resources | nindent 12 }}
+          volumeMounts:
+            - name: script
+              mountPath: /opt/ruleset-reload
+              readOnly: true
+            - name: ruleset
+              mountPath: /opt/ruleset
+              readOnly: true
+      volumes:
+        - name: script
+          configMap:
+            name: {{ $fullname }}-ruleset-reload
+        - name: ruleset
+          configMap:
+            name: {{ $fullname }}-manager-config
+            items:
+              - key: local_rules.xml
+                path: local_rules.xml
+              - key: local_decoder.xml
+                path: local_decoder.xml
+{{- end }}

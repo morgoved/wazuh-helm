@@ -1,6 +1,6 @@
 # wazuh-kubernetes-helm-chart
 
-![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square)
+![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square)
 ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 
@@ -46,6 +46,10 @@ Edge TLS (client to Gateway) and backend TLS (Gateway to the dashboard Service) 
 ### Syslog
 
 The workers receive syslog on port 514 over the transports listed in `wazuh.syslog.protocols` (`tcp` by default, `udp` or both). The listener, the worker Service and NetworkPolicy, and the LoadBalancer (when `wazuh.loadBalancer.ports` lists `syslog-tcp`/`syslog-udp`, or is empty) all follow that list. `wazuh.syslog.networkPolicyFrom` restricts which sources the worker NetworkPolicy lets reach 514 (any by default). See [Receiving syslog](./charts/wazuh/README.md#receiving-syslog) for the configuration, and [UPGRADING.md](./charts/wazuh/UPGRADING.md#21x--220) for the changes from 2.1.x and the steps needed when adding or removing a protocol on an existing release.
+
+### Ruleset reload
+
+After an upgrade that changes `wazuh.localRules` or `wazuh.localDecoder`, the workers keep running the previous ruleset: they start analysisd before the cluster sync delivers the new files. `wazuh.rulesetReload.enabled` (with `autoreload.enabled`) adds a post-upgrade Job, also an Argo CD `PostSync` hook, that reloads the ruleset once and waits until every node has reloaded it and runs the master's rules and decoders. See [Reloading the ruleset after upgrades](./charts/wazuh/README.md#reloading-the-ruleset-after-upgrades).
 
 ### Contributing
 
