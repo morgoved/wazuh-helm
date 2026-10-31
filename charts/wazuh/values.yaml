@@ -338,7 +338,7 @@ indexer:
     NETWORK_HOST: "0.0.0.0"
     DISABLE_INSTALL_DEMO_CONFIG: "true"
   ## @param indexer.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
-  ## @param indexer.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
+  ## @param indexer.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata. This value is immutable after StatefulSet creation, so changing this value will only work for new StatefulSets and PVCs.
   pvc:
     extraLabels: {} # @schema additionalProperties: true; skipProperties: true
     extraAnnotations: {} # @schema additionalProperties: true; skipProperties: true
@@ -938,7 +938,7 @@ wazuh:
       extraIngresses: []
       extraEgresses: []
     ## @param wazuh.master.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
-    ## @param wazuh.master.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
+    ## @param wazuh.master.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata. This value is immutable after StatefulSet creation, so changing this value will only work for new StatefulSets and PVCs.
     pvc:
       extraLabels: {} # @schema additionalProperties: true; skipProperties: true
       extraAnnotations: {} # @schema additionalProperties: true; skipProperties: true
@@ -1037,7 +1037,7 @@ wazuh:
       extraIngresses: []
       extraEgresses: []
     ## @param wazuh.worker.pvc.extraLabels Add addtional labels to the PersistentVolumeClaim metadata
-    ## @param wazuh.worker.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata
+    ## @param wazuh.worker.pvc.extraAnnotations Add addtional annotations to the PersistentVolumeClaim metadata. This value is immutable after StatefulSet creation, so changing this value will only work for new StatefulSets and PVCs.
     pvc:
       extraLabels: {} # @schema additionalProperties: true; skipProperties: true
       extraAnnotations: {} # @schema additionalProperties: true; skipProperties: true
