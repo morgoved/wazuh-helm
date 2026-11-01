@@ -724,6 +724,15 @@ wazuh:
     enabled: false
   ## @param wazuh.key Defines the key of the wazuh cluster.
   key: "c98b62a9b6169ac5f67dae55ae4a9088"
+  ## Read the cluster key from a Secret you manage (external-secrets, sealed-secrets, ...) instead
+  ## of wazuh.key. The chart then renders no wazuh-cluster-key Secret. The managers read the key
+  ## from the WAZUH_CLUSTER_KEY environment variable either way: ossec.conf carries the
+  ## to_be_replaced_by_cluster_key placeholder, which the manager image fills on container start.
+  ## @param wazuh.clusterKey.existingSecret Name of an existing Secret holding the cluster key; when set, wazuh.key is ignored.
+  ## @param wazuh.clusterKey.existingSecretKey Key of that Secret that holds the cluster key.
+  clusterKey:
+    existingSecret: ""
+    existingSecretKey: "key"
   ## @param wazuh.images.repository name of the image used.
   ## @param wazuh.images.tag Tag of the image.
   ## @param wazuh.images.pullPolicy pullPolicy of the image.

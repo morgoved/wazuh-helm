@@ -34,6 +34,9 @@ spec:
         checksum/configmap: {{ include (print $.Template.BasePath "/manager/configmap.yaml") . | sha256sum }}
         checksum/filebeat-certificate: {{ include (print $.Template.BasePath "/certs/filebeat/certificate.yaml") . | sha256sum }}
         checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
+        {{- if not (include "wazuh.clusterKey.existingSecret" .) }}
+        checksum/cluster-key-secret: {{ include (print $.Template.BasePath "/manager/secret-cluster-key.yaml") . | sha256sum }}
+        {{- end }}
         {{- end }}
         {{- with .Values.wazuh.worker.annotations }}
             {{- toYaml . | nindent 8 }}
@@ -260,8 +263,8 @@ spec:
             - name: WAZUH_CLUSTER_KEY
               valueFrom:
                 secretKeyRef:
-                  key: key
-                  name: "wazuh-cluster-key"
+                  name: {{ include "wazuh.clusterKey.secretName" . | quote }}
+                  key: {{ include "wazuh.clusterKey.secretKey" . | quote }}
             # Certs
             - name: SSL_CERTIFICATE_AUTHORITIES
               value: /etc/ssl/root-ca.pem

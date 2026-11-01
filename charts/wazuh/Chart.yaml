@@ -3,21 +3,17 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.9
-version: 2.3.0
+version: 2.4.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
     - kind: added
-      description: "wazuh.syslog.protocols selects the workers' syslog transports (tcp, udp or both)"
-    - kind: added
-      description: "wazuh.syslog.networkPolicyFrom restricts the sources allowed to reach the workers' syslog port"
-    - kind: fixed
-      description: "The syslog listener, worker ports, Service, NetworkPolicy and LoadBalancer now use the same protocols"
-    - kind: fixed
-      description: "The LoadBalancer sends syslog to the workers only, not to the master"
+      description: "wazuh.clusterKey.existingSecret reads the manager cluster key from an existing Secret instead of wazuh.key"
     - kind: changed
-      description: "Syslog on the LoadBalancer follows wazuh.loadBalancer.ports (syslog-tcp, syslog-udp)"
+      description: "With autoreload.enabled, a change of wazuh.key rolls both manager StatefulSets (checksum of the chart-managed cluster key Secret)"
+    - kind: changed
+      description: "ossec.conf carries the to_be_replaced_by_cluster_key placeholder, filled from WAZUH_CLUSTER_KEY by the manager image on start, so the key no longer appears in the ConfigMap"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh

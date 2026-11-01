@@ -293,7 +293,8 @@
     <node_name>{{ include "wazuh.fullname" $root }}-manager-worker-___INDEX___</node_name>
     <node_type>worker</node_type>
     {{- end }}
-    <key>{{ $root.Values.wazuh.key }}</key>
+    {{- /* Filled from WAZUH_CLUSTER_KEY by the manager image on start, so the key never sits in the ConfigMap. */}}
+    <key>to_be_replaced_by_cluster_key</key>
     <port>{{ $root.Values.wazuh.service.port }}</port>
     <bind_addr>0.0.0.0</bind_addr>
     <nodes>

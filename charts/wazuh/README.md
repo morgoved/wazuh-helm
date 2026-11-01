@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -459,6 +459,8 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.syslog.networkPolicyFrom`                    | NetworkPolicy peers allowed to reach the workers' syslog port (empty: any source).     | `[]`                                   |
 | `wazuh.archives.enabled`                            | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                         | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
+| `wazuh.clusterKey.existingSecret`                   | Name of an existing Secret holding the cluster key; when set, wazuh.key is ignored.    | `""`                                   |
+| `wazuh.clusterKey.existingSecretKey`                | Key of that Secret that holds the cluster key.                                         | `key`                                  |
 | `wazuh.images.repository`                           | name of the image used.                                                                | `wazuh/wazuh-manager`                  |
 | `wazuh.images.tag`                                  | Tag of the image.                                                                      | `4.14.9`                               |
 | `wazuh.images.pullPolicy`                           | pullPolicy of the image.                                                               | `IfNotPresent`                         |

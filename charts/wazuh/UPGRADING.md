@@ -1,5 +1,36 @@
 # Upgrading
 
+## 2.3.x → 2.4.0
+
+The manager cluster key is no longer rendered into the `<fullname>-manager-config` ConfigMap.
+`master.conf` and `worker.conf` now carry `<key>to_be_replaced_by_cluster_key</key>`, and the
+official manager image replaces it from the `WAZUH_CLUSTER_KEY` environment variable on every
+container start (`set_custom_cluster_key` in its init script). `wazuh.key` keeps working as
+before; `wazuh.clusterKey.existingSecret` lets you point `WAZUH_CLUSTER_KEY` at a Secret you
+manage, in which case the chart renders no `wazuh-cluster-key` Secret.
+
+- A custom `wazuh.images.repository` whose init script lacks `set_custom_cluster_key` ends up
+  with the literal placeholder in `ossec.conf` and the cluster does not form. Every
+  `wazuh/wazuh-manager` tag the chart has shipped includes it.
+- `wazuh.masterConf` / `wazuh.workerConf` overrides are untouched. They may use the same
+  placeholder instead of an inline key.
+
+### Moving an existing release to `wazuh.clusterKey.existingSecret`
+
+Do not point `existingSecret` at `wazuh-cluster-key`, the Secret the chart created. Once
+`existingSecret` is set the chart stops rendering that Secret, so Helm removes it from the
+release and deletes it while the managers still reference it. Instead:
+
+1. Create a Secret with a different name that holds the current key
+   (`kubectl -n <ns> get secret wazuh-cluster-key -o jsonpath='{.data.key}' | base64 -d`).
+2. Set `wazuh.clusterKey.existingSecret` to that name and upgrade. The pods switch to the new
+   reference and the chart-managed Secret is removed.
+
+With `autoreload.enabled`, a change of `wazuh.key` rolls both manager StatefulSets through a
+checksum of the chart-managed Secret. The chart cannot see changes to an external Secret:
+after rotating the key there, restart the managers
+(`kubectl -n <ns> rollout restart statefulset -l app=<fullname>-manager`).
+
 ## 2.1.x → 2.2.0
 
 2.2.0 adds `wazuh.syslog.protocols` (see [Receiving syslog](./README.md#receiving-syslog)).

@@ -489,6 +489,57 @@ out=$(render_only templates/manager/master/networkpolicy.yaml)
 assert_not_contains "master netpol unchanged when disabled" "$out" "ruleset-reload"
 expect_success "ruleset reload with master netpol disabled renders" render "${RR[@]}" --set wazuh.master.networkPolicy.enabled=false
 
+# --- Cluster key: inline (wazuh.key) vs existing Secret ---------------------------
+SECRET_CK=templates/manager/secret-cluster-key.yaml
+MASTER_STS=templates/manager/master/statefulset.yaml
+WORKER_STS=templates/manager/worker/statefulset.yaml
+MANAGER_CM=templates/manager/configmap.yaml
+
+out=$(render_only "$SECRET_CK")
+assert_contains "default renders the wazuh-cluster-key Secret" "$out" "name: wazuh-cluster-key"
+assert_eq "default Secret carries wazuh.key" "$(yq '.data.key' <<<"$out" | base64 -d)" "c98b62a9b6169ac5f67dae55ae4a9088"
+out=$(render_only "$MASTER_STS")
+assert_contains "master reads the default Secret" "$out" 'name: "wazuh-cluster-key"'
+assert_contains "master reads key \"key\" by default" "$out" 'key: "key"'
+out=$(render_only "$MANAGER_CM")
+assert_contains "ossec.conf carries the cluster key placeholder" "$out" "<key>to_be_replaced_by_cluster_key</key>"
+assert_not_contains "ossec.conf does not inline the cluster key" "$out" "c98b62a9b6169ac5f67dae55ae4a9088"
+
+CK=(--set wazuh.clusterKey.existingSecret=my-cluster-key --set wazuh.clusterKey.existingSecretKey=WAZUH_CLUSTER_KEY)
+assert_eq "existingSecret: no wazuh-cluster-key Secret rendered" "$(render_only "$SECRET_CK" "${CK[@]}" 2>/dev/null | grep -c 'kind: Secret')" "0"
+out=$(render_only "$MASTER_STS" "${CK[@]}")
+assert_contains "master reads the existing Secret" "$out" 'name: "my-cluster-key"'
+assert_contains "master reads the configured key" "$out" 'key: "WAZUH_CLUSTER_KEY"'
+assert_not_contains "master no longer references the default Secret" "$out" "wazuh-cluster-key"
+out=$(render_only "$WORKER_STS" "${CK[@]}")
+assert_contains "worker reads the existing Secret" "$out" 'name: "my-cluster-key"'
+assert_contains "worker reads the configured key" "$out" 'key: "WAZUH_CLUSTER_KEY"'
+out=$(render_only "$MASTER_STS" --set wazuh.clusterKey.existingSecret=my-cluster-key)
+assert_contains "existingSecretKey defaults to key" "$out" 'key: "key"'
+
+# clusterKey block absent (helm upgrade --reuse-values from 2.3.x)
+expect_success "missing clusterKey block: Secret renders" render_only "$SECRET_CK" --set wazuh.clusterKey=null
+expect_success "missing clusterKey block: master renders" render_only "$MASTER_STS" --set wazuh.clusterKey=null
+expect_success "missing clusterKey block: worker renders" render_only "$WORKER_STS" --set wazuh.clusterKey=null
+out=$(render_only "$MASTER_STS" --set wazuh.clusterKey=null)
+assert_contains "missing clusterKey block: master reads the default Secret" "$out" 'name: "wazuh-cluster-key"'
+assert_contains "missing clusterKey block: master reads key \"key\"" "$out" 'key: "key"'
+
+# autoreload: a new wazuh.key must roll the managers
+AR=(--set autoreload.enabled=true)
+a=$(render_only "$MASTER_STS" "${AR[@]}" --set wazuh.key=0123456789abcdef0123456789abcdef)
+b=$(render_only "$MASTER_STS" "${AR[@]}" --set wazuh.key=fedcba9876543210fedcba9876543210)
+assert_contains "autoreload: master carries the cluster key checksum" "$a" "checksum/cluster-key-secret:"
+expect_success "autoreload: master pod template changes with wazuh.key" test "$a" != "$b"
+a=$(render_only "$WORKER_STS" "${AR[@]}" --set wazuh.key=0123456789abcdef0123456789abcdef)
+b=$(render_only "$WORKER_STS" "${AR[@]}" --set wazuh.key=fedcba9876543210fedcba9876543210)
+assert_contains "autoreload: worker carries the cluster key checksum" "$a" "checksum/cluster-key-secret:"
+expect_success "autoreload: worker pod template changes with wazuh.key" test "$a" != "$b"
+out=$(render_only "$MASTER_STS" "${AR[@]}" "${CK[@]}")
+assert_not_contains "autoreload: no cluster key checksum with an existing Secret" "$out" "checksum/cluster-key-secret:"
+out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
+assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
+
 echo
 echo "==================================="
 echo "PASS: $pass  FAIL: $fail"
