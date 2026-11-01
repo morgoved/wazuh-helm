@@ -1,5 +1,20 @@
 # Upgrading
 
+## 2.3.x → 2.4.0
+
+The manager cluster key is no longer rendered into the `<fullname>-manager-config` ConfigMap.
+`master.conf` and `worker.conf` now carry `<key>to_be_replaced_by_cluster_key</key>`, and the
+official manager image replaces it from the `WAZUH_CLUSTER_KEY` environment variable on every
+container start (`set_custom_cluster_key` in its init script). `wazuh.key` keeps working as
+before; `wazuh.clusterKey.existingSecret` lets you point `WAZUH_CLUSTER_KEY` at a Secret you
+manage, in which case the chart renders no `wazuh-cluster-key` Secret.
+
+- A custom `wazuh.images.repository` whose init script lacks `set_custom_cluster_key` ends up
+  with the literal placeholder in `ossec.conf` and the cluster does not form. Every
+  `wazuh/wazuh-manager` tag the chart has shipped includes it.
+- `wazuh.masterConf` / `wazuh.workerConf` overrides are untouched. They may use the same
+  placeholder instead of an inline key.
+
 ## 2.1.x → 2.2.0
 
 2.2.0 adds `wazuh.syslog.protocols` (see [Receiving syslog](./README.md#receiving-syslog)).

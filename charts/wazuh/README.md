@@ -459,6 +459,8 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.syslog.networkPolicyFrom`                    | NetworkPolicy peers allowed to reach the workers' syslog port (empty: any source).     | `[]`                                   |
 | `wazuh.archives.enabled`                            | Index every event, not just alerts.                                                    | `false`                                |
 | `wazuh.key`                                         | Defines the key of the wazuh cluster.                                                  | `c98b62a9b6169ac5f67dae55ae4a9088`     |
+| `wazuh.clusterKey.existingSecret`                   | Name of an existing Secret holding the cluster key; when set, wazuh.key is ignored.    | `""`                                   |
+| `wazuh.clusterKey.existingSecretKey`                | Key of that Secret that holds the cluster key.                                         | `key`                                  |
 | `wazuh.images.repository`                           | name of the image used.                                                                | `wazuh/wazuh-manager`                  |
 | `wazuh.images.tag`                                  | Tag of the image.                                                                      | `4.14.9`                               |
 | `wazuh.images.pullPolicy`                           | pullPolicy of the image.                                                               | `IfNotPresent`                         |

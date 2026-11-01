@@ -265,8 +265,8 @@ spec:
             - name: WAZUH_CLUSTER_KEY
               valueFrom:
                 secretKeyRef:
-                  key: key
-                  name: "wazuh-cluster-key"
+                  name: {{ .Values.wazuh.clusterKey.existingSecret | default "wazuh-cluster-key" | quote }}
+                  key: {{ ternary .Values.wazuh.clusterKey.existingSecretKey "key" (not (empty .Values.wazuh.clusterKey.existingSecret)) | quote }}
           {{- with .Values.wazuh.master.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

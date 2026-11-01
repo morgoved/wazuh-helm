@@ -489,6 +489,34 @@ out=$(render_only templates/manager/master/networkpolicy.yaml)
 assert_not_contains "master netpol unchanged when disabled" "$out" "ruleset-reload"
 expect_success "ruleset reload with master netpol disabled renders" render "${RR[@]}" --set wazuh.master.networkPolicy.enabled=false
 
+# --- Cluster key: inline (wazuh.key) vs existing Secret ---------------------------
+SECRET_CK=templates/manager/secret-cluster-key.yaml
+MASTER_STS=templates/manager/master/statefulset.yaml
+WORKER_STS=templates/manager/worker/statefulset.yaml
+MANAGER_CM=templates/manager/configmap.yaml
+
+out=$(render_only "$SECRET_CK")
+assert_contains "default renders the wazuh-cluster-key Secret" "$out" "name: wazuh-cluster-key"
+assert_eq "default Secret carries wazuh.key" "$(yq '.data.key' <<<"$out" | base64 -d)" "c98b62a9b6169ac5f67dae55ae4a9088"
+out=$(render_only "$MASTER_STS")
+assert_contains "master reads the default Secret" "$out" 'name: "wazuh-cluster-key"'
+assert_contains "master reads key \"key\" by default" "$out" 'key: "key"'
+out=$(render_only "$MANAGER_CM")
+assert_contains "ossec.conf carries the cluster key placeholder" "$out" "<key>to_be_replaced_by_cluster_key</key>"
+assert_not_contains "ossec.conf does not inline the cluster key" "$out" "c98b62a9b6169ac5f67dae55ae4a9088"
+
+CK=(--set wazuh.clusterKey.existingSecret=my-cluster-key --set wazuh.clusterKey.existingSecretKey=WAZUH_CLUSTER_KEY)
+assert_eq "existingSecret: no wazuh-cluster-key Secret rendered" "$(render_only "$SECRET_CK" "${CK[@]}" 2>/dev/null | grep -c 'kind: Secret')" "0"
+out=$(render_only "$MASTER_STS" "${CK[@]}")
+assert_contains "master reads the existing Secret" "$out" 'name: "my-cluster-key"'
+assert_contains "master reads the configured key" "$out" 'key: "WAZUH_CLUSTER_KEY"'
+assert_not_contains "master no longer references the default Secret" "$out" "wazuh-cluster-key"
+out=$(render_only "$WORKER_STS" "${CK[@]}")
+assert_contains "worker reads the existing Secret" "$out" 'name: "my-cluster-key"'
+assert_contains "worker reads the configured key" "$out" 'key: "WAZUH_CLUSTER_KEY"'
+out=$(render_only "$MASTER_STS" --set wazuh.clusterKey.existingSecret=my-cluster-key)
+assert_contains "existingSecretKey defaults to key" "$out" 'key: "key"'
+
 echo
 echo "==================================="
 echo "PASS: $pass  FAIL: $fail"
