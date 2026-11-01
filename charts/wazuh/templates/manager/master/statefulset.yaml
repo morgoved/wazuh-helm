@@ -36,6 +36,9 @@ spec:
         checksum/configmap: {{ include (print $.Template.BasePath "/manager/configmap.yaml") . | sha256sum }}
         checksum/filebeat-certificate: {{ include (print $.Template.BasePath "/certs/filebeat/certificate.yaml") . | sha256sum }}
         checksum/indexer-secret: {{ include (print $.Template.BasePath "/indexer/secret.yaml") . | sha256sum }}
+        {{- if not (include "wazuh.clusterKey.existingSecret" .) }}
+        checksum/cluster-key-secret: {{ include (print $.Template.BasePath "/manager/secret-cluster-key.yaml") . | sha256sum }}
+        {{- end }}
         checksum/api-secret: {{ include (print $.Template.BasePath "/manager/secret-api-cred.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.wazuh.master.annotations }}
@@ -265,8 +268,8 @@ spec:
             - name: WAZUH_CLUSTER_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.wazuh.clusterKey.existingSecret | default "wazuh-cluster-key" | quote }}
-                  key: {{ ternary .Values.wazuh.clusterKey.existingSecretKey "key" (not (empty .Values.wazuh.clusterKey.existingSecret)) | quote }}
+                  name: {{ include "wazuh.clusterKey.secretName" . | quote }}
+                  key: {{ include "wazuh.clusterKey.secretKey" . | quote }}
           {{- with .Values.wazuh.master.additionalEnv }}
             {{- toYaml . | nindent 12 }}
           {{- end }}

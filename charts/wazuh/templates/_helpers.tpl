@@ -178,6 +178,27 @@ Define serviceaccount names
 {{- end -}}
 {{- end -}}
 
+{{/*
+Cluster key Secret: the chart-managed wazuh-cluster-key, or the one named in
+wazuh.clusterKey.existingSecret. The clusterKey block may be absent on --reuse-values
+upgrades from 2.3.x, so every access goes through dig.
+*/}}
+{{- define "wazuh.clusterKey.existingSecret" -}}
+{{- dig "clusterKey" "existingSecret" "" .Values.wazuh -}}
+{{- end -}}
+
+{{- define "wazuh.clusterKey.secretName" -}}
+{{- include "wazuh.clusterKey.existingSecret" . | default "wazuh-cluster-key" -}}
+{{- end -}}
+
+{{- define "wazuh.clusterKey.secretKey" -}}
+{{- if include "wazuh.clusterKey.existingSecret" . -}}
+{{- dig "clusterKey" "existingSecretKey" "key" .Values.wazuh | default "key" -}}
+{{- else -}}
+key
+{{- end -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.gateway.tlsSecretName" -}}
 {{- if .Values.dashboard.gateway.tls.certificate.create -}}
 {{- .Values.dashboard.gateway.tls.secretName | default (printf "%s-dashboard-letsencrypt" (include "wazuh.fullname" .)) -}}

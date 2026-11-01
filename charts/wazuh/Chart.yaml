@@ -11,6 +11,8 @@ annotations:
     - kind: added
       description: "wazuh.clusterKey.existingSecret reads the manager cluster key from an existing Secret instead of wazuh.key"
     - kind: changed
+      description: "With autoreload.enabled, a change of wazuh.key rolls both manager StatefulSets (checksum of the chart-managed cluster key Secret)"
+    - kind: changed
       description: "ossec.conf carries the to_be_replaced_by_cluster_key placeholder, filled from WAZUH_CLUSTER_KEY by the manager image on start, so the key no longer appears in the ConfigMap"
   artifacthub.io/links: |
     - name: application source

@@ -517,6 +517,29 @@ assert_contains "worker reads the configured key" "$out" 'key: "WAZUH_CLUSTER_KE
 out=$(render_only "$MASTER_STS" --set wazuh.clusterKey.existingSecret=my-cluster-key)
 assert_contains "existingSecretKey defaults to key" "$out" 'key: "key"'
 
+# clusterKey block absent (helm upgrade --reuse-values from 2.3.x)
+expect_success "missing clusterKey block: Secret renders" render_only "$SECRET_CK" --set wazuh.clusterKey=null
+expect_success "missing clusterKey block: master renders" render_only "$MASTER_STS" --set wazuh.clusterKey=null
+expect_success "missing clusterKey block: worker renders" render_only "$WORKER_STS" --set wazuh.clusterKey=null
+out=$(render_only "$MASTER_STS" --set wazuh.clusterKey=null)
+assert_contains "missing clusterKey block: master reads the default Secret" "$out" 'name: "wazuh-cluster-key"'
+assert_contains "missing clusterKey block: master reads key \"key\"" "$out" 'key: "key"'
+
+# autoreload: a new wazuh.key must roll the managers
+AR=(--set autoreload.enabled=true)
+a=$(render_only "$MASTER_STS" "${AR[@]}" --set wazuh.key=0123456789abcdef0123456789abcdef)
+b=$(render_only "$MASTER_STS" "${AR[@]}" --set wazuh.key=fedcba9876543210fedcba9876543210)
+assert_contains "autoreload: master carries the cluster key checksum" "$a" "checksum/cluster-key-secret:"
+expect_success "autoreload: master pod template changes with wazuh.key" test "$a" != "$b"
+a=$(render_only "$WORKER_STS" "${AR[@]}" --set wazuh.key=0123456789abcdef0123456789abcdef)
+b=$(render_only "$WORKER_STS" "${AR[@]}" --set wazuh.key=fedcba9876543210fedcba9876543210)
+assert_contains "autoreload: worker carries the cluster key checksum" "$a" "checksum/cluster-key-secret:"
+expect_success "autoreload: worker pod template changes with wazuh.key" test "$a" != "$b"
+out=$(render_only "$MASTER_STS" "${AR[@]}" "${CK[@]}")
+assert_not_contains "autoreload: no cluster key checksum with an existing Secret" "$out" "checksum/cluster-key-secret:"
+out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
+assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
+
 echo
 echo "==================================="
 echo "PASS: $pass  FAIL: $fail"
