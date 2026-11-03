@@ -637,7 +637,7 @@ EOF
 port_args=("${api_gw_args[@]}" -f /tmp/wazuh-render-test-api-ports.yaml)
 out=$(render_only "$API_HTTPROUTE" "${port_args[@]}")
 assert_contains "HTTPRoute targets the Service port" "$out" "port: 443"
-out=$(render_only "$MASTER_NETPOL" "${port_args[@]}" | sed -n '/Gateway data plane/,/from:/p')
+out=$(render_only "$MASTER_NETPOL" "${port_args[@]}" | grep -A3 'Gateway data plane')
 assert_contains "NetworkPolicy opens the pod port behind the Service" "$out" "port: 55000"
 assert_not_contains "NetworkPolicy does not open the Service port" "$out" "port: 443"
 
