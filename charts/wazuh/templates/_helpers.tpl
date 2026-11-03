@@ -341,6 +341,15 @@ chart without wazuh.rulesetReload have no such block: treat it as disabled.
 {{- $port -}}
 {{- end -}}
 
+{{/* Pod port behind that entry (targetPort, or the port when unset): what a NetworkPolicy must open. */}}
+{{- define "wazuh.api.targetPort" -}}
+{{- $port := 55000 -}}
+{{- range .Values.wazuh.master.service.ports -}}
+{{- if eq .name "api" }}{{ $port = .targetPort | default .port }}{{ end -}}
+{{- end -}}
+{{- $port -}}
+{{- end -}}
+
 {{- define "wazuh.api.gateway.tlsSecretName" -}}
 {{- if .Values.wazuh.api.gateway.tls.certificate.create -}}
 {{- .Values.wazuh.api.gateway.tls.secretName | default (printf "%s-api-letsencrypt" (include "wazuh.fullname" .)) -}}

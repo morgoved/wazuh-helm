@@ -245,9 +245,10 @@ wazuh:
 
 A public CA only issues public names, so `serviceNames: false` keeps the in-cluster Service
 names off the certificate (CN and SANs are then the Gateway host and `dnsNames`). With the
-chart's own CA, keep `serviceNames: true` and point `backendTLS.caCertificateRef.name` at a
-ConfigMap holding its `ca.crt` (trust-manager can keep one from the `wazuh-root-secret` Secret).
-`networkPolicyFrom` opens the API port on the master NetworkPolicy for the Gateway pods only;
+chart's own CA, point `backendTLS.caCertificateRef.name` at a ConfigMap holding its `ca.crt`
+(trust-manager can keep one from the `wazuh-root-secret` Secret); the key may hold a PEM bundle
+of several CAs. The Gateway always validates the Gateway host, a SAN in both modes.
+`networkPolicyFrom` opens the API pod port on the master NetworkPolicy for the Gateway pods only;
 empty, the port is open to any source once the Gateway is enabled.
 
 The certificate is renewed by cert-manager and loaded by the managers on their next restart.
@@ -548,7 +549,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.api.gateway.tls.issuerRef.group`             | Group of the issuer signing the edge TLS certificate.                                  | `cert-manager.io`                      |
 | `wazuh.api.gateway.networkPolicyFrom`               | NetworkPolicy peers allowed to reach the API port on the master (empty: any source).   | `[]`                                   |
 | `wazuh.api.gateway.backendTLS.wellKnownCACertificates` | System: validate the API certificate for api.gateway.host with the system CAs.         | `""`                                   |
-| `wazuh.api.gateway.backendTLS.caCertificateRef.name` | ConfigMap (key ca.crt) with the CA of the API certificate (or wellKnownCACertificates). | `""`                                   |
+| `wazuh.api.gateway.backendTLS.caCertificateRef.name` | ConfigMap (key ca.crt, PEM bundle) trusted for the API certificate, unless wellKnownCACertificates. | `""`                                   |
 | `wazuh.authd.enabled`                               | enable password-based agent registration                                               | `true`                                 |
 | `wazuh.authd.existingSecret`                        | name of the existingSecret                                                             | `""`                                   |
 | `wazuh.authd.pass`                                  | password of the authd.                                                                 | `password`                             |

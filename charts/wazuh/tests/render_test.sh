@@ -581,7 +581,7 @@ out=$(render_only "$API_HTTPROUTE" "${api_gw_args[@]}")
 assert_contains "HTTPRoute attaches to the ListenerSet" "$out" "kind: ListenerSet"
 assert_contains "HTTPRoute targets the master Service on the API port" "$out" "port: 55000"
 out=$(render_only "$API_BACKENDTLS" "${api_gw_args[@]}")
-assert_contains "BackendTLSPolicy validates the chart CA SAN" "$out" "hostname: test-wazuh"
+assert_contains "BackendTLSPolicy validates the Gateway host" "$out" 'hostname: "wazuh-api.example.com"'
 assert_contains "BackendTLSPolicy references the CA ConfigMap" "$out" "name: wazuh-ca"
 out=$(render_only "$API_HTTPROUTE" "${api_gw_args[@]}" --set wazuh.api.gateway.listenerSet.enabled=false)
 assert_contains "direct attachment targets the Gateway" "$out" "kind: Gateway"
@@ -608,7 +608,8 @@ assert_contains "extra public name is kept" "$out" '- "api.example.net"'
 assert_not_contains "no Service name SAN" "$out" "test-wazuh.default.svc"
 assert_not_contains "no fullname SAN" "$out" '- "test-wazuh"'
 expect_failure "serviceNames=false without any public name must fail" render_only "$API_CERT" --set wazuh.api.certificate.enabled=true --set wazuh.api.certificate.serviceNames=false --set wazuh.api.certificate.issuerRef.name=le
-expect_failure "caCertificateRef mode needs the Service name SAN" render_only "$API_BACKENDTLS" "${api_gw_args[@]}" --set wazuh.api.certificate.serviceNames=false
+out=$(render_only "$API_BACKENDTLS" "${api_gw_args[@]}" --set wazuh.api.certificate.serviceNames=false)
+assert_contains "caCertificateRef mode works without Service names (Gateway host is validated)" "$out" 'hostname: "wazuh-api.example.com"'
 
 echo "== Gateway peers on the master NetworkPolicy =="
 MASTER_NETPOL=templates/manager/master/networkpolicy.yaml
@@ -618,6 +619,12 @@ out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}")
 assert_contains "Gateway enabled opens the API port" "$out" "Gateway data plane"
 out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}" --set 'wazuh.api.gateway.networkPolicyFrom[0].namespaceSelector.matchLabels.kubernetes\.io/metadata\.name=gw-ns')
 assert_contains "Gateway peers are rendered as from" "$out" "kubernetes.io/metadata.name: gw-ns"
+port_args=("${api_gw_args[@]}" --set wazuh.master.service.ports[1].port=443 --set wazuh.master.service.ports[1].targetPort=55000)
+out=$(render_only "$API_HTTPROUTE" "${port_args[@]}")
+assert_contains "HTTPRoute targets the Service port" "$out" "port: 443"
+out=$(render_only "$MASTER_NETPOL" "${port_args[@]}" | sed -n '/Gateway data plane/,/from:/p')
+assert_contains "NetworkPolicy opens the pod port behind the Service" "$out" "port: 55000"
+assert_not_contains "NetworkPolicy does not open the Service port" "$out" "port: 443"
 
 echo "== --reuse-values from a chart without wazuh.api: absent reads as off =="
 expect_success "render with wazuh.api=null" render --set wazuh.api=null

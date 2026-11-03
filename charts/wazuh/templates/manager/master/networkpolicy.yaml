@@ -46,10 +46,10 @@ spec:
               app: {{ include "wazuh.fullname" . }}-ruleset-reload
     {{- end }}
     {{- if include "wazuh.api.gateway.enabled" . }}
-    # The Gateway data plane calls the API; wazuh.api.gateway.networkPolicyFrom narrows it to those pods.
+    # The Gateway data plane calls the API (pod port, not the Service port); wazuh.api.gateway.networkPolicyFrom narrows it to those pods.
     - ports:
         - protocol: TCP
-          port: {{ include "wazuh.api.port" . }}
+          port: {{ include "wazuh.api.targetPort" . }}
       {{- with .Values.wazuh.api.gateway.networkPolicyFrom }}
       from:
         {{- toYaml . | nindent 8 }}

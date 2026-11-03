@@ -804,7 +804,7 @@ wazuh:
   ## @param wazuh.api.gateway.tls.issuerRef.group Group of the issuer signing the edge TLS certificate.
   ## @param wazuh.api.gateway.networkPolicyFrom NetworkPolicy peers allowed to reach the API port on the master (empty: any source).
   ## @param wazuh.api.gateway.backendTLS.wellKnownCACertificates System: validate the API certificate for api.gateway.host with the system CAs.
-  ## @param wazuh.api.gateway.backendTLS.caCertificateRef.name ConfigMap (key ca.crt) with the CA of the API certificate (or wellKnownCACertificates).
+  ## @param wazuh.api.gateway.backendTLS.caCertificateRef.name ConfigMap (key ca.crt, PEM bundle) trusted for the API certificate, unless wellKnownCACertificates.
   api:
     certificate:
       enabled: false

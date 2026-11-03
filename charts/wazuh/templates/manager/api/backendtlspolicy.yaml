@@ -13,14 +13,17 @@ spec:
       kind: Service
       name: {{ include "wazuh.fullname" . }}
   validation:
-    {{- if $backend.wellKnownCACertificates }}
-    # A public issuer signed the API certificate for the Gateway hostname (certs/api/certificate.yaml).
+    # The Gateway host is a SAN of the API certificate in every mode (certs/api/certificate.yaml), so
+    # the trusted CA can change without touching the certificate's names.
     hostname: {{ .Values.wazuh.api.gateway.host | quote }}
+    {{- if $backend.wellKnownCACertificates }}
     wellKnownCACertificates: {{ $backend.wellKnownCACertificates }}
     {{- else }}
-    {{- if not .Values.wazuh.api.certificate.serviceNames }}
-    {{- fail "wazuh.api.gateway.backendTLS.caCertificateRef validates the Service name SAN: keep wazuh.api.certificate.serviceNames true, or validate a public certificate with wellKnownCACertificates" }}
+    caCertificateRefs:
+      - kind: ConfigMap
+        name: {{ required "wazuh.api.gateway.backendTLS.caCertificateRef.name is required when wazuh.api.gateway.enabled is true and backendTLS.wellKnownCACertificates is empty (ConfigMap with a ca.crt key)" $backend.caCertificateRef.name }}
     {{- end }}
+{{- end }}
     # Must match a SAN on the API certificate (certs/api/certificate.yaml).
     hostname: {{ include "wazuh.fullname" . }}
     caCertificateRefs:
