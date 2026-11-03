@@ -1,0 +1,38 @@
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled .Values.wazuh.api.gateway.enabled .Values.wazuh.api.gateway.listenerSet.enabled }}
+{{- $tls := .Values.wazuh.api.gateway.tls | default dict }}
+{{- $tlsEnabled := $tls.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: ListenerSet
+metadata:
+  name: {{ include "wazuh.fullname" . }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+  {{- if .Values.wazuh.api.gateway.annotations }}
+  annotations:
+    {{- toYaml .Values.wazuh.api.gateway.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  parentRef:
+    group: {{ .Values.wazuh.api.gateway.parentRef.group }}
+    kind: {{ .Values.wazuh.api.gateway.parentRef.kind }}
+    name: {{ required "wazuh.api.gateway.parentRef.name is required when wazuh.api.gateway.enabled is true" .Values.wazuh.api.gateway.parentRef.name }}
+    {{- with .Values.wazuh.api.gateway.parentRef.namespace }}
+    namespace: {{ . }}
+    {{- end }}
+  listeners:
+    - name: api
+      hostname: {{ .Values.wazuh.api.gateway.host | quote }}
+      port: {{ if $tlsEnabled }}443{{ else }}80{{ end }}
+      protocol: {{ if $tlsEnabled }}HTTPS{{ else }}HTTP{{ end }}
+      allowedRoutes:
+        namespaces:
+          from: Same
+      {{- if $tlsEnabled }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: {{ include "wazuh.api.gateway.tlsSecretName" . }}
+      {{- end }}
+{{- end }}

@@ -207,6 +207,38 @@ self-signed, so the Job does not verify it.
   The Job reads the master's ruleset once and polls only the nodes not done yet, but a
   master already close to its memory limit (`wazuh.master.resources`) can be OOM-killed.
 
+### Exposing the API through a Gateway
+
+The manager API (port 55000 on every manager) serves, by default, the self-signed certificate the
+manager image generates on first start, so clients cannot verify it. `wazuh.api.certificate.enabled`
+has cert-manager issue it instead (Secret `api-tls`, mounted over the image's file on every start),
+from the chart's CA issuer or any `issuerRef`. `wazuh.api.gateway` then exposes the API through
+Gateway API resources, the way `dashboard.gateway` exposes the dashboard, and adds a
+`BackendTLSPolicy` so the Gateway verifies the API certificate:
+
+```yaml
+wazuh:
+  api:
+    certificate:
+      issuerRef:                 # omit to sign with the chart's CA (certificates.enabled)
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+    gateway:
+      enabled: true
+      host: wazuh-api.example.com
+      parentRef:
+        name: internal
+        namespace: gateway-system
+      listenerSet:
+        enabled: false           # the parent Gateway already has a listener for the host
+      backendTLS:
+        wellKnownCACertificates: System   # public issuer; otherwise caCertificateRef.name
+```
+
+With the chart's own CA, point `backendTLS.caCertificateRef.name` at a ConfigMap holding its
+`ca.crt` (trust-manager can keep one from the `wazuh-root-secret` Secret). The certificate is
+renewed by cert-manager; the managers pick a renewed one up on their next restart.
+
 ### Values validation
 
 The chart ships a `values.schema.json`, so Helm rejects unknown keys at `install`,
@@ -479,6 +511,27 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.apiCred.existingSecret`                      | name of the existingSecret                                                             | `""`                                   |
 | `wazuh.apiCred.username`                            | name of the username.                                                                  | `wazuh-wui`                            |
 | `wazuh.apiCred.password`                            | password of the user.                                                                  | `MyS3cr37P450r.*-`                     |
+| `wazuh.api.certificate.enabled`                     | Issue the API server certificate with cert-manager (Secret api-tls). Implied by api.gateway. | `false`                                |
+| `wazuh.api.certificate.issuerRef.name`              | Issuer signing the API certificate. Empty: the chart's CA issuer (certificates.issuer). | `""`                                   |
+| `wazuh.api.certificate.issuerRef.kind`              | Kind of that issuer (Issuer or ClusterIssuer).                                         | `Issuer`                               |
+| `wazuh.api.certificate.issuerRef.group`             | Group of that issuer.                                                                  | `cert-manager.io`                      |
+| `wazuh.api.certificate.dnsNames`                    | Extra DNS names on the API certificate, next to the Service names and api.gateway.host. | `[]`                                   |
+| `wazuh.api.gateway.enabled`                         | Expose the API through Gateway API resources (HTTPRoute + parent), as for the dashboard.   | `false`                                |
+| `wazuh.api.gateway.host`                            | Hostname under which the API is exposed through the Gateway.                           | `wazuh-api.example.com`                |
+| `wazuh.api.gateway.annotations`                     | Annotations to add on the ListenerSet.                                                 | `{}`                                   |
+| `wazuh.api.gateway.parentRef.group`                 | Group of the parent Gateway reference.                                                 | `gateway.networking.k8s.io`            |
+| `wazuh.api.gateway.parentRef.kind`                  | Kind of the parent Gateway reference.                                                  | `Gateway`                              |
+| `wazuh.api.gateway.parentRef.name`                  | Name of the parent Gateway. Required when api.gateway.enabled is true.                 | `""`                                   |
+| `wazuh.api.gateway.parentRef.namespace`             | Namespace of the parent Gateway. Empty when the Gateway is in the same namespace.      | `""`                                   |
+| `wazuh.api.gateway.listenerSet.enabled`             | Create a ListenerSet for the HTTPRoute. Disable to attach it directly to the parent Gateway. | `true`                                 |
+| `wazuh.api.gateway.tls.enabled`                     | Terminate edge TLS (client to Gateway) on the listener for the API hostname.           | `false`                                |
+| `wazuh.api.gateway.tls.secretName`                  | Secret holding the edge TLS certificate. Default "<fullname>-api-letsencrypt" when created. | `""`                                   |
+| `wazuh.api.gateway.tls.certificate.create`          | Create a cert-manager Certificate for the edge TLS secret, or reuse tls.secretName.    | `true`                                 |
+| `wazuh.api.gateway.tls.issuerRef.name`              | Issuer signing the edge TLS certificate. Required when tls.certificate.create is true. | `""`                                   |
+| `wazuh.api.gateway.tls.issuerRef.kind`              | Kind of the issuer signing the edge TLS certificate (Issuer or ClusterIssuer).         | `ClusterIssuer`                        |
+| `wazuh.api.gateway.tls.issuerRef.group`             | Group of the issuer signing the edge TLS certificate.                                  | `cert-manager.io`                      |
+| `wazuh.api.gateway.backendTLS.wellKnownCACertificates` | System: validate the API certificate for api.gateway.host with the system CAs.         | `""`                                   |
+| `wazuh.api.gateway.backendTLS.caCertificateRef.name` | ConfigMap (key ca.crt) with the CA of the API certificate (or wellKnownCACertificates).    | `""`                                   |
 | `wazuh.authd.enabled`                               | enable password-based agent registration                                               | `true`                                 |
 | `wazuh.authd.existingSecret`                        | name of the existingSecret                                                             | `""`                                   |
 | `wazuh.authd.pass`                                  | password of the authd.                                                                 | `password`                             |

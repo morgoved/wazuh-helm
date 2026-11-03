@@ -320,3 +320,25 @@ chart without wazuh.rulesetReload have no such block: treat it as disabled.
 {{- define "wazuh.rulesetReload.enabled" -}}
 {{- if and .Values.wazuh.enabled (dig "rulesetReload" "enabled" false .Values.wazuh) }}true{{- end }}
 {{- end }}
+
+{{/* The API server certificate is chart-issued when asked for or when a Gateway must verify it. */}}
+{{- define "wazuh.api.certificate.enabled" -}}
+{{- if or .Values.wazuh.api.certificate.enabled .Values.wazuh.api.gateway.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{/* Port of the master Service entry named "api" (55000 unless renamed). */}}
+{{- define "wazuh.api.port" -}}
+{{- $port := 55000 -}}
+{{- range .Values.wazuh.master.service.ports -}}
+{{- if eq .name "api" }}{{ $port = .port }}{{ end -}}
+{{- end -}}
+{{- $port -}}
+{{- end -}}
+
+{{- define "wazuh.api.gateway.tlsSecretName" -}}
+{{- if .Values.wazuh.api.gateway.tls.certificate.create -}}
+{{- .Values.wazuh.api.gateway.tls.secretName | default (printf "%s-api-letsencrypt" (include "wazuh.fullname" .)) -}}
+{{- else -}}
+{{- required "wazuh.api.gateway.tls.secretName is required when wazuh.api.gateway.tls.certificate.create is false" .Values.wazuh.api.gateway.tls.secretName -}}
+{{- end -}}
+{{- end -}}

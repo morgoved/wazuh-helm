@@ -76,6 +76,11 @@ spec:
         - name: filebeat-certs
           secret:
             secretName: filebeat-tls
+        {{- if include "wazuh.api.certificate.enabled" . }}
+        - name: api-certs
+          secret:
+            secretName: api-tls
+        {{- end }}
         - name: wazuh-authd-pass
           secret:
             secretName: {{ .Values.wazuh.authd.existingSecret | default "wazuh-authd-pass" }}
@@ -174,6 +179,17 @@ spec:
               name: filebeat-certs
               readOnly: true
               subPath: tls.key
+            {{- if include "wazuh.api.certificate.enabled" . }}
+            # API server certificate (cert-manager), copied over the image's self-signed one on start
+            - mountPath: /wazuh-config-mount/api/configuration/ssl/server.crt
+              name: api-certs
+              readOnly: true
+              subPath: tls.crt
+            - mountPath: /wazuh-config-mount/api/configuration/ssl/server.key
+              name: api-certs
+              readOnly: true
+              subPath: tls.key
+            {{- end }}
             # Authd pass
             - name: wazuh-authd-pass
               mountPath: /wazuh-config-mount/etc/authd.pass

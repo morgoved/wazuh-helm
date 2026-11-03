@@ -1,0 +1,18 @@
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled .Values.wazuh.api.gateway.enabled .Values.wazuh.api.gateway.tls.enabled .Values.wazuh.api.gateway.tls.certificate.create }}
+{{- $secretName := include "wazuh.api.gateway.tlsSecretName" . }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $secretName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+spec:
+  secretName: {{ $secretName }}
+  issuerRef:
+    name: {{ required "wazuh.api.gateway.tls.issuerRef.name is required when wazuh.api.gateway.tls.certificate.create is true" .Values.wazuh.api.gateway.tls.issuerRef.name }}
+    kind: {{ .Values.wazuh.api.gateway.tls.issuerRef.kind }}
+    group: {{ .Values.wazuh.api.gateway.tls.issuerRef.group }}
+  dnsNames:
+    - {{ .Values.wazuh.api.gateway.host | quote }}
+{{- end }}
