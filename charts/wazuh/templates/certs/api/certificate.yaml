@@ -1,7 +1,19 @@
 {{- if and .Values.wazuh.enabled (include "wazuh.api.certificate.enabled" .) }}
-{{- $issuer := .Values.wazuh.api.certificate.issuerRef }}
+{{- $cert := .Values.wazuh.api.certificate }}
+{{- $issuer := $cert.issuerRef }}
 {{- if and (not $issuer.name) (not .Values.certificates.enabled) }}
 {{- fail "wazuh.api.certificate needs certificates.enabled (the chart's CA issuer) or wazuh.api.certificate.issuerRef.name" }}
+{{- end }}
+{{- $names := list }}
+{{- if $cert.serviceNames }}
+{{- $names = list (include "wazuh.fullname" .) (printf "%s.%s" (include "wazuh.fullname" .) .Release.Namespace) (printf "%s.%s.svc" (include "wazuh.fullname" .) .Release.Namespace) (printf "%s.%s.svc.cluster.local" (include "wazuh.fullname" .) .Release.Namespace) }}
+{{- end }}
+{{- if include "wazuh.api.gateway.enabled" . }}
+{{- $names = append $names .Values.wazuh.api.gateway.host }}
+{{- end }}
+{{- $names = concat $names ($cert.dnsNames | default list) }}
+{{- if not $names }}
+{{- fail "wazuh.api.certificate: with serviceNames false, set wazuh.api.gateway.host or wazuh.api.certificate.dnsNames (a public CA only issues public names)" }}
 {{- end }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -19,16 +31,10 @@ spec:
   duration: {{ .Values.certificates.duration }}
   renewBefore: {{ .Values.certificates.renewBefore }}
   isCA: false
-  commonName: {{ include "wazuh.fullname" . }}
+  # serviceNames: the in-cluster names first (CN = Service name); off: public names only, CN = the first
+  commonName: {{ first $names | quote }}
   dnsNames:
-    - {{ include "wazuh.fullname" . }}
-    - {{ include "wazuh.fullname" . }}.{{ .Release.Namespace }}
-    - {{ include "wazuh.fullname" . }}.{{ .Release.Namespace }}.svc
-    - {{ include "wazuh.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
-    {{- if .Values.wazuh.api.gateway.enabled }}
-    - {{ .Values.wazuh.api.gateway.host | quote }}
-    {{- end }}
-    {{- range .Values.wazuh.api.certificate.dnsNames }}
+    {{- range $names }}
     - {{ . | quote }}
     {{- end }}
   subject:

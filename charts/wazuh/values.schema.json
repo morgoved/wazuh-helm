@@ -1472,6 +1472,9 @@
                     }
                   },
                   "additionalProperties": false
+                },
+                "serviceNames": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -1515,6 +1518,27 @@
                     }
                   },
                   "additionalProperties": false
+                },
+                "networkPolicyFrom": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ipBlock": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "namespaceSelector": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "podSelector": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    },
+                    "additionalProperties": false
+                  }
                 },
                 "parentRef": {
                   "type": "object",

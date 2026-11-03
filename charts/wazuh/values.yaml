@@ -779,11 +779,14 @@ wazuh:
     password: "MyS3cr37P450r.*-"
   ## The manager API (port 55000, master and workers). By default it serves the self-signed
   ## certificate the manager image generates on first start; api.certificate replaces it with one
-  ## issued by cert-manager so clients, and a Gateway in front of it, can verify it.
+  ## issued by cert-manager so clients, and a Gateway in front of it, can verify it. Changing the
+  ## issuer or the Gateway's CA later needs the staged procedure in UPGRADING.md: the managers only
+  ## load a new certificate on restart.
   ## @param wazuh.api.certificate.enabled Issue the API server certificate with cert-manager (Secret api-tls). Implied by api.gateway.
   ## @param wazuh.api.certificate.issuerRef.name Issuer signing the API certificate. Empty: the chart's CA issuer (certificates.issuer).
   ## @param wazuh.api.certificate.issuerRef.kind Kind of that issuer (Issuer or ClusterIssuer).
   ## @param wazuh.api.certificate.issuerRef.group Group of that issuer.
+  ## @param wazuh.api.certificate.serviceNames Put the master Service names on the API certificate (CN + SANs). Off for a public CA.
   ## @param wazuh.api.certificate.dnsNames Extra DNS names on the API certificate, next to the Service names and api.gateway.host.
   ## @param wazuh.api.gateway.enabled Expose the API through Gateway API resources (HTTPRoute + parent), as for the dashboard.
   ## @param wazuh.api.gateway.host Hostname under which the API is exposed through the Gateway.
@@ -799,6 +802,7 @@ wazuh:
   ## @param wazuh.api.gateway.tls.issuerRef.name Issuer signing the edge TLS certificate. Required when tls.certificate.create is true.
   ## @param wazuh.api.gateway.tls.issuerRef.kind Kind of the issuer signing the edge TLS certificate (Issuer or ClusterIssuer).
   ## @param wazuh.api.gateway.tls.issuerRef.group Group of the issuer signing the edge TLS certificate.
+  ## @param wazuh.api.gateway.networkPolicyFrom NetworkPolicy peers allowed to reach the API port on the master (empty: any source).
   ## @param wazuh.api.gateway.backendTLS.wellKnownCACertificates System: validate the API certificate for api.gateway.host with the system CAs.
   ## @param wazuh.api.gateway.backendTLS.caCertificateRef.name ConfigMap (key ca.crt) with the CA of the API certificate (or wellKnownCACertificates).
   api:
@@ -808,6 +812,7 @@ wazuh:
         name: ""
         kind: Issuer
         group: cert-manager.io
+      serviceNames: true
       dnsNames: []
     gateway:
       enabled: false
@@ -829,6 +834,7 @@ wazuh:
           name: ""
           kind: ClusterIssuer
           group: cert-manager.io
+      networkPolicyFrom: [] # @schema item: object; itemProperties: {podSelector: {type: object, additionalProperties: true}, namespaceSelector: {type: object, additionalProperties: true}, ipBlock: {type: object, additionalProperties: true}}
       backendTLS:
         wellKnownCACertificates: ""
         caCertificateRef:

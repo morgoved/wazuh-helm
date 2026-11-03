@@ -1,4 +1,4 @@
-{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled .Values.wazuh.api.gateway.enabled }}
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled (include "wazuh.api.gateway.enabled" .) }}
 {{- $backend := .Values.wazuh.api.gateway.backendTLS }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: BackendTLSPolicy
@@ -18,6 +18,9 @@ spec:
     hostname: {{ .Values.wazuh.api.gateway.host | quote }}
     wellKnownCACertificates: {{ $backend.wellKnownCACertificates }}
     {{- else }}
+    {{- if not .Values.wazuh.api.certificate.serviceNames }}
+    {{- fail "wazuh.api.gateway.backendTLS.caCertificateRef validates the Service name SAN: keep wazuh.api.certificate.serviceNames true, or validate a public certificate with wellKnownCACertificates" }}
+    {{- end }}
     # Must match a SAN on the API certificate (certs/api/certificate.yaml).
     hostname: {{ include "wazuh.fullname" . }}
     caCertificateRefs:

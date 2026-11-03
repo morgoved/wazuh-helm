@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -223,6 +223,7 @@ wazuh:
       issuerRef:                 # omit to sign with the chart's CA (certificates.enabled)
         name: letsencrypt-prod
         kind: ClusterIssuer
+      serviceNames: false        # a public CA: only the Gateway host on the certificate
     gateway:
       enabled: true
       host: wazuh-api.example.com
@@ -233,11 +234,25 @@ wazuh:
         enabled: false           # the parent Gateway already has a listener for the host
       backendTLS:
         wellKnownCACertificates: System   # public issuer; otherwise caCertificateRef.name
+      networkPolicyFrom:                  # the Gateway's data-plane pods (master NetworkPolicy)
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gateway-system
+          podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: internal
 ```
 
-With the chart's own CA, point `backendTLS.caCertificateRef.name` at a ConfigMap holding its
-`ca.crt` (trust-manager can keep one from the `wazuh-root-secret` Secret). The certificate is
-renewed by cert-manager; the managers pick a renewed one up on their next restart.
+A public CA only issues public names, so `serviceNames: false` keeps the in-cluster Service
+names off the certificate (CN and SANs are then the Gateway host and `dnsNames`). With the
+chart's own CA, keep `serviceNames: true` and point `backendTLS.caCertificateRef.name` at a
+ConfigMap holding its `ca.crt` (trust-manager can keep one from the `wazuh-root-secret` Secret).
+`networkPolicyFrom` opens the API port on the master NetworkPolicy for the Gateway pods only;
+empty, the port is open to any source once the Gateway is enabled.
+
+The certificate is renewed by cert-manager and loaded by the managers on their next restart.
+Changing the issuer or the CA the Gateway trusts is a staged change: see
+[UPGRADING.md](UPGRADING.md#changing-the-api-certificate-issuer-or-the-gateways-ca).
 
 ### Values validation
 
@@ -515,8 +530,9 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.api.certificate.issuerRef.name`              | Issuer signing the API certificate. Empty: the chart's CA issuer (certificates.issuer). | `""`                                   |
 | `wazuh.api.certificate.issuerRef.kind`              | Kind of that issuer (Issuer or ClusterIssuer).                                         | `Issuer`                               |
 | `wazuh.api.certificate.issuerRef.group`             | Group of that issuer.                                                                  | `cert-manager.io`                      |
+| `wazuh.api.certificate.serviceNames`                | Put the master Service names on the API certificate (CN + SANs). Off for a public CA.  | `true`                                 |
 | `wazuh.api.certificate.dnsNames`                    | Extra DNS names on the API certificate, next to the Service names and api.gateway.host. | `[]`                                   |
-| `wazuh.api.gateway.enabled`                         | Expose the API through Gateway API resources (HTTPRoute + parent), as for the dashboard.   | `false`                                |
+| `wazuh.api.gateway.enabled`                         | Expose the API through Gateway API resources (HTTPRoute + parent), as for the dashboard. | `false`                                |
 | `wazuh.api.gateway.host`                            | Hostname under which the API is exposed through the Gateway.                           | `wazuh-api.example.com`                |
 | `wazuh.api.gateway.annotations`                     | Annotations to add on the ListenerSet.                                                 | `{}`                                   |
 | `wazuh.api.gateway.parentRef.group`                 | Group of the parent Gateway reference.                                                 | `gateway.networking.k8s.io`            |
@@ -530,8 +546,9 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.api.gateway.tls.issuerRef.name`              | Issuer signing the edge TLS certificate. Required when tls.certificate.create is true. | `""`                                   |
 | `wazuh.api.gateway.tls.issuerRef.kind`              | Kind of the issuer signing the edge TLS certificate (Issuer or ClusterIssuer).         | `ClusterIssuer`                        |
 | `wazuh.api.gateway.tls.issuerRef.group`             | Group of the issuer signing the edge TLS certificate.                                  | `cert-manager.io`                      |
+| `wazuh.api.gateway.networkPolicyFrom`               | NetworkPolicy peers allowed to reach the API port on the master (empty: any source).   | `[]`                                   |
 | `wazuh.api.gateway.backendTLS.wellKnownCACertificates` | System: validate the API certificate for api.gateway.host with the system CAs.         | `""`                                   |
-| `wazuh.api.gateway.backendTLS.caCertificateRef.name` | ConfigMap (key ca.crt) with the CA of the API certificate (or wellKnownCACertificates).    | `""`                                   |
+| `wazuh.api.gateway.backendTLS.caCertificateRef.name` | ConfigMap (key ca.crt) with the CA of the API certificate (or wellKnownCACertificates). | `""`                                   |
 | `wazuh.authd.enabled`                               | enable password-based agent registration                                               | `true`                                 |
 | `wazuh.authd.existingSecret`                        | name of the existingSecret                                                             | `""`                                   |
 | `wazuh.authd.pass`                                  | password of the authd.                                                                 | `password`                             |

@@ -321,9 +321,15 @@ chart without wazuh.rulesetReload have no such block: treat it as disabled.
 {{- if and .Values.wazuh.enabled (dig "rulesetReload" "enabled" false .Values.wazuh) }}true{{- end }}
 {{- end }}
 
+{{/* wazuh.api may be absent (release values from a chart without it, --reuse-values): absent is off. */}}
+{{- define "wazuh.api.gateway.enabled" -}}
+{{- if dig "gateway" "enabled" false (.Values.wazuh.api | default dict) -}}true{{- end -}}
+{{- end -}}
+
 {{/* The API server certificate is chart-issued when asked for or when a Gateway must verify it. */}}
 {{- define "wazuh.api.certificate.enabled" -}}
-{{- if or .Values.wazuh.api.certificate.enabled .Values.wazuh.api.gateway.enabled -}}true{{- end -}}
+{{- $api := .Values.wazuh.api | default dict -}}
+{{- if or (dig "certificate" "enabled" false $api) (dig "gateway" "enabled" false $api) -}}true{{- end -}}
 {{- end -}}
 
 {{/* Port of the master Service entry named "api" (55000 unless renamed). */}}

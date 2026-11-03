@@ -557,7 +557,7 @@ echo "== wazuh.api.certificate.enabled: chart CA issues api-tls, mounted over th
 cert_args=(--set wazuh.api.certificate.enabled=true --set wazuh.api.certificate.dnsNames[0]=api.internal.example)
 out=$(render_only "$API_CERT" "${cert_args[@]}")
 assert_contains "Certificate secret is api-tls" "$out" "secretName: api-tls"
-assert_contains "Certificate carries the master Service name" "$out" "- test-wazuh.default.svc.cluster.local"
+assert_contains "Certificate carries the master Service name" "$out" '- "test-wazuh.default.svc.cluster.local"'
 assert_contains "Certificate carries the extra dnsName" "$out" '- "api.internal.example"'
 assert_contains "Certificate is signed by the chart CA issuer" "$out" "name: test-wazuh-ca-issuer"
 for sts in "$MASTER_STS" "$WORKER_STS"; do
@@ -599,6 +599,34 @@ assert_contains "edge TLS secret defaults to <fullname>-api-letsencrypt" "$out" 
 out=$(render_only "$API_EDGE_CERT" "${api_pub_args[@]}")
 assert_contains "edge Certificate for the API host" "$out" '- "wazuh-api.example.com"'
 expect_failure "edge TLS without an issuer must fail" render_only "$API_EDGE_CERT" "${api_pub_args[@]}" --set wazuh.api.gateway.tls.issuerRef.name=
+
+echo "== public CA: serviceNames=false keeps the in-cluster names off the certificate =="
+pub_cert_args=("${api_pub_args[@]}" --set wazuh.api.certificate.serviceNames=false --set wazuh.api.certificate.dnsNames[0]=api.example.net)
+out=$(render_only "$API_CERT" "${pub_cert_args[@]}")
+assert_contains "CN is the gateway host" "$out" 'commonName: "wazuh-api.example.com"'
+assert_contains "extra public name is kept" "$out" '- "api.example.net"'
+assert_not_contains "no Service name SAN" "$out" "test-wazuh.default.svc"
+assert_not_contains "no fullname SAN" "$out" '- "test-wazuh"'
+expect_failure "serviceNames=false without any public name must fail" render_only "$API_CERT" --set wazuh.api.certificate.enabled=true --set wazuh.api.certificate.serviceNames=false --set wazuh.api.certificate.issuerRef.name=le
+expect_failure "caCertificateRef mode needs the Service name SAN" render_only "$API_BACKENDTLS" "${api_gw_args[@]}" --set wazuh.api.certificate.serviceNames=false
+
+echo "== Gateway peers on the master NetworkPolicy =="
+MASTER_NETPOL=templates/manager/master/networkpolicy.yaml
+out=$(render_only "$MASTER_NETPOL")
+assert_not_contains "no Gateway rule without the Gateway" "$out" "Gateway data plane"
+out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}")
+assert_contains "Gateway enabled opens the API port" "$out" "Gateway data plane"
+out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}" --set 'wazuh.api.gateway.networkPolicyFrom[0].namespaceSelector.matchLabels.kubernetes\.io/metadata\.name=gw-ns')
+assert_contains "Gateway peers are rendered as from" "$out" "kubernetes.io/metadata.name: gw-ns"
+
+echo "== --reuse-values from a chart without wazuh.api: absent reads as off =="
+expect_success "render with wazuh.api=null" render --set wazuh.api=null
+expect_failure "no API Certificate with wazuh.api=null" render_only "$API_CERT" --set wazuh.api=null
+expect_failure "no API HTTPRoute with wazuh.api=null" render_only "$API_HTTPROUTE" --set wazuh.api=null
+out=$(render_only "$MASTER_STS" --set wazuh.api=null)
+assert_not_contains "master does not mount api-tls with wazuh.api=null" "$out" "name: api-certs"
+out=$(render_only "$MASTER_NETPOL" --set wazuh.api=null)
+assert_not_contains "no Gateway rule with wazuh.api=null" "$out" "Gateway data plane"
 
 echo
 echo "==================================="

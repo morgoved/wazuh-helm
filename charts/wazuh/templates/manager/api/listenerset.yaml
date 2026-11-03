@@ -1,4 +1,4 @@
-{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled .Values.wazuh.api.gateway.enabled .Values.wazuh.api.gateway.listenerSet.enabled }}
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled (include "wazuh.api.gateway.enabled" .) .Values.wazuh.api.gateway.listenerSet.enabled }}
 {{- $tls := .Values.wazuh.api.gateway.tls | default dict }}
 {{- $tlsEnabled := $tls.enabled }}
 apiVersion: gateway.networking.k8s.io/v1

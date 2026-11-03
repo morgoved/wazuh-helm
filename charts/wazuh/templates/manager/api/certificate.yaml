@@ -1,4 +1,4 @@
-{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled .Values.wazuh.api.gateway.enabled .Values.wazuh.api.gateway.tls.enabled .Values.wazuh.api.gateway.tls.certificate.create }}
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled (include "wazuh.api.gateway.enabled" .) .Values.wazuh.api.gateway.tls.enabled .Values.wazuh.api.gateway.tls.certificate.create }}
 {{- $secretName := include "wazuh.api.gateway.tlsSecretName" . }}
 apiVersion: cert-manager.io/v1
 kind: Certificate

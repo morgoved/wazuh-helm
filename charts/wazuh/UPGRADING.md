@@ -131,3 +131,29 @@ LoadBalancer port reaches it, so syslog stops until the second upgrade.
 `--force` (Helm 3) and `--force-replace` (Helm 4) replace every object of the release, not just
 the ones above. Replacing a bound chart-managed PVC (e.g. the indexer snapshot PVC) fails,
 because the rendered PVC has no `spec.volumeName`.
+
+## Changing the API certificate issuer or the Gateway's CA
+
+`wazuh.api.certificate` and `wazuh.api.gateway.backendTLS` move independently of the managers:
+cert-manager rewrites the `api-tls` Secret when the issuer changes, but a manager only loads the
+file on its next start, and the Gateway trusts whatever `backendTLS` says the moment the
+`BackendTLSPolicy` is applied. `autoreload.enabled` does not help here: a checksum of the
+Certificate manifest would roll the managers before cert-manager has issued the new certificate.
+Stage the change so that the Gateway trusts both certificates while the managers switch:
+
+1. **Make the Gateway trust the new CA as well.** With `caCertificateRef`, add the new CA to the
+   ConfigMap's `ca.crt` (a PEM bundle). Switching to or from `wellKnownCACertificates: System`
+   cannot trust both: expect the API to be unreachable through the Gateway between steps 3 and 4.
+2. **Change the issuer** (`wazuh.api.certificate.issuerRef`, and `serviceNames: false` for a public
+   CA) and upgrade. Wait for the new certificate:
+   `kubectl -n <ns> wait certificate <fullname>-api --for=condition=Ready --timeout=10m`.
+   Until it is Ready the Secret still holds the old certificate and nothing has changed.
+3. **Restart the managers** so they load it:
+   `kubectl -n <ns> rollout restart statefulset/<fullname>-manager-master statefulset/<fullname>-manager-worker`.
+   Agents reconnect on their own.
+4. **Point `backendTLS` at the new CA only** (`caCertificateRef.name`, or
+   `wellKnownCACertificates: System` for a public issuer) and upgrade. The policy applies at once;
+   the managers already serve the matching certificate. Then drop the old CA from the bundle.
+
+Renewals by cert-manager need no steps: the same CA signs the renewed certificate, and the
+managers load it on their next restart (`certificates.renewBefore` leaves ample time).
