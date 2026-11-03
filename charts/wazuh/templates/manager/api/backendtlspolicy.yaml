@@ -1,0 +1,26 @@
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled (include "wazuh.api.gateway.enabled" .) }}
+{{- $backend := .Values.wazuh.api.gateway.backendTLS }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: {{ include "wazuh.fullname" . }}-api-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: {{ include "wazuh.fullname" . }}
+  validation:
+    # The Gateway host is a SAN of the API certificate in every mode (certs/api/certificate.yaml), so
+    # the trusted CA can change without touching the certificate's names.
+    hostname: {{ .Values.wazuh.api.gateway.host | quote }}
+    {{- if $backend.wellKnownCACertificates }}
+    wellKnownCACertificates: {{ $backend.wellKnownCACertificates }}
+    {{- else }}
+    caCertificateRefs:
+      - kind: ConfigMap
+        name: {{ required "wazuh.api.gateway.backendTLS.caCertificateRef.name is required when wazuh.api.gateway.enabled is true and backendTLS.wellKnownCACertificates is empty (ConfigMap with a ca.crt key)" $backend.caCertificateRef.name }}
+    {{- end }}
+{{- end }}

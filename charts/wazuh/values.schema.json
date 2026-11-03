@@ -1446,6 +1446,160 @@
             "additionalProperties": false
           }
         },
+        "api": {
+          "type": "object",
+          "properties": {
+            "certificate": {
+              "type": "object",
+              "properties": {
+                "dnsNames": {
+                  "type": "array"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "issuerRef": {
+                  "type": "object",
+                  "properties": {
+                    "group": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "serviceNames": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            },
+            "gateway": {
+              "type": "object",
+              "properties": {
+                "annotations": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "backendTLS": {
+                  "type": "object",
+                  "properties": {
+                    "caCertificateRef": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "wellKnownCACertificates": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "host": {
+                  "type": "string"
+                },
+                "listenerSet": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "networkPolicyFrom": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ipBlock": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "namespaceSelector": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "podSelector": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "parentRef": {
+                  "type": "object",
+                  "properties": {
+                    "group": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "namespace": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "tls": {
+                  "type": "object",
+                  "properties": {
+                    "certificate": {
+                      "type": "object",
+                      "properties": {
+                        "create": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "issuerRef": {
+                      "type": "object",
+                      "properties": {
+                        "group": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "secretName": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
         "apiCred": {
           "type": "object",
           "properties": {

@@ -540,6 +540,116 @@ assert_not_contains "autoreload: no cluster key checksum with an existing Secret
 out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
 assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
 
+# --- API certificate and Gateway (wazuh.api) ------------------------------------
+echo "== wazuh.api disabled (default): no API certificate, mount or Gateway resource =="
+API_CERT=templates/certs/api/certificate.yaml
+API_HTTPROUTE=templates/manager/api/httproute.yaml
+API_LISTENERSET=templates/manager/api/listenerset.yaml
+API_BACKENDTLS=templates/manager/api/backendtlspolicy.yaml
+API_EDGE_CERT=templates/manager/api/certificate.yaml
+expect_failure "no API Certificate by default" render_only "$API_CERT"
+expect_failure "no API HTTPRoute by default" render_only "$API_HTTPROUTE"
+expect_failure "no API BackendTLSPolicy by default" render_only "$API_BACKENDTLS"
+out=$(render_only "$MASTER_STS")
+assert_not_contains "master does not mount api-tls by default" "$out" "name: api-certs"
+
+echo "== wazuh.api.certificate.enabled: chart CA issues api-tls, mounted over the image's file =="
+cert_args=(--set wazuh.api.certificate.enabled=true --set wazuh.api.certificate.dnsNames[0]=api.internal.example)
+out=$(render_only "$API_CERT" "${cert_args[@]}")
+assert_contains "Certificate secret is api-tls" "$out" "secretName: api-tls"
+assert_contains "Certificate carries the master Service name" "$out" '- "test-wazuh.default.svc.cluster.local"'
+assert_contains "Certificate carries the extra dnsName" "$out" '- "api.internal.example"'
+assert_contains "Certificate is signed by the chart CA issuer" "$out" "name: test-wazuh-ca-issuer"
+for sts in "$MASTER_STS" "$WORKER_STS"; do
+  out=$(render_only "$sts" "${cert_args[@]}")
+  assert_contains "$sts mounts server.crt from api-tls" "$out" "mountPath: /wazuh-config-mount/api/configuration/ssl/server.crt"
+  assert_contains "$sts mounts server.key from api-tls" "$out" "mountPath: /wazuh-config-mount/api/configuration/ssl/server.key"
+done
+expect_failure "chart CA issuer needs certificates.enabled" render_only "$API_CERT" "${cert_args[@]}" --set certificates.enabled=false
+out=$(render_only "$API_CERT" "${cert_args[@]}" --set certificates.enabled=false --set wazuh.api.certificate.issuerRef.name=le --set wazuh.api.certificate.issuerRef.kind=ClusterIssuer)
+assert_contains "a custom issuerRef works without the chart CA" "$out" "kind: ClusterIssuer"
+
+echo "== wazuh.api.gateway: HTTPRoute + BackendTLSPolicy, certificate implied =="
+expect_failure "gateway without parentRef.name must fail" render --set wazuh.api.gateway.enabled=true --set wazuh.api.gateway.backendTLS.caCertificateRef.name=ca
+expect_failure "gateway without a CA ConfigMap or System CAs must fail" render --set wazuh.api.gateway.enabled=true --set wazuh.api.gateway.parentRef.name=my-gw
+api_gw_args=(--set wazuh.api.gateway.enabled=true --set wazuh.api.gateway.parentRef.name=my-gw --set wazuh.api.gateway.host=wazuh-api.example.com --set wazuh.api.gateway.backendTLS.caCertificateRef.name=wazuh-ca)
+out=$(render_only "$API_CERT" "${api_gw_args[@]}")
+assert_contains "gateway implies the API certificate, with the gateway host as a SAN" "$out" '- "wazuh-api.example.com"'
+out=$(render_only "$API_LISTENERSET" "${api_gw_args[@]}")
+assert_contains "ListenerSet listens for the API host over HTTP" "$out" "protocol: HTTP"
+out=$(render_only "$API_HTTPROUTE" "${api_gw_args[@]}")
+assert_contains "HTTPRoute attaches to the ListenerSet" "$out" "kind: ListenerSet"
+assert_contains "HTTPRoute targets the master Service on the API port" "$out" "port: 55000"
+out=$(render_only "$API_BACKENDTLS" "${api_gw_args[@]}")
+assert_contains "BackendTLSPolicy validates the Gateway host" "$out" 'hostname: "wazuh-api.example.com"'
+assert_contains "BackendTLSPolicy references the CA ConfigMap" "$out" "name: wazuh-ca"
+out=$(render_only "$API_HTTPROUTE" "${api_gw_args[@]}" --set wazuh.api.gateway.listenerSet.enabled=false)
+assert_contains "direct attachment targets the Gateway" "$out" "kind: Gateway"
+expect_failure "direct attachment renders no ListenerSet" render_only "$API_LISTENERSET" "${api_gw_args[@]}" --set wazuh.api.gateway.listenerSet.enabled=false
+
+echo "== wazuh.api.gateway with a public issuer: System CAs, edge TLS =="
+api_pub_args=(--set wazuh.api.gateway.enabled=true --set wazuh.api.gateway.parentRef.name=my-gw --set wazuh.api.gateway.host=wazuh-api.example.com --set wazuh.api.gateway.backendTLS.wellKnownCACertificates=System --set wazuh.api.certificate.issuerRef.name=le --set wazuh.api.certificate.issuerRef.kind=ClusterIssuer --set wazuh.api.gateway.tls.enabled=true --set wazuh.api.gateway.tls.issuerRef.name=le)
+out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}")
+assert_contains "BackendTLSPolicy validates the gateway host" "$out" 'hostname: "wazuh-api.example.com"'
+assert_contains "BackendTLSPolicy uses the system CAs" "$out" "wellKnownCACertificates: System"
+assert_not_contains "no CA ConfigMap with System CAs" "$out" "caCertificateRefs"
+out=$(render_only "$API_LISTENERSET" "${api_pub_args[@]}")
+assert_contains "edge TLS listener on 443" "$out" "port: 443"
+assert_contains "edge TLS secret defaults to <fullname>-api-letsencrypt" "$out" "name: test-wazuh-api-letsencrypt"
+out=$(render_only "$API_EDGE_CERT" "${api_pub_args[@]}")
+assert_contains "edge Certificate for the API host" "$out" '- "wazuh-api.example.com"'
+expect_failure "edge TLS without an issuer must fail" render_only "$API_EDGE_CERT" "${api_pub_args[@]}" --set wazuh.api.gateway.tls.issuerRef.name=
+
+echo "== public CA: serviceNames=false keeps the in-cluster names off the certificate =="
+pub_cert_args=("${api_pub_args[@]}" --set wazuh.api.certificate.serviceNames=false --set wazuh.api.certificate.dnsNames[0]=api.example.net)
+out=$(render_only "$API_CERT" "${pub_cert_args[@]}")
+assert_contains "CN is the gateway host" "$out" 'commonName: "wazuh-api.example.com"'
+assert_contains "extra public name is kept" "$out" '- "api.example.net"'
+assert_not_contains "no Service name SAN" "$out" "test-wazuh.default.svc"
+assert_not_contains "no fullname SAN" "$out" '- "test-wazuh"'
+expect_failure "serviceNames=false without any public name must fail" render_only "$API_CERT" --set wazuh.api.certificate.enabled=true --set wazuh.api.certificate.serviceNames=false --set wazuh.api.certificate.issuerRef.name=le
+out=$(render_only "$API_BACKENDTLS" "${api_gw_args[@]}" --set wazuh.api.certificate.serviceNames=false)
+assert_contains "caCertificateRef mode works without Service names (Gateway host is validated)" "$out" 'hostname: "wazuh-api.example.com"'
+
+echo "== Gateway peers on the master NetworkPolicy =="
+MASTER_NETPOL=templates/manager/master/networkpolicy.yaml
+out=$(render_only "$MASTER_NETPOL")
+assert_not_contains "no Gateway rule without the Gateway" "$out" "Gateway data plane"
+out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}")
+assert_contains "Gateway enabled opens the API port" "$out" "Gateway data plane"
+out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}" --set 'wazuh.api.gateway.networkPolicyFrom[0].namespaceSelector.matchLabels.kubernetes\.io/metadata\.name=gw-ns')
+assert_contains "Gateway peers are rendered as from" "$out" "kubernetes.io/metadata.name: gw-ns"
+# --set on a list index drops the other entries, so the Service ports come from a values file.
+cat >/tmp/wazuh-render-test-api-ports.yaml <<'EOF'
+wazuh:
+  master:
+    service:
+      ports:
+        - name: registration
+          protocol: TCP
+          port: 1515
+          targetPort: 1515
+        - name: api
+          protocol: TCP
+          port: 443
+          targetPort: 55000
+EOF
+port_args=("${api_gw_args[@]}" -f /tmp/wazuh-render-test-api-ports.yaml)
+out=$(render_only "$API_HTTPROUTE" "${port_args[@]}")
+assert_contains "HTTPRoute targets the Service port" "$out" "port: 443"
+out=$(render_only "$MASTER_NETPOL" "${port_args[@]}" | grep -A3 'Gateway data plane')
+assert_contains "NetworkPolicy opens the pod port behind the Service" "$out" "port: 55000"
+assert_not_contains "NetworkPolicy does not open the Service port" "$out" "port: 443"
+
+echo "== --reuse-values from a chart without wazuh.api: absent reads as off =="
+expect_success "render with wazuh.api=null" render --set wazuh.api=null
+expect_failure "no API Certificate with wazuh.api=null" render_only "$API_CERT" --set wazuh.api=null
+expect_failure "no API HTTPRoute with wazuh.api=null" render_only "$API_HTTPROUTE" --set wazuh.api=null
+out=$(render_only "$MASTER_STS" --set wazuh.api=null)
+assert_not_contains "master does not mount api-tls with wazuh.api=null" "$out" "name: api-certs"
+out=$(render_only "$MASTER_NETPOL" --set wazuh.api=null)
+assert_not_contains "no Gateway rule with wazuh.api=null" "$out" "Gateway data plane"
+
 echo
 echo "==================================="
 echo "PASS: $pass  FAIL: $fail"

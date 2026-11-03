@@ -1,0 +1,33 @@
+{{- if and .Values.wazuh.enabled .Values.wazuh.master.enabled (include "wazuh.api.gateway.enabled" .) }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "wazuh.fullname" . }}-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "wazuh.fullname" . }}-manager
+spec:
+  parentRefs:
+    {{- if .Values.wazuh.api.gateway.listenerSet.enabled }}
+    - group: gateway.networking.k8s.io
+      kind: ListenerSet
+      name: {{ include "wazuh.fullname" . }}-api
+    {{- else }}
+    - group: {{ .Values.wazuh.api.gateway.parentRef.group }}
+      kind: {{ .Values.wazuh.api.gateway.parentRef.kind }}
+      name: {{ required "wazuh.api.gateway.parentRef.name is required when wazuh.api.gateway.enabled is true" .Values.wazuh.api.gateway.parentRef.name }}
+      {{- with .Values.wazuh.api.gateway.parentRef.namespace }}
+      namespace: {{ . }}
+      {{- end }}
+    {{- end }}
+  hostnames:
+    - {{ .Values.wazuh.api.gateway.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "wazuh.fullname" . }}
+          port: {{ include "wazuh.api.port" . }}
+{{- end }}

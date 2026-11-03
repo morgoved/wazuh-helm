@@ -131,3 +131,65 @@ LoadBalancer port reaches it, so syslog stops until the second upgrade.
 `--force` (Helm 3) and `--force-replace` (Helm 4) replace every object of the release, not just
 the ones above. Replacing a bound chart-managed PVC (e.g. the indexer snapshot PVC) fails,
 because the rendered PVC has no `spec.volumeName`.
+
+## Changing the API certificate issuer or the Gateway's CA
+
+`wazuh.api.certificate` and `wazuh.api.gateway.backendTLS` move independently of the managers:
+cert-manager rewrites the `api-tls` Secret when the issuer changes, but a manager only loads the
+file on its next start, and the Gateway trusts whatever `backendTLS` says the moment the
+`BackendTLSPolicy` is applied. `autoreload.enabled` does not help here: a checksum of the
+Certificate manifest would roll the managers before cert-manager has issued the new certificate.
+The `BackendTLSPolicy` always validates the Gateway host, which is a SAN in every mode, so only
+the trusted CA has to be staged. In all sequences, "wait for the certificate" means
+
+```sh
+kubectl -n <ns> wait certificate <fullname>-api --for=condition=Ready --timeout=10m
+```
+
+and "restart the managers" means both StatefulSets, and not continuing while either fails:
+
+```sh
+kubectl -n <ns> rollout restart statefulset/<fullname>-manager-master statefulset/<fullname>-manager-worker
+kubectl -n <ns> rollout status statefulset/<fullname>-manager-master --timeout=10m
+kubectl -n <ns> rollout status statefulset/<fullname>-manager-worker --timeout=10m
+```
+
+Agents reconnect on their own after a restart.
+
+### Rotating a private CA (`caCertificateRef` stays)
+
+No downtime: the ConfigMap holds both CAs while the managers switch.
+
+1. Add the new CA to the ConfigMap's `ca.crt` (PEM bundle, old CA first or last, order is free).
+2. Change `wazuh.api.certificate.issuerRef` and upgrade. Wait for the certificate. The Gateway
+   still validates the old certificate against the bundle.
+3. Restart the managers. They now serve the new certificate, trusted through the bundle.
+4. Remove the old CA from the bundle.
+
+### Private CA → public issuer (`wellKnownCACertificates: System`)
+
+1. Optional, to avoid downtime: add the public CA's root (for example ISRG Root X1 for Let's
+   Encrypt) to the ConfigMap bundle.
+2. Change `wazuh.api.certificate.issuerRef` and set `wazuh.api.certificate.serviceNames: false`
+   (a public CA only issues public names); keep `caCertificateRef` for now. Upgrade and wait for
+   the certificate. Nothing has changed for the Gateway yet: the managers serve the old
+   certificate, which carries the Gateway host, trusted through the bundle.
+3. Restart the managers. Downtime starts here if step 1 was skipped: the Gateway rejects the new
+   certificate, whose CA is not in the bundle.
+4. Set `wazuh.api.gateway.backendTLS.wellKnownCACertificates: System` (and clear
+   `caCertificateRef.name`) and upgrade. The policy applies at once; downtime, if any, ends here.
+   The ConfigMap is no longer referenced.
+
+### Public issuer → private CA
+
+1. Create the ConfigMap. To avoid downtime, include the public CA's root next to the private CA.
+2. Set `wazuh.api.gateway.backendTLS.caCertificateRef.name` to it and clear
+   `wellKnownCACertificates`; upgrade. Downtime starts here if the public root was left out: the
+   Gateway no longer trusts the certificate the managers serve.
+3. Change `wazuh.api.certificate.issuerRef` (and `serviceNames: true` if in-cluster clients
+   should verify the certificate too); upgrade and wait for the certificate.
+4. Restart the managers. Downtime, if any, ends here.
+5. Remove the public root from the bundle.
+
+Renewals by cert-manager need no steps: the same CA signs the renewed certificate, and the
+managers load it on their next restart (`certificates.renewBefore` leaves ample time).
