@@ -24,10 +24,3 @@ spec:
         name: {{ required "wazuh.api.gateway.backendTLS.caCertificateRef.name is required when wazuh.api.gateway.enabled is true and backendTLS.wellKnownCACertificates is empty (ConfigMap with a ca.crt key)" $backend.caCertificateRef.name }}
     {{- end }}
 {{- end }}
-    # Must match a SAN on the API certificate (certs/api/certificate.yaml).
-    hostname: {{ include "wazuh.fullname" . }}
-    caCertificateRefs:
-      - kind: ConfigMap
-        name: {{ required "wazuh.api.gateway.backendTLS.caCertificateRef.name is required when wazuh.api.gateway.enabled is true and backendTLS.wellKnownCACertificates is empty (ConfigMap with a ca.crt key)" $backend.caCertificateRef.name }}
-    {{- end }}
-{{- end }}

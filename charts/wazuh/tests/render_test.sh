@@ -619,7 +619,22 @@ out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}")
 assert_contains "Gateway enabled opens the API port" "$out" "Gateway data plane"
 out=$(render_only "$MASTER_NETPOL" "${api_gw_args[@]}" --set 'wazuh.api.gateway.networkPolicyFrom[0].namespaceSelector.matchLabels.kubernetes\.io/metadata\.name=gw-ns')
 assert_contains "Gateway peers are rendered as from" "$out" "kubernetes.io/metadata.name: gw-ns"
-port_args=("${api_gw_args[@]}" --set wazuh.master.service.ports[1].port=443 --set wazuh.master.service.ports[1].targetPort=55000)
+# --set on a list index drops the other entries, so the Service ports come from a values file.
+cat >/tmp/wazuh-render-test-api-ports.yaml <<'EOF'
+wazuh:
+  master:
+    service:
+      ports:
+        - name: registration
+          protocol: TCP
+          port: 1515
+          targetPort: 1515
+        - name: api
+          protocol: TCP
+          port: 443
+          targetPort: 55000
+EOF
+port_args=("${api_gw_args[@]}" -f /tmp/wazuh-render-test-api-ports.yaml)
 out=$(render_only "$API_HTTPROUTE" "${port_args[@]}")
 assert_contains "HTTPRoute targets the Service port" "$out" "port: 443"
 out=$(render_only "$MASTER_NETPOL" "${port_args[@]}" | sed -n '/Gateway data plane/,/from:/p')
