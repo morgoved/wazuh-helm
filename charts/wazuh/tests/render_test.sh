@@ -593,6 +593,10 @@ out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}")
 assert_contains "BackendTLSPolicy validates the gateway host" "$out" 'hostname: "wazuh-api.example.com"'
 assert_contains "BackendTLSPolicy uses the system CAs" "$out" "wellKnownCACertificates: System"
 assert_not_contains "no CA ConfigMap with System CAs" "$out" "caCertificateRefs"
+out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}" --set 'wazuh.api.gateway.backendTLS.options.kgateway\.dev/min-tls-version=1.3')
+assert_contains "backendTLS.options are rendered as spec.options" "$out" 'kgateway.dev/min-tls-version: "1.3"'
+out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}")
+assert_not_contains "no options block by default" "$out" "options:"
 out=$(render_only "$API_LISTENERSET" "${api_pub_args[@]}")
 assert_contains "edge TLS listener on 443" "$out" "port: 443"
 assert_contains "edge TLS secret defaults to <fullname>-api-letsencrypt" "$out" "name: test-wazuh-api-letsencrypt"
