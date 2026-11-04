@@ -1305,6 +1305,15 @@
           "type": "object",
           "additionalProperties": true
         },
+        "securityConfig": {
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
         "securityContext": {
           "type": "object",
           "additionalProperties": true

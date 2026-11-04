@@ -540,6 +540,33 @@ assert_not_contains "autoreload: no cluster key checksum with an existing Secret
 out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
 assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
 
+# --- Indexer security config: chart-rendered vs existing Secret -----------------
+INDEXER_STS=templates/indexer/statefulset.yaml
+INDEXER_JOB=templates/indexer/job.yaml
+
+out=$(render_only "$INDEXER_SECURITYCONFIG")
+assert_contains "default renders the securityconfig Secret" "$out" "name: test-wazuh-securityconfig"
+out=$(render_only "$INDEXER_STS")
+assert_contains "indexer mounts the default securityconfig Secret" "$out" "secretName: test-wazuh-securityconfig"
+out=$(render_only "$INDEXER_JOB")
+assert_contains "securityadmin Job mounts the default securityconfig Secret" "$out" "secretName: test-wazuh-securityconfig"
+
+SC=(--set indexer.securityConfig.existingSecret=my-securityconfig)
+assert_eq "existingSecret: no securityconfig Secret rendered" "$(render_only "$INDEXER_SECURITYCONFIG" "${SC[@]}" 2>/dev/null | grep -c 'kind: Secret')" "0"
+out=$(render_only "$INDEXER_STS" "${SC[@]}")
+assert_contains "indexer mounts the existing Secret" "$out" "secretName: my-securityconfig"
+assert_not_contains "indexer no longer references the default Secret" "$out" "test-wazuh-securityconfig"
+out=$(render_only "$INDEXER_JOB" "${SC[@]}")
+assert_contains "securityadmin Job mounts the existing Secret" "$out" "secretName: my-securityconfig"
+assert_not_contains "securityadmin Job no longer references the default Secret" "$out" "test-wazuh-securityconfig"
+out=$(render "${SC[@]}")
+assert_not_contains "existingSecret: no internal_users.yml rendered anywhere" "$out" "internal_users.yml: |"
+
+# securityConfig block absent (helm upgrade --reuse-values from 2.5.x)
+expect_success "missing securityConfig block: chart renders" render --set indexer.securityConfig=null
+out=$(render_only "$INDEXER_STS" --set indexer.securityConfig=null)
+assert_contains "missing securityConfig block: indexer mounts the default Secret" "$out" "secretName: test-wazuh-securityconfig"
+
 # --- API certificate and Gateway (wazuh.api) ------------------------------------
 echo "== wazuh.api disabled (default): no API certificate, mount or Gateway resource =="
 API_CERT=templates/certs/api/certificate.yaml

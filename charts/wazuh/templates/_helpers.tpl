@@ -199,6 +199,19 @@ key
 {{- end -}}
 {{- end -}}
 
+{{/*
+Indexer security config Secret: the chart-managed <indexer fullname>-securityconfig, or the
+one named in indexer.securityConfig.existingSecret. The securityConfig block may be absent on
+--reuse-values upgrades from 2.5.x, so the access goes through dig.
+*/}}
+{{- define "wazuh.indexer.securityConfig.existingSecret" -}}
+{{- dig "securityConfig" "existingSecret" "" .Values.indexer -}}
+{{- end -}}
+
+{{- define "wazuh.indexer.securityConfig.secretName" -}}
+{{- include "wazuh.indexer.securityConfig.existingSecret" . | default (printf "%s-securityconfig" (include "wazuh.indexer.fullname" .)) -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.gateway.tlsSecretName" -}}
 {{- if .Values.dashboard.gateway.tls.certificate.create -}}
 {{- .Values.dashboard.gateway.tls.secretName | default (printf "%s-dashboard-letsencrypt" (include "wazuh.fullname" .)) -}}

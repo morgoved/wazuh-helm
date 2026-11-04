@@ -137,7 +137,7 @@ spec:
           defaultMode: 0600
       - name: indexer-security
         secret:
-          secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
+          secretName: {{ include "wazuh.indexer.securityConfig.secretName" . }}
           defaultMode: 0600
       {{- if .Values.indexer.snapshot.enabled }}
       - name: snapshot-repo

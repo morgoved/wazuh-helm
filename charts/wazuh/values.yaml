@@ -253,6 +253,14 @@ indexer:
     tenants: ""
     nodesDn: ""
     whitelist: ""
+  ## Read the OpenSearch security files from a Secret you manage (external-secrets, sealed-secrets, ...)
+  ## instead of the chart-rendered <indexer fullname>-securityconfig Secret, which then is not rendered.
+  ## The Secret must hold the keys config.yml, internal_users.yml, roles.yml and roles_mapping.yml;
+  ## indexer.config.securityConfig, internalUsers, roles and rolesMapping are ignored. The
+  ## internal_users.yml hashes must match the indexer.cred and dashboard.cred passwords.
+  ## @param indexer.securityConfig.existingSecret Name of an existing Secret with the OpenSearch security files; when set, none is rendered.
+  securityConfig:
+    existingSecret: ""
   ## @param indexer.additionalConfigs Additional configurations to add to the configmap
   additionalConfigs: {} # @schema additionalProperties: true; skipProperties: true
   ## LDAP / Active Directory authentication for the indexer (OpenSearch Security)

@@ -145,6 +145,6 @@ spec:
             name: {{ include "wazuh.indexer.fullname" . }}-indexer-config
         - name: indexer-security
           secret:
-            secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
+            secretName: {{ include "wazuh.indexer.securityConfig.secretName" . }}
             defaultMode: 0600
 {{- end }}

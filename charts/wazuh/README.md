@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.6.0](https://img.shields.io/badge/Version-2.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -376,6 +376,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `indexer.config.tenants`                              | Override for tenants.yml. If empty, the chart default is used.                             | `""`                                                           |
 | `indexer.config.nodesDn`                              | Override for nodes_dn.yml. If empty, the chart default is used.                            | `""`                                                           |
 | `indexer.config.whitelist`                            | Override for whitelist.yml. If empty, the chart default is used.                           | `""`                                                           |
+| `indexer.securityConfig.existingSecret`               | Name of an existing Secret with the OpenSearch security files; when set, none is rendered. | `""`                                                           |
 | `indexer.additionalConfigs`                           | Additional configurations to add to the configmap                                          | `{}`                                                           |
 | `indexer.ldap.enabled`                                | Enable LDAP authentication domain                                                          | `false`                                                        |
 | `indexer.ldap.order`                                  | Auth domain order (lower = higher priority)                                                | `5`                                                            |

@@ -1,5 +1,27 @@
 # Upgrading
 
+## 2.5.x → 2.6.0
+
+2.6.0 adds `indexer.securityConfig.existingSecret`. Defaults are unchanged: without it the chart
+renders `<indexer fullname>-securityconfig` from `indexer.config.*` as before. When it is set, the
+chart renders no securityconfig Secret, and the indexer StatefulSet and the securityadmin Job mount
+the named Secret instead. That Secret must hold the keys `config.yml`, `internal_users.yml`,
+`roles.yml` and `roles_mapping.yml`, and the hashes in `internal_users.yml` must match the
+passwords in `indexer.cred` and `dashboard.cred` (or their `existingSecret`).
+
+### Moving an existing release to `indexer.securityConfig.existingSecret`
+
+Do not point `existingSecret` at the Secret the chart created. Once `existingSecret` is set the
+chart stops rendering that Secret, so Helm removes it from the release and deletes it while the
+indexer still mounts it. Instead:
+
+1. Create a Secret with a different name that holds the same four keys.
+2. Set `indexer.securityConfig.existingSecret` to that name and upgrade. The indexer pods and the
+   securityadmin Job switch to the new reference and the chart-managed Secret is removed.
+
+The securityadmin Job runs on `post-install` / `post-upgrade`. After changing the external Secret
+outside a Helm upgrade, run an upgrade (or the Job) again to apply it to the security index.
+
 ## 2.3.x → 2.4.0
 
 The manager cluster key is no longer rendered into the `<fullname>-manager-config` ConfigMap.

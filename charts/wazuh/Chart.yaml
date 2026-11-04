@@ -3,21 +3,13 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.9
-version: 2.5.0
+version: 2.6.0
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
     - kind: added
-      description: "wazuh.api.certificate issues the manager API server certificate with cert-manager (Secret api-tls) instead of the image's self-signed one"
-    - kind: added
-      description: "wazuh.api.gateway exposes the API through Gateway API resources (HTTPRoute, ListenerSet, edge Certificate, BackendTLSPolicy), like dashboard.gateway"
-    - kind: added
-      description: "wazuh.clusterKey.existingSecret reads the manager cluster key from an existing Secret instead of wazuh.key"
-    - kind: changed
-      description: "With autoreload.enabled, a change of wazuh.key rolls both manager StatefulSets (checksum of the chart-managed cluster key Secret)"
-    - kind: changed
-      description: "ossec.conf carries the to_be_replaced_by_cluster_key placeholder, filled from WAZUH_CLUSTER_KEY by the manager image on start, so the key no longer appears in the ConfigMap"
+      description: "indexer.securityConfig.existingSecret reads the OpenSearch security files (config.yml, internal_users.yml, roles.yml, roles_mapping.yml) from an existing Secret instead of the chart-rendered securityconfig Secret"
   artifacthub.io/links: |
     - name: application source
       url: https://github.com/wazuh/wazuh
