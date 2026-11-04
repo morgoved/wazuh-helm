@@ -1,5 +1,14 @@
 # Upgrading
 
+## 2.5.0 → 2.5.1
+
+The securityadmin Job is now `<fullname>-indexer-securityadmin` (was `<fullname>-indexer`).
+On clusters whose network policy agent derives a pod identity from the pod name prefix (Amazon
+VPC CNI), a Job pod `<fullname>-indexer-xxxxx` was matched to the `<fullname>-indexer`
+StatefulSet and ran under the indexer's NetworkPolicy, whose egress allows DNS and the cluster
+ports only, so the Job could not reach `<fullname>-indexer:9200` and failed. Helm replaces the
+hook Job under its new name on the next upgrade; nothing to migrate.
+
 ## 2.3.x → 2.4.0
 
 The manager cluster key is no longer rendered into the `<fullname>-manager-config` ConfigMap.

@@ -540,6 +540,13 @@ assert_not_contains "autoreload: no cluster key checksum with an existing Secret
 out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
 assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
 
+# --- securityadmin Job name (pod-name-prefix policy agents) ----------------------
+echo "== securityadmin Job is not a name-prefix of the indexer StatefulSet =="
+out=$(render_only templates/indexer/job.yaml)
+assert_contains "Job is named <fullname>-indexer-securityadmin" "$out" "name: test-wazuh-indexer-securityadmin"
+out=$(render_only templates/indexer/networkpolicy.yaml)
+assert_contains "indexer NetworkPolicy admits the renamed Job" "$out" "job-name: test-wazuh-indexer-securityadmin"
+
 # --- API certificate and Gateway (wazuh.api) ------------------------------------
 echo "== wazuh.api disabled (default): no API certificate, mount or Gateway resource =="
 API_CERT=templates/certs/api/certificate.yaml

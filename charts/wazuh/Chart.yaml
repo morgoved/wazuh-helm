@@ -8,6 +8,8 @@ annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
+    - kind: changed
+      description: "The securityadmin Job is named <fullname>-indexer-securityadmin: the VPC CNI network policy agent keys policies by pod-name prefix, so its pods ran under the indexer StatefulSet's NetworkPolicy"
     - kind: added
       description: "wazuh.api.gateway.backendTLS.options passes spec.options to the BackendTLSPolicy (e.g. a minimum TLS version: the API only negotiates CBC ciphers on TLS 1.2)"
     - kind: added

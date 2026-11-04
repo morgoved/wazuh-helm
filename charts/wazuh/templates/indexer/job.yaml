@@ -9,7 +9,9 @@ metadata:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     {{- end }}
-  name: {{ include "wazuh.indexer.fullname" . }}-indexer
+  # Not "<fullname>-indexer": the VPC CNI policy agent keys policies by pod-name prefix, and a
+  # Job pod "<fullname>-indexer-xxxxx" would run under the indexer StatefulSet's NetworkPolicy.
+  name: {{ include "wazuh.indexer.fullname" . }}-indexer-securityadmin
   namespace: {{ .Release.Namespace }}
 spec:
   backoffLimit: 6
