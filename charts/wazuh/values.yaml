@@ -804,6 +804,7 @@ wazuh:
   ## @param wazuh.api.gateway.tls.issuerRef.group Group of the issuer signing the edge TLS certificate.
   ## @param wazuh.api.gateway.networkPolicyFrom NetworkPolicy peers allowed to reach the API port on the master (empty: any source).
   ## @param wazuh.api.gateway.backendTLS.wellKnownCACertificates System: validate the API certificate for api.gateway.host with the system CAs.
+  ## @param wazuh.api.gateway.backendTLS.options BackendTLSPolicy spec.options (implementation keys, e.g. kgateway.dev/min-tls-version: "1.3").
   ## @param wazuh.api.gateway.backendTLS.caCertificateRef.name ConfigMap (key ca.crt, PEM bundle) trusted for the API certificate, unless wellKnownCACertificates.
   api:
     certificate:
@@ -837,6 +838,10 @@ wazuh:
       networkPolicyFrom: [] # @schema item: object; itemProperties: {podSelector: {type: object, additionalProperties: true}, namespaceSelector: {type: object, additionalProperties: true}, ipBlock: {type: object, additionalProperties: true}}
       backendTLS:
         wellKnownCACertificates: ""
+        ## The manager API negotiates only CBC ciphers on TLS 1.2 (uvicorn's default cipher list);
+        ## an Envoy-based Gateway offers TLS 1.2 with AEAD ciphers by default and the handshake
+        ## fails. kgateway: `kgateway.dev/min-tls-version: "1.3"`.
+        options: {} # @schema additionalProperties: true; skipProperties: true
         caCertificateRef:
           name: ""
   ## @param wazuh.authd.enabled enable password-based agent registration
