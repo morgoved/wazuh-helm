@@ -9,7 +9,7 @@ metadata:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
     {{- end }}
-  name: {{ include "wazuh.indexer.fullname" . }}-indexer
+  name: {{ include "wazuh.indexer.securityadminJobName" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   backoffLimit: 6
@@ -20,8 +20,8 @@ spec:
         appId: sand
         appName: wazuh
       labels:
-        batch.kubernetes.io/job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
-        job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
+        batch.kubernetes.io/job-name: {{ include "wazuh.indexer.securityadminJobName" . }}
+        job-name: {{ include "wazuh.indexer.securityadminJobName" . }}
     spec:
       restartPolicy: OnFailure
       {{- with .Values.indexer.nodeSelector }}

@@ -540,6 +540,23 @@ assert_not_contains "autoreload: no cluster key checksum with an existing Secret
 out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
 assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
 
+# --- securityadmin Job name (pod-name-prefix policy agents) ----------------------
+echo "== securityadmin Job is not a name-prefix of the indexer StatefulSet =="
+out=$(render_only templates/indexer/job.yaml)
+assert_contains "Job is named <fullname>-indexer-securityadmin" "$out" "name: test-wazuh-indexer-securityadmin"
+assert_eq "Job pod labels match the Job name" "$(grep -c 'job-name: test-wazuh-indexer-securityadmin$' <<<"$out")" "2"
+out=$(render_only templates/indexer/networkpolicy.yaml)
+assert_contains "indexer NetworkPolicy admits the renamed Job" "$out" "job-name: test-wazuh-indexer-securityadmin"
+LONG_INDEXER=production-eu-central-1-wazuh-search-cluster
+out=$(render_only templates/indexer/job.yaml --set indexer.fullnameOverride="$LONG_INDEXER")
+long_job=$(awk '/^  name:/ {print $2; exit}' <<<"$out")
+expect_success "long fullname: Job name is at most 57 characters" test "${#long_job}" -le 57
+expect_success "long fullname: Job name keeps the -indexer-securityadmin suffix" test "${long_job%-indexer-securityadmin}" != "$long_job"
+expect_success "long fullname: Job name is not the indexer StatefulSet name" test "$long_job" != "$LONG_INDEXER-indexer"
+assert_eq "long fullname: Job pod labels match the Job name" "$(grep -c "job-name: $long_job\$" <<<"$out")" "2"
+out=$(render_only templates/indexer/networkpolicy.yaml --set indexer.fullnameOverride="$LONG_INDEXER")
+assert_contains "long fullname: indexer NetworkPolicy selects the Job by its name" "$out" "job-name: $long_job"
+
 # --- API certificate and Gateway (wazuh.api) ------------------------------------
 echo "== wazuh.api disabled (default): no API certificate, mount or Gateway resource =="
 API_CERT=templates/certs/api/certificate.yaml
@@ -593,6 +610,10 @@ out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}")
 assert_contains "BackendTLSPolicy validates the gateway host" "$out" 'hostname: "wazuh-api.example.com"'
 assert_contains "BackendTLSPolicy uses the system CAs" "$out" "wellKnownCACertificates: System"
 assert_not_contains "no CA ConfigMap with System CAs" "$out" "caCertificateRefs"
+out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}" --set 'wazuh.api.gateway.backendTLS.options.kgateway\.dev/min-tls-version=1.3')
+assert_contains "backendTLS.options are rendered as spec.options" "$out" 'kgateway.dev/min-tls-version: "1.3"'
+out=$(render_only "$API_BACKENDTLS" "${api_pub_args[@]}")
+assert_not_contains "no options block by default" "$out" "options:"
 out=$(render_only "$API_LISTENERSET" "${api_pub_args[@]}")
 assert_contains "edge TLS listener on 443" "$out" "port: 443"
 assert_contains "edge TLS secret defaults to <fullname>-api-letsencrypt" "$out" "name: test-wazuh-api-letsencrypt"

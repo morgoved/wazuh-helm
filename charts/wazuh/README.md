@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.5.1](https://img.shields.io/badge/Version-2.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -234,6 +234,8 @@ wazuh:
         enabled: false           # the parent Gateway already has a listener for the host
       backendTLS:
         wellKnownCACertificates: System   # public issuer; otherwise caCertificateRef.name
+        options:
+          kgateway.dev/min-tls-version: "1.3"   # kgateway 2.5.0+, see below
       networkPolicyFrom:                  # the Gateway's data-plane pods (master NetworkPolicy)
         - namespaceSelector:
             matchLabels:
@@ -250,6 +252,13 @@ chart's own CA, point `backendTLS.caCertificateRef.name` at a ConfigMap holding 
 of several CAs. The Gateway always validates the Gateway host, a SAN in both modes.
 `networkPolicyFrom` opens the API pod port on the master NetworkPolicy for the Gateway pods only;
 empty, the port is open to any source once the Gateway is enabled.
+
+The manager API accepts only CBC ciphers on TLS 1.2 (uvicorn's default `ssl_ciphers`), while
+Envoy-based Gateways offer TLS 1.2 with AEAD ciphers by default, so the handshake fails with
+the backend closing the connection. `backendTLS.options` passes implementation-specific
+`spec.options` to the policy; with kgateway 2.5.0 or later, `kgateway.dev/min-tls-version: "1.3"`
+makes the Gateway negotiate TLS 1.3, which the API supports with modern ciphers. Earlier kgateway
+releases ignore BackendTLSPolicy options, so the handshake keeps failing there.
 
 The certificate is renewed by cert-manager and loaded by the managers on their next restart.
 Changing the issuer or the CA the Gateway trusts is a staged change: see
@@ -549,6 +558,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.api.gateway.tls.issuerRef.group`             | Group of the issuer signing the edge TLS certificate.                                  | `cert-manager.io`                      |
 | `wazuh.api.gateway.networkPolicyFrom`               | NetworkPolicy peers allowed to reach the API port on the master (empty: any source).   | `[]`                                   |
 | `wazuh.api.gateway.backendTLS.wellKnownCACertificates` | System: validate the API certificate for api.gateway.host with the system CAs.         | `""`                                   |
+| `wazuh.api.gateway.backendTLS.options`                 | BackendTLSPolicy spec.options (implementation keys, e.g. kgateway.dev/min-tls-version: "1.3" on kgateway 2.5.0+). | `{}`                                   |
 | `wazuh.api.gateway.backendTLS.caCertificateRef.name` | ConfigMap (key ca.crt, PEM bundle) trusted for the API certificate, unless wellKnownCACertificates. | `""`                                   |
 | `wazuh.authd.enabled`                               | enable password-based agent registration                                               | `true`                                 |
 | `wazuh.authd.existingSecret`                        | name of the existingSecret                                                             | `""`                                   |

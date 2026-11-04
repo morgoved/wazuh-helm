@@ -35,7 +35,7 @@ spec:
               app: {{ include "wazuh.indexer.fullname" . }}-indexer
         - podSelector:
             matchLabels:
-              job-name: {{ include "wazuh.indexer.fullname" . }}-indexer
+              job-name: {{ include "wazuh.indexer.securityadminJobName" . }}
     {{- with .Values.indexer.networkPolicy.extraIngresses }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

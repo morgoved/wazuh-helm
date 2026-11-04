@@ -31,6 +31,17 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
   {{- end -}}
 {{- end -}}
 
+{{/*
+securityadmin Job name. Not "<fullname>-indexer": network policy agents that key policies by
+pod-name prefix (Amazon VPC CNI) would run its pods under the indexer StatefulSet's policy.
+At most 57 characters (35 + the 22-character suffix) so the pod's "-<random>" is never
+truncated away, which would hand the pods back the StatefulSet's identity; the suffix is
+kept whole, the fullname is what gets cut.
+*/}}
+{{- define "wazuh.indexer.securityadminJobName" -}}
+  {{- printf "%s-indexer-securityadmin" (include "wazuh.indexer.fullname" . | trunc 35 | trimSuffix "-") -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.username" -}}
 {{- if .Values.dashboard.cred.existingSecret -}}
   {{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.dashboard.cred.existingSecret -}}

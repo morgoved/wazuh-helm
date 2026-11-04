@@ -12,6 +12,10 @@ spec:
     - group: ""
       kind: Service
       name: {{ include "wazuh.fullname" . }}
+  {{- with $backend.options }}
+  options:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   validation:
     # The Gateway host is a SAN of the API certificate in every mode (certs/api/certificate.yaml), so
     # the trusted CA can change without touching the certificate's names.
