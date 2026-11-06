@@ -1,5 +1,37 @@
 # Upgrading
 
+## 2.5.1 → 2.5.2
+
+No changes are required for existing installations. With
+`indexer.config.internalUsersExistingSecret` unset or empty, rendering and mounts are unchanged.
+
+To move the internal users file to an external Secret:
+
+1. Create a **differently named** Secret in the release namespace, with the complete file
+   under `internal_users.yml`. Keep the existing users and hashes for this first migration;
+   do not combine it with a password rotation. Include any users created through the UI/API
+   that must survive: securityadmin applies the file as the internal user database.
+2. Wait for External Secrets to populate the Secret. Set `dashboard.cred.username` to the
+   actual dashboard username (also present in its credential Secret and the users file).
+   Generated role mappings use this value without lookup in external mode. Keep the existing
+   indexer/dashboard credential Secret references and passwords unchanged.
+3. Set `indexer.config.internalUsersExistingSecret`, clear any inline
+   `indexer.config.internalUsers`, and run the Helm upgrade or full Argo CD sync. Changing
+   the volume source changes the indexer Pod template; allow its normal update strategy to
+   complete. Verify that the securityadmin hook succeeds and existing logins still work.
+
+The chart retains ownership of its securityconfig Secret and the other security files.
+Do not transfer that Secret to External Secrets or reuse its name for the external users file.
+
+For later rotations, updating the Secret alone does not rerun securityadmin or update an
+existing subPath mount. After the external file is ready, run a fresh securityadmin hook via
+Helm upgrade/full Argo CD sync. Once it succeeds, the active user database is updated without
+requiring an indexer restart just for the user changes. Coordinate matching credential
+Secrets and recreation of their consumers (dashboard, managers and any other clients reading
+credentials through environment variables). Do not restart dashboard with mismatched
+credentials before Argo's PostSync hook can run: its readiness may prevent that hook from
+starting. Rotation is not automatic or guaranteed to be zero-downtime.
+
 ## 2.5.0 → 2.5.1
 
 The securityadmin Job is now `<fullname>-indexer-securityadmin` (was `<fullname>-indexer`).

@@ -1,4 +1,5 @@
 {{- if .Values.indexer.enabled }}
+{{- $internalUsersSecret := include "wazuh.indexer.internalUsersExistingSecret" . }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -139,6 +140,15 @@ spec:
         secret:
           secretName: {{ include "wazuh.indexer.fullname" . }}-securityconfig
           defaultMode: 0600
+      {{- if $internalUsersSecret }}
+      - name: indexer-internal-users
+        secret:
+          secretName: {{ $internalUsersSecret | quote }}
+          defaultMode: 0600
+          items:
+            - key: internal_users.yml
+              path: internal_users.yml
+      {{- end }}
       {{- if .Values.indexer.snapshot.enabled }}
       - name: snapshot-repo
         persistentVolumeClaim:
@@ -253,7 +263,7 @@ spec:
               mountPath: /usr/share/wazuh-indexer/config/opensearch.yml
               subPath: opensearch.yml
               readOnly: true
-            - name: indexer-security
+            - name: {{ if $internalUsersSecret }}indexer-internal-users{{ else }}indexer-security{{ end }}
               mountPath: /usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
               subPath: internal_users.yml
               readOnly: true

@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.5.1](https://img.shields.io/badge/Version-2.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -51,6 +51,55 @@ helm install [RELEASE_NAME] wazuh-helm/wazuh
 When changing `indexer.cred.password` you also have to adjust `indexer.cred.passwordHash` in order to get the correct value, you have to hash the password with bcrypt and 12 rounds / costs. You can do so via CLI or some online converter in the web.
 
 Same applies when changing `dashboard.cred.password`
+
+### External internal users (Argo CD / External Secrets)
+
+Argo CD renders Helm templates without looking up live Secrets. To keep user hashes outside
+Git, have External Secrets (or another controller) create a Secret in the release namespace
+with the **complete** `internal_users.yml` under that exact key, then reference it:
+
+```yaml
+indexer:
+  cred:
+    existingSecret: wazuh-indexer-credentials
+  config:
+    internalUsersExistingSecret: wazuh-internal-users
+dashboard:
+  cred:
+    existingSecret: wazuh-dashboard-credentials
+    username: kibanaserver
+```
+
+The chart mounts only that key at
+`/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml` in both the indexer
+StatefulSet and the securityadmin Job. It omits the file from its own securityconfig Secret;
+there is no fallback to the demo users if the external Secret or key is missing. The Pod
+waits for the required Secret/key. `roles.yml`, `roles_mapping.yml` and `config.yml` remain
+chart-managed, including their existing values overrides.
+
+`internalUsersExistingSecret` and the inline `indexer.config.internalUsers` override cannot
+be used together. Use a different name from the chart-managed `<indexer-fullname>-securityconfig`
+Secret. Leaving the new setting empty keeps the previous behavior.
+
+In this mode, generated role mappings use **`dashboard.cred.username` directly**, without
+`lookup`. Set it to the dashboard user in the external users file and to the `DASHBOARD_USERNAME`
+in the dashboard credential Secret. The username is not a password. The separate credential
+Secrets still need the existing `INDEXER_USERNAME`/`INDEXER_PASSWORD` and
+`DASHBOARD_USERNAME`/`DASHBOARD_PASSWORD` keys; their plaintext passwords must match the hashes
+in `internal_users.yml`. Hash keys in those credential Secrets are not needed in this mode.
+This setting does not create or rotate the credential Secrets.
+
+For Argo CD, ensure the external Secret is ready before the indexer Pods and securityadmin
+hook need it. Sync ordering can arrange that dependency, but it does not make Helm `lookup`
+available. Default hooks are unchanged: Helm runs securityadmin after install/upgrade;
+Argo CD maps these to `PostSync`. Custom `indexer.job.annotations` replace the defaults.
+
+Updating the external Secret alone does **not** apply users. After it is ready, run a Helm
+upgrade or a full Argo CD sync that recreates the securityadmin hook. The file replaces the
+internal user database rather than merging users created through the UI/API. Existing
+`subPath` mounts do not refresh automatically; the fresh Job reads the new file and applies
+it to the security index. An indexer restart alone is not a substitute for this step.
+See [UPGRADING.md](UPGRADING.md#251--252) before migration or credential rotation.
 
 ### Archiving every event
 
@@ -379,6 +428,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `indexer.additionalVolumeMounts`                      | Possibility to define additional volumeMounts in the pod.                                  | `[]`                                                           |
 | `indexer.config.opensearch`                           | Override for opensearch.yml. If empty, the chart default is used.                          | `""`                                                           |
 | `indexer.config.internalUsers`                        | Override for internal_users.yml. If empty, the chart default is used.                      | `""`                                                           |
+| `indexer.config.internalUsersExistingSecret`           | Existing Secret with the complete internal_users.yml; mounted by the indexer and securityadmin Job. Mutually exclusive with internalUsers. | `""`                            |
 | `indexer.config.securityConfig`                       | Override for config.yml (OpenSearch security config). If empty, the chart default is used. | `""`                                                           |
 | `indexer.config.rolesMapping`                         | Override for roles_mapping.yml. If empty, the chart default is used.                       | `""`                                                           |
 | `indexer.config.roles`                                | Override for roles.yml. If empty, the chart default is used.                               | `""`                                                           |

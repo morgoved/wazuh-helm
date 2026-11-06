@@ -42,8 +42,16 @@ kept whole, the fullname is what gets cut.
   {{- printf "%s-indexer-securityadmin" (include "wazuh.indexer.fullname" . | trunc 35 | trimSuffix "-") -}}
 {{- end -}}
 
+{{/* Optional for upgrades that reuse values from before this setting existed. */}}
+{{- define "wazuh.indexer.internalUsersExistingSecret" -}}
+{{- dig "internalUsersExistingSecret" "" (.Values.indexer.config | default dict) | default "" -}}
+{{- end -}}
+
 {{- define "wazuh.dashboard.username" -}}
-{{- if .Values.dashboard.cred.existingSecret -}}
+{{- if include "wazuh.indexer.internalUsersExistingSecret" . -}}
+  {{/* Keep generated role mappings deterministic for offline Helm/Argo renders. */}}
+  {{- .Values.dashboard.cred.username -}}
+{{- else if .Values.dashboard.cred.existingSecret -}}
   {{- $secret := lookup "v1" "Secret" .Release.Namespace .Values.dashboard.cred.existingSecret -}}
   {{- if and $secret (index $secret.data "DASHBOARD_USERNAME") -}}
     {{- index $secret.data "DASHBOARD_USERNAME" | b64dec -}}
