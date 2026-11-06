@@ -3,11 +3,13 @@ name: wazuh
 description: Wazuh is a free and open source security platform that unifies XDR and SIEM protection for endpoints and cloud workloads.
 type: application
 appVersion: 4.14.9
-version: 2.5.1
+version: 2.5.2
 annotations:
   artifacthub.io/prerelease: "false"
   artifacthub.io/category: security
   artifacthub.io/changes: |
+    - kind: added
+      description: "indexer.config.internalUsersExistingSecret mounts an external internal_users.yml in the indexer and securityadmin Job without render-time Secret lookups"
     - kind: changed
       description: "The securityadmin Job is named <fullname>-indexer-securityadmin: the VPC CNI network policy agent keys policies by pod-name prefix, so its pods ran under the indexer StatefulSet's NetworkPolicy"
     - kind: added

@@ -238,6 +238,7 @@ indexer:
   ## set a value to manage the config through values.yaml instead.
   ## @param indexer.config.opensearch Override for opensearch.yml. If empty, the chart default is used.
   ## @param indexer.config.internalUsers Override for internal_users.yml. If empty, the chart default is used.
+  ## @param indexer.config.internalUsersExistingSecret Existing Secret containing internal_users.yml, mounted by the indexer and securityadmin Job instead of generating the file. Mutually exclusive with internalUsers.
   ## @param indexer.config.securityConfig Override for config.yml (OpenSearch security config). If empty, the chart default is used.
   ## @param indexer.config.rolesMapping Override for roles_mapping.yml. If empty, the chart default is used.
   ## @param indexer.config.roles Override for roles.yml. If empty, the chart default is used.
@@ -247,6 +248,11 @@ indexer:
   config:
     opensearch: ""
     internalUsers: ""
+    # The Secret must be in the release namespace. Its internal_users.yml key is required;
+    # a missing Secret/key blocks Pod startup rather than falling back to demo users.
+    # In this mode, generated role mappings use dashboard.cred.username without lookup;
+    # it must match the username in the external file and dashboard credential Secret.
+    internalUsersExistingSecret: ""
     securityConfig: ""
     rolesMapping: ""
     roles: ""

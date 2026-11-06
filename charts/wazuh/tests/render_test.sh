@@ -540,6 +540,99 @@ assert_not_contains "autoreload: no cluster key checksum with an existing Secret
 out=$(render_only "$MASTER_STS" --set wazuh.key=0123456789abcdef0123456789abcdef)
 assert_not_contains "autoreload off: no cluster key checksum" "$out" "checksum/cluster-key-secret:"
 
+# --- external internal_users.yml ----------------------------------------------
+echo "== internal_users.yml stays chart-managed unless an existing Secret is set =="
+INDEXER_STS=templates/indexer/statefulset.yaml
+INDEXER_JOB=templates/indexer/job.yaml
+INTERNAL_USERS_PATH=/usr/share/wazuh-indexer/config/opensearch-security/internal_users.yml
+legacy_security=$(render_only "$INDEXER_SECURITYCONFIG")
+assert_contains "default Secret includes internal_users.yml" "$legacy_security" '  internal_users.yml: |-'
+assert_contains "default internal users still include the demo admin" "$legacy_security" 'description: "Demo admin user"'
+out=$(render_only "$INDEXER_SECURITYCONFIG" --set-string indexer.config.internalUsersExistingSecret=)
+assert_eq "an empty external Secret name leaves the generated Secret unchanged" "$out" "$legacy_security"
+# Helm removes a defaulted key set to null, reproducing old --reuse-values releases without it.
+out=$(render_only "$INDEXER_SECURITYCONFIG" --set indexer.config.internalUsersExistingSecret=null)
+assert_eq "a missing/null external Secret name keeps the legacy Secret" "$out" "$legacy_security"
+out=$(render_only "$INDEXER_SECURITYCONFIG" --set-string 'indexer.config.internalUsers=# custom internal users')
+assert_contains "legacy inline internalUsers still overrides the generated file" "$out" '# custom internal users'
+assert_not_contains "legacy inline internalUsers does not add demo users" "$out" 'description: "Demo admin user"'
+for workload in "$INDEXER_STS" "$INDEXER_JOB"; do
+  legacy_workload=$(render_only "$workload")
+  assert_not_contains "$workload: no external users volume by default" "$legacy_workload" 'name: indexer-internal-users'
+  out=$(flat render_only "$workload")
+  assert_contains "$workload: default users mount still uses indexer-security" "$out" \
+    "- name: indexer-security|              mountPath: $INTERNAL_USERS_PATH|              subPath: internal_users.yml|              readOnly: true"
+  out=$(render_only "$workload" --set indexer.config.internalUsersExistingSecret=null)
+  assert_eq "$workload: missing/null new field leaves the workload unchanged" "$out" "$legacy_workload"
+done
+
+echo "== an external Secret supplies only internal_users.yml to both indexer workloads =="
+external_users_args=(--set indexer.config.internalUsersExistingSecret=external-internal-users)
+expect_success "rendering does not require the external Secret to exist" render "${external_users_args[@]}"
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${external_users_args[@]}")
+assert_not_contains "external mode omits internal_users.yml from the generated Secret" "$out" '  internal_users.yml:'
+assert_not_contains "external mode emits no internal-user hashes" "$out" 'hash:'
+assert_not_contains "external mode emits no demo user definitions" "$out" 'description: "Demo'
+for security_file in roles.yml roles_mapping.yml config.yml; do
+  assert_contains "external mode retains $security_file" "$out" "  $security_file: |-"
+done
+for workload in "$INDEXER_STS" "$INDEXER_JOB"; do
+  out=$(render_only "$workload" "${external_users_args[@]}")
+  # Normalize indentation and optional YAML quotes to compare the shared mount/volume structure.
+  compact=$(sed -e 's/^[[:space:]]*//' -e 's/"//g' <<<"$out" | tr '\n' '|')
+  assert_contains "$workload: only the users file uses the external volume" "$compact" \
+    "- name: indexer-internal-users|mountPath: $INTERNAL_USERS_PATH|subPath: internal_users.yml|readOnly: true"
+  assert_contains "$workload: users volume references the supplied Secret" "$compact" \
+    '- name: indexer-internal-users|secret:|secretName: external-internal-users|'
+  assert_contains "$workload: external volume projects the fixed users key" "$compact" \
+    'items:|- key: internal_users.yml|path: internal_users.yml|'
+  external_volume=$(awk '/^- name:/ {capture=($0 == "- name: indexer-internal-users"); volume=0; next} capture && /^secret:$/ {volume=1} capture && volume {print}' \
+    <<<"$(sed -e 's/^[[:space:]]*//' -e 's/"//g' <<<"$out")")
+  assert_contains "$workload: external Secret keeps restrictive permissions" "$external_volume" 'defaultMode: 0600'
+  assert_not_contains "$workload: the external Secret/key is required" "$external_volume" 'optional: true'
+  for security_file in roles.yml roles_mapping.yml config.yml; do
+    assert_contains "$workload: $security_file stays on indexer-security" "$compact" \
+      "- name: indexer-security|mountPath: /usr/share/wazuh-indexer/config/opensearch-security/$security_file|subPath: $security_file|readOnly: true"
+  done
+  assert_contains "$workload: the remaining files still use the managed Secret" "$out" 'secretName: test-wazuh-securityconfig'
+done
+out=$(render_only "$INDEXER_JOB" --set-json 'indexer.config.internalUsersExistingSecret="{{ .Release.Name }}-users"')
+assert_contains "the external Secret name is literal, not evaluated with tpl" "$out" '{{ .Release.Name }}-users'
+
+echo "== external users retain custom mappings and security-file overrides =="
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${external_users_args[@]}" \
+  --set dashboard.cred.username=external-dashboard --set dashboard.cred.existingSecret=external-dashboard-credentials)
+assert_count "both dashboard role mappings use the explicitly configured username" "$out" '- "external-dashboard"' 2
+assert_not_contains "external mode does not map the default dashboard username" "$out" '- "kibanaserver"'
+out=$(render_only "$INDEXER_SECURITYCONFIG" "${external_users_args[@]}" \
+  --set-string 'indexer.config.roles=# custom roles' \
+  --set-string 'indexer.config.rolesMapping=# custom mappings' \
+  --set-string 'indexer.config.securityConfig=# custom security config')
+for marker in '# custom roles' '# custom mappings' '# custom security config'; do
+  assert_contains "external users preserve $marker" "$out" "$marker"
+done
+out=$(render_only "$INDEXER_STS" "${external_users_args[@]}" --set indexer.fullnameOverride=custom-indexer)
+assert_contains "a custom indexer fullname keeps the managed security Secret reference" "$out" 'secretName: custom-indexer-securityconfig'
+assert_contains "a custom indexer fullname does not change the external Secret name" "$out" 'external-internal-users'
+
+echo "== external users reject conflicting sources and the chart-managed Secret name =="
+expect_failure "external Secret and nonempty internalUsers cannot be combined" render "${external_users_args[@]}" \
+  --set-string 'indexer.config.internalUsers=# conflicting inline users'
+assert_contains "the conflict error names internalUsers" "$(cat /tmp/wazuh-render-test.err)" 'internalUsers'
+assert_contains "the conflict error names internalUsersExistingSecret" "$(cat /tmp/wazuh-render-test.err)" 'internalUsersExistingSecret'
+expect_failure "the external Secret cannot be the chart-managed securityconfig Secret" render \
+  --set indexer.config.internalUsersExistingSecret=test-wazuh-securityconfig
+assert_contains "the same-name error explains the chart-managed Secret conflict" "$(cat /tmp/wazuh-render-test.err)" 'chart-managed'
+expect_failure "the same-name guard follows indexer.fullnameOverride" render --set indexer.fullnameOverride=custom-indexer \
+  --set indexer.config.internalUsersExistingSecret=custom-indexer-securityconfig
+assert_contains "the custom-name error identifies the conflicting setting" "$(cat /tmp/wazuh-render-test.err)" 'internalUsersExistingSecret'
+
+echo "== disabling the indexer renders no external users resources =="
+expect_success "external users do not require an enabled indexer" render "${external_users_args[@]}" --set indexer.enabled=false --set externalIndexer.enabled=true
+for resource in "$INDEXER_STS" "$INDEXER_JOB" "$INDEXER_SECURITYCONFIG"; do
+  expect_failure "indexer disabled: no $resource" render_only "$resource" "${external_users_args[@]}" --set indexer.enabled=false --set externalIndexer.enabled=true
+done
+
 # --- securityadmin Job name (pod-name-prefix policy agents) ----------------------
 echo "== securityadmin Job is not a name-prefix of the indexer StatefulSet =="
 out=$(render_only templates/indexer/job.yaml)

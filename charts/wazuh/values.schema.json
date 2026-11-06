@@ -933,6 +933,9 @@
             "internalUsers": {
               "type": "string"
             },
+            "internalUsersExistingSecret": {
+              "type": "string"
+            },
             "nodesDn": {
               "type": "string"
             },

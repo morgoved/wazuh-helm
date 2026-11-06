@@ -1,6 +1,6 @@
 # wazuh-kubernetes-helm-chart
 
-![Version: 2.5.1](https://img.shields.io/badge/Version-2.5.1-informational?style=flat-square)
+![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square)
 ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 
@@ -21,6 +21,15 @@ docker run --rm -ti wazuh/wazuh-indexer:4.14.9 bash /usr/share/wazuh-indexer/plu
 ### Automatic Configuration Updates
 
 Any changes made to the indexer configuration or secrets will be automatically applied via job hooks. The [`reloader`](https://artifacthub.io/packages/helm/cloudnativeapp/reloader) monitors for updates to ensure seamless application of changes. For a practical example of a production configuration, check the example folder.
+
+### External indexer users (Argo CD / External Secrets)
+
+Set `indexer.config.internalUsersExistingSecret` to mount a complete `internal_users.yml`
+from an external Secret in both the indexer and its securityadmin Job. The chart keeps the
+other security files and does not render user hashes in this mode. See the
+[configuration example](./charts/wazuh/README.md#external-internal-users-argo-cd--external-secrets)
+and [migration notes](./charts/wazuh/UPGRADING.md#251--252).
+Updating that Secret alone does not rerun securityadmin: a fresh hook Job is needed to apply users.
 
 ### Compatibility
 
