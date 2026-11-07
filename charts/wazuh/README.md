@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.5.3](https://img.shields.io/badge/Version-2.5.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.10](https://img.shields.io/badge/AppVersion-4.14.10-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -390,7 +390,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `indexer.extraPodLabels`                              | Extra labels to add to the indexer pods.                                                   | `{}`                                                           |
 | `indexer.updateStrategy`                              | updateStrategy for the statefulset.                                                        | `RollingUpdate`                                                |
 | `indexer.images.repository`                           | name of the image used.                                                                    | `wazuh/wazuh-indexer`                                          |
-| `indexer.images.tag`                                  | Tag of the image.                                                                          | `4.14.9`                                                       |
+| `indexer.images.tag`                                  | Tag of the image.                                                                          | `4.14.10`                                                      |
 | `indexer.images.pullPolicy`                           | pullPolicy of the image.                                                                   | `IfNotPresent`                                                 |
 | `indexer.images.imagePullSecrets.enabled`             | Enable pulling image using secret.                                                         | `false`                                                        |
 | `indexer.images.imagePullSecrets.secret`              | Map of secret names to authenticate.                                                       | `{}`                                                           |
@@ -487,7 +487,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `dashboard.annotations`                                 | additional annotations set on deployment.                                                                                                                                                           | `{}`                                                           |
 | `dashboard.extraPodLabels`                              | Extra labels to add to the dashboard pods.                                                                                                                                                          | `{}`                                                           |
 | `dashboard.images.repository`                           | name of the image used.                                                                                                                                                                             | `wazuh/wazuh-dashboard`                                        |
-| `dashboard.images.tag`                                  | Tag of the image.                                                                                                                                                                                   | `4.14.9`                                                       |
+| `dashboard.images.tag`                                  | Tag of the image.                                                                                                                                                                                   | `4.14.10`                                                      |
 | `dashboard.images.pullPolicy`                           | pullPolicy of the image.                                                                                                                                                                            | `IfNotPresent`                                                 |
 | `dashboard.images.updateStrategy`                       | updateStrategy of the image.                                                                                                                                                                        | `OnDelete`                                                     |
 | `dashboard.resources.requests.cpu`                      | Minimum CPU assigned to the pod.                                                                                                                                                                    | `500m`                                                         |
@@ -569,7 +569,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `wazuh.clusterKey.existingSecret`                   | Name of an existing Secret holding the cluster key; when set, wazuh.key is ignored.    | `""`                                   |
 | `wazuh.clusterKey.existingSecretKey`                | Key of that Secret that holds the cluster key.                                         | `key`                                  |
 | `wazuh.images.repository`                           | name of the image used.                                                                | `wazuh/wazuh-manager`                  |
-| `wazuh.images.tag`                                  | Tag of the image.                                                                      | `4.14.9`                               |
+| `wazuh.images.tag`                                  | Tag of the image.                                                                      | `4.14.10`                              |
 | `wazuh.images.pullPolicy`                           | pullPolicy of the image.                                                               | `IfNotPresent`                         |
 | `wazuh.images.imagePullSecrets.enabled`             | Enable pulling image using secret.                                                     | `false`                                |
 | `wazuh.images.imagePullSecrets.secret`              | Map of secret names to authenticate.                                                   | `{}`                                   |

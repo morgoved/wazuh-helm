@@ -1,5 +1,31 @@
 # Upgrading
 
+## 2.5.2 → 2.5.3
+
+The default manager, indexer and dashboard images move from Wazuh 4.14.9 to
+[4.14.10](https://documentation.wazuh.com/current/release-notes/release-4-14-10.html).
+If your values pin these image tags, update all three to `4.14.10` as well.
+
+Wazuh 4.14.10 requires two new settings in `internal_options.conf`. The bundled file
+already includes the upstream defaults, so no values change is needed if
+`wazuh.internalOptions` is empty. If you supply your own complete file through that
+value, add these lines before upgrading:
+
+```ini
+analysisd.rule_tree_memory_warning=25%
+analysisd.rule_tree_memory_limit=0
+```
+
+The first setting logs a warning when rule-tree memory exceeds 25% of available
+memory, respecting the container's memory limit; `0` disables the abort threshold.
+Without these keys (or equivalent definitions in `local_internal_options.conf`),
+`wazuh-analysisd` fails to start. See the
+[upstream defaults](https://github.com/wazuh/wazuh/blob/v4.14.10/etc/internal_options.conf#L31-L35).
+
+The image changes restart the affected pods according to their update strategies;
+allow for service interruptions during the upgrade. The separately maintained
+`kinseii/wazuh-agent:4.14.1` image is unchanged.
+
 ## 2.5.1 → 2.5.2
 
 No changes are required for existing installations. With

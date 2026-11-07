@@ -92,6 +92,26 @@ GATEWAY_CERTIFICATE=templates/dashboard/certificate.yaml
 INGRESS=templates/dashboard/ingress.yaml
 INDEXER_SECURITYCONFIG=templates/indexer/secret-securityconfig.yaml
 
+echo "== default server images match the Wazuh appVersion =="
+app_version=$(yq '.appVersion' "$CHART_DIR/Chart.yaml")
+assert_eq "chart appVersion is 4.14.10" "$app_version" "4.14.10"
+for workload in templates/indexer/statefulset.yaml templates/indexer/job.yaml; do
+  out=$(render_only "$workload")
+  assert_eq "$workload: wazuh-indexer uses the default server version" \
+    "$(yq '.spec.template.spec.containers[] | select(.name == "wazuh-indexer") | .image' <<<"$out")" \
+    "wazuh/wazuh-indexer:$app_version"
+done
+out=$(render_only templates/dashboard/deployment.yaml)
+assert_eq "dashboard: wazuh-dashboard uses the default server version" \
+  "$(yq '.spec.template.spec.containers[] | select(.name == "wazuh-dashboard") | .image' <<<"$out")" \
+  "wazuh/wazuh-dashboard:$app_version"
+for workload in templates/manager/master/statefulset.yaml templates/manager/worker/statefulset.yaml; do
+  out=$(render_only "$workload")
+  assert_eq "$workload: wazuh-manager uses the default server version" \
+    "$(yq '.spec.template.spec.containers[] | select(.name == "wazuh-manager") | .image' <<<"$out")" \
+    "wazuh/wazuh-manager:$app_version"
+done
+
 echo "== Gateway disabled (default): no Gateway API resource is rendered =="
 expect_failure "no ListenerSet by default" render_only "$LISTENERSET"
 expect_failure "no HTTPRoute by default" render_only "$HTTPROUTE"
@@ -215,6 +235,18 @@ MANAGER_CONFIGMAP=templates/manager/configmap.yaml
 MASTER_STS=templates/manager/master/statefulset.yaml
 WORKER_STS=templates/manager/worker/statefulset.yaml
 FILEBEAT_MOUNT=/var/ossec/data_tmp/exclusion/etc/filebeat/filebeat.yml
+
+echo "== bundled internal options include the Wazuh 4.14.10 rule-tree memory defaults =="
+internal_options=$(render_only "$MANAGER_CONFIGMAP" | yq '.data."internal_options.conf"')
+assert_eq "rule-tree memory warning defaults to 25%" \
+  "$(grep -Fx 'analysisd.rule_tree_memory_warning=25%' <<<"$internal_options")" \
+  'analysisd.rule_tree_memory_warning=25%'
+assert_eq "rule-tree memory limit defaults to 0" \
+  "$(grep -Fx 'analysisd.rule_tree_memory_limit=0' <<<"$internal_options")" \
+  'analysisd.rule_tree_memory_limit=0'
+custom_internal_options=$'analysisd.rule_tree_memory_warning=10%\nanalysisd.rule_tree_memory_limit=20%'
+out=$(render_only "$MANAGER_CONFIGMAP" --set-string "wazuh.internalOptions=$custom_internal_options" | yq '.data."internal_options.conf"')
+assert_eq "wazuh.internalOptions remains an exact full-file override" "$out" "$custom_internal_options"
 
 echo "== #174: archives disabled (default) leaves the image's filebeat.yml alone =="
 out=$(render_only "$MANAGER_CONFIGMAP")
@@ -471,7 +503,7 @@ assert_eq "job container drops all capabilities" "$(yq '.spec.template.spec.cont
 assert_eq "job container read-only root" "$(yq '.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem' <<<"$out")" "true"
 assert_eq "job container no privilege escalation" "$(yq '.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation' <<<"$out")" "false"
 assert_eq "job container securityContext can be overridden" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.rulesetReload.securityContext.readOnlyRootFilesystem=false | yq '.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem')" "false"
-assert_eq "job uses the manager image" "$(yq '.spec.template.spec.containers[0].image' <<<"$out")" "wazuh/wazuh-manager:4.14.9"
+assert_eq "job uses the manager image" "$(yq '.spec.template.spec.containers[0].image' <<<"$out")" "wazuh/wazuh-manager:4.14.10"
 assert_eq "job api url" "$(job_env WAZUH_API_URL <<<"$out")" "https://test-wazuh:55000"
 assert_eq "expected nodes, 2 workers" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.worker.replicas=2 | job_env EXPECTED_NODES)" "test-wazuh-manager-master-0,test-wazuh-manager-worker-0,test-wazuh-manager-worker-1"
 assert_eq "expected nodes, workers disabled" "$(render_only "$RR_JOB" "${RR[@]}" --set wazuh.worker.enabled=false | job_env EXPECTED_NODES)" "test-wazuh-manager-master-0"
