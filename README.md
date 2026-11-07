@@ -1,7 +1,7 @@
 # wazuh-kubernetes-helm-chart
 
-![Version: 2.5.2](https://img.shields.io/badge/Version-2.5.2-informational?style=flat-square)
-![AppVersion: 4.14.9](https://img.shields.io/badge/AppVersion-4.14.9-informational?style=flat-square)
+![Version: 2.5.3](https://img.shields.io/badge/Version-2.5.3-informational?style=flat-square)
+![AppVersion: 4.14.10](https://img.shields.io/badge/AppVersion-4.14.10-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 
 Wazuh is a centralized Security Information and Event Management (SIEM) platform offering vulnerability intelligence and threat monitoring capabilities.
@@ -15,7 +15,7 @@ To generate the necessary certificates, refer to the instructions available [her
 To retrieve hashes, execute the following command:
 
 ```bash
-docker run --rm -ti wazuh/wazuh-indexer:4.14.9 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh`
+docker run --rm -ti wazuh/wazuh-indexer:4.14.10 bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/hash.sh
 ```
 
 ### Automatic Configuration Updates
@@ -33,7 +33,8 @@ Updating that Secret alone does not rerun securityadmin: a fresh hook Job is nee
 
 ### Compatibility
 
-This Helm chart has been tested with Wazuh version 4.14.9. Please note:
+The default manager, indexer and dashboard image version is 4.14.10. See
+[UPGRADING.md](./charts/wazuh/UPGRADING.md#252--253) before upgrading an existing release. Please note:
 
 Wazuh supports only a single master node and multiple worker nodes. Although the configuration is prepared for a multi-master setup, Wazuh does not currently support this feature.
 All XML configuration files are automatically updated through init containers.
