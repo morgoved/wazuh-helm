@@ -7,6 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ include "wazuh.fullname" . }}-dashboard
+    {{- toYaml .Values.dashboard.service.labels | nindent 4 }}
   annotations:
     {{- toYaml .Values.dashboard.service.annotations | nindent 4 }}
 spec:
