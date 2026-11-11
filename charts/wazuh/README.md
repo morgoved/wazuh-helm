@@ -1,6 +1,6 @@
 # wazuh
 
-![Version: 2.5.3](https://img.shields.io/badge/Version-2.5.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.10](https://img.shields.io/badge/AppVersion-4.14.10-informational?style=flat-square)
+![Version: 2.5.4](https://img.shields.io/badge/Version-2.5.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.14.10](https://img.shields.io/badge/AppVersion-4.14.10-informational?style=flat-square)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/wazuh-helm-morgoved)](https://artifacthub.io/packages/search?repo=wazuh-helm-morgoved)
 ## Introduction
 
@@ -510,6 +510,7 @@ probes, `annotations`, `extraSpec.*`...) and the `cert-manager` sub-chart values
 | `dashboard.networkPolicy.extraIngresses`                | specify additional ingress rules for the NetworkPolicy.                                                                                                                                             | `[]`                                                           |
 | `dashboard.networkPolicy.extraEgresses`                 | specify additional egress rules for the NetworkPolicy.                                                                                                                                              | `[]`                                                           |
 | `dashboard.service.type`                                | Type of the created service.                                                                                                                                                                        | `ClusterIP`                                                    |
+| `dashboard.service.labels`                              | Labels of the created service.                                                                                                                                                                 | `{}`                                                           |
 | `dashboard.service.annotations`                         | Annotations of the created service.                                                                                                                                                                 | `{}`                                                           |
 | `dashboard.service.httpPort`                            | Port for the http endpoint.                                                                                                                                                                         | `5601`                                                         |
 | `dashboard.service.nodePort`                            | Node port of the service, only used when type is NodePort.                                                                                                                                          | `nil`                                                          |

@@ -505,6 +505,7 @@ dashboard:
   ## @param dashboard.service.nodePort Node port of the service, only used when type is NodePort.
   service:
     type: ClusterIP
+    labels: {} # @schema additionalProperties: true; skipProperties: true
     annotations: {} # @schema additionalProperties: true; skipProperties: true
     httpPort: 5601
     nodePort: null # @schema type: [integer, null]
