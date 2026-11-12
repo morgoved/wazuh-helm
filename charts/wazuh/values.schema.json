@@ -579,6 +579,10 @@
             "httpPort": {
               "type": "integer"
             },
+            "labels": {
+              "type": "object",
+              "additionalProperties": true
+            },
             "nodePort": {
               "type": [
                 "integer",

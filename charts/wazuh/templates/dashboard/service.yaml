@@ -6,8 +6,7 @@ metadata:
   name: {{ include "wazuh.fullname" . }}-dashboard
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ include "wazuh.fullname" . }}-dashboard
-    {{- toYaml .Values.dashboard.service.labels | nindent 4 }}
+    {{- merge (dict "app" (printf "%s-dashboard" (include "wazuh.fullname" .))) (.Values.dashboard.service.labels | default dict) | toYaml | nindent 4 }}
   annotations:
     {{- toYaml .Values.dashboard.service.annotations | nindent 4 }}
 spec:
