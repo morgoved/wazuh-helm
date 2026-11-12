@@ -92,6 +92,18 @@ GATEWAY_CERTIFICATE=templates/dashboard/certificate.yaml
 INGRESS=templates/dashboard/ingress.yaml
 INDEXER_SECURITYCONFIG=templates/indexer/secret-securityconfig.yaml
 
+echo "== dashboard Service labels =="
+out=$(render_only templates/dashboard/service.yaml)
+assert_eq "default labels render without an extra mapping" \
+  "$(yq -o=json -I=0 '.metadata.labels' <<<"$out")" '{"app":"test-wazuh-dashboard"}'
+out=$(render_only templates/dashboard/service.yaml \
+  --set-string 'dashboard.service.labels.example\.com/team=security' \
+  --set-string dashboard.service.labels.app=custom)
+assert_eq "custom dashboard Service label is rendered" \
+  "$(yq '.metadata.labels."example.com/team"' <<<"$out")" "security"
+assert_eq "custom labels preserve the built-in dashboard Service app label" \
+  "$(yq '.metadata.labels.app' <<<"$out")" "test-wazuh-dashboard"
+
 echo "== default server images match the Wazuh appVersion =="
 app_version=$(yq '.appVersion' "$CHART_DIR/Chart.yaml")
 assert_eq "chart appVersion is 4.14.10" "$app_version" "4.14.10"
